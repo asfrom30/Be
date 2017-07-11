@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <activeusers type="reference-key">
+        <givers type="reference-key">
+            <giver type="value" isBundle="true" isAutoGenerateModelKey="true" refer=""/>
+        </givers>
+        <takers type="reference-key">
+            <taker type="value" isBundle="true" isAutoGenerateModelKey="false" refer=""/>
+        </takers>
+    </activeusers>
+    <users type="reference-key">
+        <user type="value" isBundle="true" isAutoGenerateModelKey="false" refer=""/>
+    </users>
+    <matchinglogs type="reference-key">
+        <matchinglog type="value"/>
+    </matchinglogs>
+</root>

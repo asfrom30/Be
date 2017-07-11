@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "188695266894",
+    "firebase_url": "https://bravenewworld-45c25.firebaseio.com",
+    "project_id": "bravenewworld-45c25",
+    "storage_bucket": "bravenewworld-45c25.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:188695266894:android:3823275dcb8ae101",
+        "android_client_info": {
+          "package_name": "com.doyoon.android.bravenewworld"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "188695266894-klqbj3hbm8j3c5qjq9pckcc3d6em9q8k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.doyoon.android.bravenewworld",
+            "certificate_hash": "2b8e82f62d386cbb1bd00a344ff738a058b85145"
+          }
+        },
+        {
+          "client_id": "188695266894-cdu6th6q48061oavek0r0ibcf35dkj2v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMua4lrsnblZF9V72-8RLcAxopmfT8e9I"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "188695266894-cdu6th6q48061oavek0r0ibcf35dkj2v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
