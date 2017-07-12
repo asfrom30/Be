@@ -22,9 +22,15 @@ import android.widget.Toast;
 
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
-import com.doyoon.android.bravenewworld.domain.firebase.value.Giver;
+import com.doyoon.android.bravenewworld.domain.firebase.geovalue.ActiveUser;
+import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
+import com.doyoon.android.bravenewworld.presenter.fragment.abst.RecyclerFragment;
 import com.doyoon.android.bravenewworld.util.Const;
-import com.doyoon.android.bravenewworld.util.DistanceUtil;
+import com.doyoon.android.bravenewworld.util.LatLngUtil;
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
+import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryEventListener;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
@@ -35,14 +41,14 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by DOYOON on 7/10/2017.
@@ -60,8 +66,12 @@ public class UserMapFragment extends Fragment implements OnMapReadyCallback {
     private ThisView thisView;
 
     private LatLng lastLatLng;
-    private List<Giver> giverList = new ArrayList();
 
+    private Map<String, ActiveUser> activeUserMap = new HashMap<>();
+    private List<UserProfile> displayUserList = new ArrayList();
+
+    /* Preference */
+    private double SEARCH_DISTANCE_KM = 100;
 
     public static UserMapFragment newInstance() {
         return new UserMapFragment();
@@ -73,7 +83,10 @@ public class UserMapFragment extends Fragment implements OnMapReadyCallback {
 
         /* Layout Inflating */
         View view = inflater.inflate(R.layout.fragment_user_map, container, false);
-        thisView = new ThisView(getContext(), view);
+        thisView = new ThisView(this, getContext(), view);
+
+        /* Get Default Setting  */
+        SEARCH_DISTANCE_KM = Const.DEFAULT_SEARCH_DISTANCE_KM;
 
         /* Bundle */
         updateValuesFromBundle(savedInstanceState);
@@ -95,6 +108,8 @@ public class UserMapFragment extends Fragment implements OnMapReadyCallback {
             String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(permissions, Const.LOCATION_REQ_CODE);
+            } else {
+                // Permission이 없으면 서비스를 정상적으로 이용할수 없습니다.
             }
         }
         return view;
@@ -107,24 +122,42 @@ public class UserMapFragment extends Fragment implements OnMapReadyCallback {
 //            }
 //            updateUI();
         }
+        // todo Update One, Apply to paging
+        updateListUI();
+        updateMapUI();
     }
 
-    public void onBtn (){
-        Log.i(TAG, "Service Start");
-        this.runService();
+    boolean needListUiUpdate = false;
+
+    /* This is On Btn */
+    public void onTriggeredUpdateUIThread(){
+        // Log.i(TAG, "Service Start");
+        // this.runService();
+        /*
+        if(giverList의 사이즈가 변했으면... ){
+            google map을 업데이트하고
+        }
+        */
+        if (needListUiUpdate) {
+
+        }
+        addGeoQueryListener();
     }
 
     public void runService(){
 
         //thisView.startInProgress();
-
         updateLastLatLng(new PostUpdateLatLng() {
             @Override
             public void callback() {
-                loadDataAtFirst();
+                /* Initialize end... real service start */
+                activeUserMap.clear();
+                changeDataListenerFromLastLatLng();
             }
         });
     }
+
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -142,7 +175,7 @@ public class UserMapFragment extends Fragment implements OnMapReadyCallback {
             setFocusLastLatLng();
         }
 
-        if(giverList.size() != 0){
+        if(activeUserMap.size() != 0){
             updateMapUI();
         }
     }
@@ -156,68 +189,76 @@ public class UserMapFragment extends Fragment implements OnMapReadyCallback {
     }
 
 
-    private void loadDataAtFirst(){
-        String modelDir = FirebaseHelper.getModelDir("giver");
-        FirebaseDatabase.getInstance().getReference(modelDir).addListenerForSingleValueEvent(new ValueEventListener() {
+    /* Data Listener */
+    private GeoFire geoFire = null;
+    private GeoQuery geoQuery = null;
 
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                giverList.clear();
-                for (DataSnapshot item : dataSnapshot.getChildren()) {
-                    Giver giver = item.getValue(Giver.class);
-
-                    // Calculate Distance...
-                    LatLng myLatLng = lastLatLng;
-                    LatLng yourLatLng = giver.getLatLng();
-                    double distance = 100;
-                    if (DistanceUtil.isDistanceNear(myLatLng, yourLatLng, distance)) {
-                        giverList.add(giver);
-                    }
-                }
-                updateListUI();
-                updateMapUI();
-
-                Log.i(TAG, "Load Data At First Complete, loaded data size is " + giverList.size());
-                thisView.endInProgress();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+    private void changeDataListenerFromLastLatLng(){
+        toSetEnabledDataListener();
+    }
+    private void changeDataListenerFromDistance(double distance_km) {
+        SEARCH_DISTANCE_KM = distance_km;
+        toSetEnabledDataListener();
     }
 
-    private void addDataChangedListener(){
-        String modelDir = FirebaseHelper.getModelDir("taker");
-        FirebaseDatabase.getInstance().getReference(modelDir).addChildEventListener(new ChildEventListener() {
+    private void toSetEnabledDataListener(){
+        Log.e(TAG, "Request Geo DAO");
+
+        this.toUpdateGeoQuery();
+
+        if(geoQuery == null) {
+            Log.e(TAG, "Geo Query is null... please check this line");
+        }
+
+        this.geoQuery.removeAllListeners();
+        this.addGeoQueryListener();
+    }
+
+    private void toUpdateGeoQuery(){
+        if (geoFire == null) {
+            String modelDir = FirebaseHelper.getModelDir("giver");
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference(modelDir);
+            geoFire = new GeoFire(ref);
+        }
+        GeoLocation lastGeoLocation = new GeoLocation(lastLatLng.latitude, lastLatLng.longitude);
+        geoQuery = geoFire.queryAtLocation(lastGeoLocation, SEARCH_DISTANCE_KM);
+    }
+
+    private void addGeoQueryListener() {
+        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            public void onKeyEntered(String key, GeoLocation location) {
+                LatLng latLng = new LatLng(location.latitude, location.longitude);
+                ActiveUser activeUser = new ActiveUser(key, latLng);
+                activeUserMap.put(key, activeUser);
+
+                /* No need this method... validate distance */
+                float distance = LatLngUtil.distanceBetweenTwoLatLngUnitMeter(lastLatLng, activeUser.getLatLng());
+                Log.i(TAG, "ADD User Complete Active User Key is " + activeUser.getKey() + ", distance is " + distance);
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+                // todo need array list set... for remove activeuser using key... and search by order
+                activeUserMap.remove(key);
+                Log.i(TAG, "ADD User Complete Active User Key is " + key);
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
 
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            public void onGeoQueryReady() {
 
             }
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onGeoQueryError(DatabaseError error) {
 
             }
         });
-        // updateListUI();  // Update One   // Apply paging
-        // updateMapUI();
     }
 
     private void updateMapUI(){
@@ -237,9 +278,7 @@ public class UserMapFragment extends Fragment implements OnMapReadyCallback {
 
     private void updateListUI(){
         // update list View...
-        for (Giver giver : giverList) {
 
-        }
         Log.i(TAG, "Update UI List View");
     }
 
@@ -276,28 +315,18 @@ public class UserMapFragment extends Fragment implements OnMapReadyCallback {
 
 
     /* Location... */
-    /**
-     * Provides a simple way of getting a device's location and is well suited for
-     * applications that do not require a fine-grained location and that do not need location
-     * updates. Gets the best and most recent location currently available, which may be null
-     * in rare cases when a location is not available.
-     * <p>
-     * Note: this method should be called after location permission has been granted.
-     */
-    //private LatLng getLatLng
-
     @SuppressWarnings("MissingPermission")
     private void updateLastLatLng(final PostUpdateLatLng postUpdateLatLng) {
         mFusedLocationClient.getLastLocation()
                 .addOnCompleteListener(getActivity(), new OnCompleteListener<Location>() {
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
-                        Log.e(TAG, "여기는?");
                         if (task.isSuccessful() && task.getResult() != null) {
                             Location location  = task.getResult();
                             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                             lastLatLng = latLng;
                             postUpdateLatLng.callback();
+                            Log.i(TAG, "Last Location Update Complete, My Last Location is " + latLng.toString());
                         } else {
                             Log.w(TAG, "getLastLocation:exception", task.getException());
                             // showSnackbar(getString(R.string.no_location_detected));
@@ -319,17 +348,6 @@ public class UserMapFragment extends Fragment implements OnMapReadyCallback {
             return false;
         }
     }
-    private void toMyLocationEnabled(PermissionChecker permissionChecker){
-        if (isPermissionsGranted()) {
-            //noinspection MissingPermission
-            mGoogleMap.setMyLocationEnabled(true);
-            Log.i(TAG, "setMyLocationEnabled = true");
-            Toast.makeText(getActivity(), "Location이 승인되었습니다. 서비스를 이용할 수 있습니다.", Toast.LENGTH_SHORT).show();
-        } else {
-            permissionChecker.notGranted();
-        }
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == Const.LOCATION_REQ_CODE) {
@@ -343,62 +361,37 @@ public class UserMapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    public interface PermissionChecker {
-        void notGranted();
-    }
-
-    private void firstTryToSetEnableMyLocation(){
-        this.toMyLocationEnabled(new PermissionChecker() {
-            @Override
-            public void notGranted() {
-                /* If permission is not granted, Request permission at once  */
-                String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    requestPermissions(permissions, Const.LOCATION_REQ_CODE);
-                }
-            }
-        });
-    }
-
-    private void lastTryToSetEnableMyLocation(){
-        toMyLocationEnabled(new PermissionChecker() {
-            @Override
-            public void notGranted() {
-                Log.e(TAG, "권한이 없으면 서비스를 정상적으로 이용할 수 없습니다.");
-                Toast.makeText(getActivity(), "권한이 없으면 서비스를 정상적으로 이용할 수 없습니다.", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-
-    private class ThisView {
+    private static class ThisView {
 
         private Context context;
+        private UserMapFragment presenter;
         private View view;
 
         private String mLatitudeLabel;
         private String mLongitudeLabel;
         private TextView mLatitudeText;
         private TextView mLongitudeText;
-        private Button button;
+        private Button tempButton;
 
         private ProgressDialog progressDialog;
 
-        private ThisView(Context context, View view) {
+        private Fragment displayUserListFragment;
+
+        private ThisView(UserMapFragment userMapFragment, Context context, View view) {
+            this.presenter = userMapFragment;
             this.context = context;
             this.view = view;
 
             this.setWidgetsPropFromResources();
             this.dependencyInjection();
             this.addWidgetsListener();
-
         }
 
         private void addWidgetsListener() {
-            button.setOnClickListener(new View.OnClickListener() {
+            tempButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    UserMapFragment.this.onBtn();
+                    presenter.onTriggeredUpdateUIThread();
                 }
             });
         }
@@ -410,18 +403,20 @@ public class UserMapFragment extends Fragment implements OnMapReadyCallback {
             mLongitudeLabel = resources.getString(R.string.longitude_label);
         }
 
-        private void dependencyInjection(){
+        private void dependencyInjection() {
             /* Relate to Location */
             mLatitudeText = (TextView) view.findViewById((R.id.latitude_text));
             mLongitudeText = (TextView) view.findViewById((R.id.longitude_text));
 
-            button = (Button) view.findViewById(R.id.getPosition_btn);
+            tempButton = (Button) view.findViewById(R.id.getPosition_btn);
+
+            displayUserListFragment = new DisplayUserListFragment();
 
             progressDialog = new ProgressDialog(this.context);
         }
 
         /* Data Loading Progress Dialog*/
-        public void startInProgress(){
+        public void startInProgress() {
             progressDialog.setMessage("Downloading Music");
             progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             progressDialog.setIndeterminate(true);
@@ -433,7 +428,7 @@ public class UserMapFragment extends Fragment implements OnMapReadyCallback {
                 public void run() {
                     int jumpTime = 0;
 
-                    while(jumpTime < totalProgressTime) {
+                    while (jumpTime < totalProgressTime) {
                         try {
                             sleep(200);
                             jumpTime += 5;
@@ -448,9 +443,10 @@ public class UserMapFragment extends Fragment implements OnMapReadyCallback {
             t.start();
         }
 
-        public void endInProgress(){
+        public void endInProgress() {
             progressDialog.dismiss();
         }
+
 
         /*
         mLatitudeText.setText(String.format(Locale.ENGLISH, "%s: %f",
@@ -463,8 +459,45 @@ public class UserMapFragment extends Fragment implements OnMapReadyCallback {
 
     }
 
+    public static class DisplayUserListFragment extends RecyclerFragment<UserProfile> {
 
-/* show snack bar */
+        private List<UserProfile> displayUserList;
+
+        public DisplayUserListFragment() {
+            this.displayUserList = displayUserList;
+        }
+
+        @Override
+        public CustomViewHolder throwCustomViewHolder(View view) {
+            return null;
+        }
+
+        @Override
+        public int throwFragmentLayoutResId() {
+            return R.layout.inner_fragment_active_user_list;
+        }
+
+        @Override
+        public int throwRecyclerViewResId() {
+            return R.id.inner_recycler_view;
+        }
+
+        @Override
+        public List<UserProfile> throwDataList() {
+            return displayUserList;
+        }
+
+        @Override
+        public int throwItemLayoutId() {
+            return R.layout.item_active_user_list;
+        }
+    }
+}
+
+
+
+
+
 //
 //    /**
 //     * Shows a {@link Snackbar} using {@code text}.
@@ -496,4 +529,3 @@ public class UserMapFragment extends Fragment implements OnMapReadyCallback {
 
 
 
-}

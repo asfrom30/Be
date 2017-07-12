@@ -1,22 +1,68 @@
 package com.doyoon.android.bravenewworld.domain;
 
-import com.doyoon.android.bravenewworld.domain.firebase.value.Giver;
+import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
+import com.doyoon.android.bravenewworld.util.Const;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.Random;
+
+import static com.doyoon.android.bravenewworld.util.ConvString.commaSignToString;
 
 /**
  * Created by DOYOON on 7/12/2017.
  */
 
 public class DummyDao {
+    /* Secure Key */
+    private SecureRandom random = new SecureRandom();
 
-    public static Giver createDummyGiver(){
-        Giver giver = new Giver();
+    public String nextSessionId() {
+        return new BigInteger(130, random).toString(32);
+    }
+
+    /* MY DUMMY PROFILE */
+    public static UserProfile createDummyMyProfile(){
+        String email = "mireae05@naver.com";
+        String key = commaSignToString(email);
+        UserProfile userProfile = new UserProfile("김도윤", 33, Const.Gender.MALE);
+        userProfile.setKey(key);
+        return userProfile;
+    }
+
+    public static UserProfile createDummyUserProfile(){
+        String key = commaSignToString(getRandomEmailAddress());
+        int gender = getRandomInt(0, 1);
+        if (gender == 0) {
+            gender = -1;
+        }
+        UserProfile userProfile = new UserProfile(getSaltString(3), getRandomInt(20,30), gender);
+        userProfile.setKey(key);
+        return userProfile;
+    }
+
+    private static String getRandomEmailAddress() {
+        String random = getSaltString(10);
+        return random + "@google.com";
+    }
+
+    private static String getSaltString(int length) {
+        String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        StringBuilder salt = new StringBuilder();
+        Random rnd = new Random();
+        while (salt.length() < length) { // length of the random string.
+            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
+            salt.append(SALTCHARS.charAt(index));
+        }
+        String saltStr = salt.toString();
+        return saltStr;
+    }
+
+    /* MY DUMMY GIVER */
+    public static LatLng createDummyLatLng(){
         LatLng latLng = getRandomLatLng();
-        giver.setLatitude(latLng.latitude);
-        giver.setLongitude(latLng.longitude);
-        return giver;
+        return latLng;
     }
 
     private static LatLng getRandomLatLng() {
@@ -35,7 +81,12 @@ public class DummyDao {
     }
 
     private static Random r = new Random();
+
     private static double getRandomDouble(double min, double max) {
         return min + (max - min) * r.nextDouble();
+    }
+
+    private static int getRandomInt(int min, int max) {
+        return r.nextInt((max - min) + 1) + min;
     }
 }

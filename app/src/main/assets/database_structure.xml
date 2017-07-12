@@ -2,14 +2,18 @@
 <root>
     <activeusers type="reference-key">
         <givers type="reference-key">
-            <giver type="value" isBundle="true" isAutoGenerateModelKey="true" refer=""/>
+            <giver type="value" isBundle="true" isAutoGenerateModelKey="true" refer="">
+                <activeuser type="geo-value"/>
+            </giver>
         </givers>
         <takers type="reference-key">
-            <taker type="value" isBundle="true" isAutoGenerateModelKey="false" refer=""/>
+            <taker type="value" isBundle="true" isAutoGenerateModelKey="false" refer="">
+                <activeuser type="geo-value"/>
+            </taker>
         </takers>
     </activeusers>
     <users type="reference-key">
-        <user type="value" isBundle="true" isAutoGenerateModelKey="false" refer=""/>
+        <userprofile type="value" isBundle="true" isAutoGenerateModelKey="false" refer=""/>
     </users>
     <matchinglogs type="reference-key">
         <matchinglog type="value"/>
