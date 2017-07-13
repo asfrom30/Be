@@ -18,9 +18,11 @@ import android.widget.Toast;
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.domain.firebase.geovalue.ActiveUser;
-import com.doyoon.android.bravenewworld.domain.firebase.value.Invite;
+import com.doyoon.android.bravenewworld.domain.firebase.value.MatchingComplete;
+import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.presenter.activity.interfaces.InviteDialog;
+import com.doyoon.android.bravenewworld.presenter.activity.interfaces.ViewPagerMover;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.LatLngUtil;
 import com.doyoon.android.bravenewworld.view.UserSelectFragmentView;
@@ -116,7 +118,9 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
     public void runService(){
 
         if(USER_TYPE == Const.UserType.Giver) {
-            this.addInviteListener();
+            this.addPickMeRequestListener();
+        } else if(USER_TYPE == Const.UserType.Taker){
+            this.addMatchingCompleteListener();
         }
 
         if (!onMatching) {
@@ -336,18 +340,18 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
     }
 
     /* Add Firebase Listener, refer key is "invite" */
-    private void addInviteListener(){
+    private void addPickMeRequestListener(){
 
-        String modelDir = FirebaseHelper.getModelDir("invite", Const.MY_USER_KEY);
+        String modelDir = FirebaseHelper.getModelDir(Const.RefKey.PICK_ME_REQUEST, Const.MY_USER_KEY);
 
         FirebaseDatabase.getInstance().getReference(modelDir).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
-                Invite invite = dataSnapshot.getValue(Invite.class);
-                getInviteDialog(getActivity()).showInvitedDialog(invite);
+                PickMeRequest pickMeRequest = dataSnapshot.getValue(PickMeRequest.class);
+                getInviteDialog(getActivity()).showInvitedDialog(pickMeRequest);
 
-                // todo readed invite must be deleted...
+                // todo readed pickMeRequest must be deleted...
                 // dataSnapshot.getRef().removeValue();
             }
 
@@ -369,6 +373,49 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.i(TAG, "on Child Added called ");
+            }
+        });
+    }
+
+    /* Add Firebase Listener, refer key is "invite" */
+    //todo if matching complete detach Matching Complete Listener
+    private void addMatchingCompleteListener(){
+
+        String modelDir = FirebaseHelper.getModelDir(Const.RefKey.MATCHING_COMPLETE, Const.MY_USER_KEY);
+
+        FirebaseDatabase.getInstance().getReference(modelDir).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+                // matching 중이 아닐때만...
+                if (!onMatching) {
+                    MatchingComplete matchingComplete = dataSnapshot.getValue(MatchingComplete.class);
+
+                    // Delete All Request History...
+
+                    // Go Chat...
+                    UserChatFragment.chatAccessKey = matchingComplete.getChatAccessKey();
+                    getViewPagerMover(getActivity()).moveViewPage(Const.ViewPagerIndex.CHAT);
+
+                    // On Matching false
+                    onMatching = true;
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
             }
         });
     }
@@ -499,11 +546,21 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
         return this.displayUserList;
     }
 
+    // todo make to inclue baseFragment...
     private InviteDialog getInviteDialog(Object object){
         if (object instanceof InviteDialog) {
             return (InviteDialog) object;
         } else {
-            throw new RuntimeException("You have to implement Invite Dialog Interface");
+            throw new RuntimeException("You have to implement PickMeRequest Dialog Interface");
+        }
+    }
+
+    // todo make to inclue baseFragment...
+    private ViewPagerMover getViewPagerMover(Object object) {
+        if (object instanceof InviteDialog) {
+            return (ViewPagerMover) object;
+        } else {
+            throw new RuntimeException("You have to implement PickMeRequest Dialog Interface");
         }
     }
 }

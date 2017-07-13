@@ -5,7 +5,7 @@ import android.util.Log;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseGeoDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
-import com.doyoon.android.bravenewworld.domain.firebase.value.Invite;
+import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.ConvString;
@@ -124,21 +124,22 @@ public class DummyDao {
     }
 
 
-    /* Dummy Invite */
-    public static void insertDummyInvite(){
+    /* Dummy PickMeRequest */
+    public static void insertDummyPickMeRequest(){
         /* Get User Profile */
         String targetDummyAccessKey = "ZMWAFD3OLF@google_comma_com";
         String modelDir = FirebaseHelper.getModelDir("userprofile", targetDummyAccessKey);
 
         /* Create Dummy Invites */
-        final Invite invite = new Invite();
+        final PickMeRequest pickMeRequest = new PickMeRequest();
 
+        /* User Profile을 한번 가져온다. Invite를 생성하기 위해서... */
         FirebaseDatabase.getInstance().getReference(modelDir + "userprofile").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 UserProfile userProfile = dataSnapshot.getValue(UserProfile.class);
-                invite.fetchDataFromUserProfile(userProfile);
-                FirebaseDao.insert(invite, Const.MY_USER_KEY);
+                pickMeRequest.fetchDataFromUserProfile(userProfile);
+                FirebaseDao.insert(pickMeRequest, Const.MY_USER_KEY);
             }
 
             @Override

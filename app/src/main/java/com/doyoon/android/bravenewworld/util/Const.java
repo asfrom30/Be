@@ -13,6 +13,9 @@ public class Const {
     public static class RefKey {
         public static String CHAT_ROOM = "chatroom";
         public static String CHAT_PROFILE = "chatprofile";
+        public static String PICK_ME_REQUEST = "pickmerequest";
+        public static String MATCHING_COMPLETE = "matchingcompletes";
+        public static String CHAT = "chat";
     }
 
     /* final */
@@ -39,9 +42,11 @@ public class Const {
         public static int FEMALE = -1;
     }
 
-    public static class DialogType {
-        public static final int NOTICE = 1;
-        public static final int INVITED = 2;
-        public static final int INVITING = 3;
+    public static class ViewPagerIndex {
+        public static int SELECT = 0;
+        public static int MAP = 1;
+        public static int CHAT = 2;
+        public static int PROFILE = 3;
     }
+
 }

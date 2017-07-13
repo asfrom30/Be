@@ -96,9 +96,10 @@ public abstract class RecyclerFragment<T> extends Fragment{
         public abstract void dependencyInjection(View itemView, T t);
     }
 
+    public abstract List<T> throwDataList();
     public abstract CustomViewHolder throwCustomViewHolder(View view);
+
     public abstract int throwFragmentLayoutResId();
     public abstract int throwRecyclerViewResId();
-    public abstract List<T> throwDataList();
     public abstract int throwItemLayoutId();
 }

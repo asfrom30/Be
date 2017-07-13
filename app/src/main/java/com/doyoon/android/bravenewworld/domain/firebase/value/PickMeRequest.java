@@ -6,14 +6,14 @@ import com.doyoon.android.bravenewworld.domain.firebase.FirebaseModel;
  * Created by DOYOON on 7/13/2017.
  */
 
-public class Invite extends FirebaseModel {
+public class PickMeRequest extends FirebaseModel {
 
     private String from;
     private int age;
     private int gender;
     private String name;
 
-    public Invite() {
+    public PickMeRequest() {
     }
 
     @Override
@@ -67,7 +67,7 @@ public class Invite extends FirebaseModel {
 
     @Override
     public String toString() {
-        return "Invite{" +
+        return "PickMeRequest{" +
                 "from='" + from + '\'' +
                 ", age=" + age +
                 ", gender=" + gender +

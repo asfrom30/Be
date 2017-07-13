@@ -44,7 +44,7 @@ public class InvitingDialogFragment extends DialogFragment {
                 });
 
         if(userType == Const.UserType.Taker){
-            builder.setPositiveButton("Invite", new DialogInterface.OnClickListener() {
+            builder.setPositiveButton("PickMeRequest", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int id) {
                     listener.onDialogPositiveClick();

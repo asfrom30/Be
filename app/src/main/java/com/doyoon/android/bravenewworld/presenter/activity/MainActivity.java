@@ -11,17 +11,19 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 
 import com.doyoon.android.bravenewworld.R;
-import com.doyoon.android.bravenewworld.domain.DummyDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.domain.firebase.value.ChatProfile;
-import com.doyoon.android.bravenewworld.domain.firebase.value.Invite;
+import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.domain.reactivenetwork.ReactiveInviteResponse;
 import com.doyoon.android.bravenewworld.presenter.activity.interfaces.InviteDialog;
+import com.doyoon.android.bravenewworld.presenter.activity.interfaces.ViewPagerMover;
 import com.doyoon.android.bravenewworld.presenter.dialog.DialogListener;
 import com.doyoon.android.bravenewworld.presenter.dialog.InvitedDialogFragment;
 import com.doyoon.android.bravenewworld.presenter.dialog.InvitingDialogFragment;
+import com.doyoon.android.bravenewworld.presenter.fragment.UserChatFragment;
+import com.doyoon.android.bravenewworld.presenter.fragment.UserMapFragment;
 import com.doyoon.android.bravenewworld.presenter.fragment.UserProfileFragment;
 import com.doyoon.android.bravenewworld.presenter.fragment.UserSelectFragment;
 import com.doyoon.android.bravenewworld.util.Const;
@@ -31,7 +33,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends FragmentActivity implements InviteDialog{
+public class MainActivity extends FragmentActivity implements InviteDialog, ViewPagerMover{
 
     private static String TAG = MainActivity.class.getSimpleName();
 
@@ -47,7 +49,7 @@ public class MainActivity extends FragmentActivity implements InviteDialog{
 
         /* Create Dummy */
         // DummyDao.createDummy();
-        DummyDao.insertDummyInvite();   // from "ZMWAFD3OLF@google_comma_com" to "miraee05@naver.com"
+        // DummyDao.insertDummyPickMeRequest();   // from "ZMWAFD3OLF@google_comma_com" to "miraee05@naver.com"
 
         /* Log in activity 에서 log in 정보를 받아 온다.... */
         // get Bundle, get Extra...
@@ -63,8 +65,8 @@ public class MainActivity extends FragmentActivity implements InviteDialog{
         /* Add All Fragment */
         final List<Fragment> fragmentList = new ArrayList<>();
         fragmentList.add(new UserSelectFragment());
-        // fragmentList.add(new UserChatFragment());
-        // fragmentList.add(new UserMapFragment());
+        fragmentList.add(new UserMapFragment());
+        fragmentList.add(UserChatFragment.getInstance());
         fragmentList.add(new UserProfileFragment());
 
         CustomPageAdapter customPageAdapter = new CustomPageAdapter(getSupportFragmentManager(), fragmentList);
@@ -78,11 +80,11 @@ public class MainActivity extends FragmentActivity implements InviteDialog{
 
     /* I'm giver, 초대를 받았습니다.  */
     @Override
-    public void showInvitedDialog(final Invite invite){
+    public void showInvitedDialog(final PickMeRequest pickMeRequest){
         DialogFragment dialog = new InvitedDialogFragment(new DialogListener() {
             @Override
             public void onDialogPositiveClick() {
-                ReactiveInviteResponse.hasActiveUser(invite.getKey(), new ReactiveInviteResponse.Callback() {
+                ReactiveInviteResponse.hasActiveUser(pickMeRequest.getKey(), new ReactiveInviteResponse.Callback() {
                     @Override
                     public void userExist() {
                         // 아직 있으면 채팅방을 개설하고
@@ -91,7 +93,8 @@ public class MainActivity extends FragmentActivity implements InviteDialog{
 
                         /* ChatProfile Manual Input for Remember Auto Generate Key */
                         ChatProfile chatProfile = new ChatProfile(chatAccessKey);
-                        FirebaseDatabase.getInstance().getReference(modelDir + chatAccessKey).setValue(chatProfile);
+                        FirebaseDao.insert(chatProfile, chatAccessKey);
+                        // FirebaseDatabase.getInstance().getReference(modelDir + chatAccessKey \).setValue(chatProfile);
 
                         // 상대방에게 response를 전달합니다.
 
@@ -99,7 +102,9 @@ public class MainActivity extends FragmentActivity implements InviteDialog{
                         /* 채팅방을 개설하고 상대방에게 채팅방 키를 전달해줍니다 */
                         /* 초대가 성사되었습니다. */
                         // onMatching을 true 변경하고 Chat으로 이동합니다.
-                        viewPager.setCurrentItem(1);
+                        UserChatFragment.chatAccessKey = chatAccessKey;
+                        UserChatFragment.getInstance().runChatService();
+                        moveViewPage(Const.ViewPagerIndex.CHAT);
                     }
 
                     @Override
@@ -130,10 +135,10 @@ public class MainActivity extends FragmentActivity implements InviteDialog{
             @Override
             public void onDialogPositiveClick() {
                 String invitingTargetUserAccessKey = invitingTargetUserProfile.getEmail();
-                Invite invite = new Invite();
-                invite.setFrom(Const.MY_USER_KEY);
+                PickMeRequest pickMeRequest = new PickMeRequest();
+                pickMeRequest.setFrom(Const.MY_USER_KEY);
 
-                FirebaseDao.insert(invite, invitingTargetUserAccessKey);
+                FirebaseDao.insert(pickMeRequest, invitingTargetUserAccessKey);
 
                 /*
                 ChatProfile chatProfile = new ChatProfile();
@@ -148,6 +153,14 @@ public class MainActivity extends FragmentActivity implements InviteDialog{
             }
         });
         dialog.show(getSupportFragmentManager(), "Inviting");
+    }
+
+    @Override
+    public void moveViewPage(int targetViewPage) {
+        if (viewPager == null) {
+            return;
+        }
+        viewPager.setCurrentItem(targetViewPage);
     }
 
 

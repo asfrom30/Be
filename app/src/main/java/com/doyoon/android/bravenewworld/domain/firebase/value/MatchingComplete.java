@@ -4,15 +4,14 @@ package com.doyoon.android.bravenewworld.domain.firebase.value;
  * Created by DOYOON on 7/13/2017.
  */
 
-public class InviteResponse {
-
+public class MatchingComplete {
     private String from;
     private String chatAccessKey;
 
-    public InviteResponse() {
+    public MatchingComplete() {
     }
 
-    public InviteResponse(String from, String chatAccessKey) {
+    public MatchingComplete(String from, String chatAccessKey) {
         this.from = from;
         this.chatAccessKey = chatAccessKey;
     }
@@ -23,5 +22,13 @@ public class InviteResponse {
 
     public void setFrom(String from) {
         this.from = from;
+    }
+
+    public String getChatAccessKey() {
+        return chatAccessKey;
+    }
+
+    public void setChatAccessKey(String chatAccessKey) {
+        this.chatAccessKey = chatAccessKey;
     }
 }

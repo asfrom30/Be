@@ -1,6 +1,6 @@
 package com.doyoon.android.bravenewworld.presenter.activity.interfaces;
 
-import com.doyoon.android.bravenewworld.domain.firebase.value.Invite;
+import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 
 /**
@@ -8,6 +8,6 @@ import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
  */
 
 public interface InviteDialog {
-    void showInvitedDialog(Invite invite);
+    void showInvitedDialog(PickMeRequest pickMeRequest);
     void showInvitingDialog(UserProfile invitingTargetUserProfile, int userType);
 }

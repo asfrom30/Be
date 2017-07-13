@@ -12,20 +12,6 @@
             </taker>
         </takers>
     </activeusers>
-    <users type="reference-key">
-        <user type="primary-key" isBundle="true" isAutoGenerateModelKey="false" refer="user email address">
-            <userprofile type="value" isBundle="false" isAutoGenerateModelKey="false" refer=""/>
-            <invites type="reference-key">
-                <invite type="value" isBundle="true" isAutoGenerateModelKey="true" refer="" />
-            </invites>
-            <responses type="reference-key">
-                <inviteresponse type="value" isBundle="true" isAutoGenerateModelKey="true" refer=""></inviteresponse>
-            </responses>
-        </user>
-    </users>
-    <matchinglogs type="reference-key">
-        <matchinglog type="value"/>
-    </matchinglogs>
     <chatrooms type="reference-key">
         <chatroom type="primary-key" isBundle="true" isAutoGenerateModelKey="true">
             <chatprofile type="value" isBundle="false" isAutoGenerateModelKey="false" refer=""></chatprofile>
@@ -34,4 +20,22 @@
             </chats>
         </chatroom>
     </chatrooms>
+    <users type="reference-key">
+        <user type="primary-key" isBundle="true" isAutoGenerateModelKey="false" refer="user email address">
+            <userprofile type="value" isBundle="false" isAutoGenerateModelKey="false" refer=""/>
+            <giver_history type="reference-key">
+                <pickmerequests type="reference-key">
+                    <pickmerequest type="value" isBundle="true" isAutoGenerateModelKey="true" refer="" />
+                </pickmerequests>
+            </giver_history>
+            <taker_history type="reference-key">
+                <matchingcompletes type="reference-key">
+                    <matchingcomplete type="value" isBundle="true" isAutoGenerateModelKey="true" refer=""></matchingcomplete>
+                </matchingcompletes>
+            </taker_history>
+        </user>
+    </users>
+    <matchinglogs type="reference-key">
+        <matchinglog type="value"/>
+    </matchinglogs>
 </root>
