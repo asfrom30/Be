@@ -13,9 +13,25 @@
         </takers>
     </activeusers>
     <users type="reference-key">
-        <userprofile type="value" isBundle="true" isAutoGenerateModelKey="false" refer=""/>
+        <user type="primary-key" isBundle="true" isAutoGenerateModelKey="false" refer="user email address">
+            <userprofile type="value" isBundle="false" isAutoGenerateModelKey="false" refer=""/>
+            <invites type="reference-key">
+                <invite type="value" isBundle="true" isAutoGenerateModelKey="true" refer="" />
+            </invites>
+            <responses type="reference-key">
+                <inviteresponse type="value" isBundle="true" isAutoGenerateModelKey="true" refer=""></inviteresponse>
+            </responses>
+        </user>
     </users>
     <matchinglogs type="reference-key">
         <matchinglog type="value"/>
     </matchinglogs>
+    <chatrooms type="reference-key">
+        <chatroom type="primary-key" isBundle="true" isAutoGenerateModelKey="true">
+            <chatprofile type="value" isBundle="false" isAutoGenerateModelKey="false" refer=""></chatprofile>
+            <chats type="reference-key">
+                <chat type="value" isBundle="true" isAutoGenerateModelKey="true" refer=""></chat>
+            </chats>
+        </chatroom>
+    </chatrooms>
 </root>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/cast_expanded_controller_progress_text_color"
+    tools:layout_editor_absoluteY="81dp"
+    tools:layout_editor_absoluteX="0dp">
+
+    <ImageButton
+        android:id="@+id/imGiverBtn"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
+        android:background="@drawable/ic_audiotrack_light"
+        app:layout_constraintBottom_toBottomOf="@+id/imTakerBtn"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/imTakerBtn"
+        app:layout_constraintTop_toTopOf="@+id/imTakerBtn" />
+
+    <ImageButton
+        android:id="@+id/imTakerBtn"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/ic_dialog_close_light"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/imGiverBtn"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</android.support.constraint.ConstraintLayout>

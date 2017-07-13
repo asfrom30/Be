@@ -12,24 +12,16 @@ public class UserProfile extends FirebaseModel{
     private String name;
     private int age;
     private int gender;
+    private String email;
 
     public UserProfile() {
     }
 
-    public UserProfile(String name, int age, int gender) {
+    public UserProfile(String name, int age, int gender, String email) {
         this.name = name;
         this.age = age;
         this.gender = gender;
-    }
-
-    @Override
-    public String getKey() {
-        return this.key;
-    }
-
-    @Override
-    public void setKey(String key) {
-        this.key = key;
+        this.email = email;
     }
 
     public String getName() {
@@ -56,6 +48,24 @@ public class UserProfile extends FirebaseModel{
         this.gender = gender;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    @Override
+    public String getKey() {
+        return null;
+    }
+
+    @Override
+    public void setKey(String key) {
+
+    }
+
     @Override
     public String toString() {
         return "UserProfile{" +
@@ -65,4 +75,6 @@ public class UserProfile extends FirebaseModel{
                 ", gender=" + gender +
                 '}';
     }
+
+
 }

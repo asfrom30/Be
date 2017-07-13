@@ -1,8 +1,20 @@
 package com.doyoon.android.bravenewworld.domain;
 
+import android.util.Log;
+
+import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
+import com.doyoon.android.bravenewworld.domain.firebase.FirebaseGeoDao;
+import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
+import com.doyoon.android.bravenewworld.domain.firebase.value.Invite;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.util.ConvString;
+import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -15,6 +27,9 @@ import static com.doyoon.android.bravenewworld.util.ConvString.commaSignToString
  */
 
 public class DummyDao {
+
+    private static final String TAG = DummyDao.class.getSimpleName();
+
     /* Secure Key */
     private SecureRandom random = new SecureRandom();
 
@@ -23,22 +38,20 @@ public class DummyDao {
     }
 
     /* MY DUMMY PROFILE */
-    public static UserProfile createDummyMyProfile(){
-        String email = "mireae05@naver.com";
+    public static UserProfile createDummyMyProfile() {
+        String email = "miraee05@naver.com";
         String key = commaSignToString(email);
-        UserProfile userProfile = new UserProfile("김도윤", 33, Const.Gender.MALE);
+        UserProfile userProfile = new UserProfile("김도윤", 33, Const.Gender.MALE, email);
         userProfile.setKey(key);
         return userProfile;
     }
 
-    public static UserProfile createDummyUserProfile(){
-        String key = commaSignToString(getRandomEmailAddress());
+    private static UserProfile createDummyUserProfile() {
         int gender = getRandomInt(0, 1);
         if (gender == 0) {
             gender = -1;
         }
-        UserProfile userProfile = new UserProfile(getSaltString(3), getRandomInt(20,30), gender);
-        userProfile.setKey(key);
+        UserProfile userProfile = new UserProfile(getSaltString(3), getRandomInt(20, 30), gender, commaSignToString(getRandomEmailAddress()));
         return userProfile;
     }
 
@@ -60,7 +73,7 @@ public class DummyDao {
     }
 
     /* MY DUMMY GIVER */
-    public static LatLng createDummyLatLng(){
+    private static LatLng createDummyLatLng() {
         LatLng latLng = getRandomLatLng();
         return latLng;
     }
@@ -89,4 +102,50 @@ public class DummyDao {
     private static int getRandomInt(int min, int max) {
         return r.nextInt((max - min) + 1) + min;
     }
+
+    public static void createDummy(){
+        /* Create MY Dummy */
+        UserProfile myUserProfile = DummyDao.createDummyMyProfile();
+        String myAccessKey = ConvString.commaSignToString(myUserProfile.getEmail());
+        FirebaseDao.insert(myUserProfile, myAccessKey);
+
+        for(int i =0; i < 10; i++) {
+            /* Create Dummy Profile */
+            UserProfile userProfile = DummyDao.createDummyUserProfile();
+            String userAccessKey = ConvString.commaSignToString(userProfile.getEmail());
+            Log.i(TAG, "Create Dummy User : " + userProfile.toString());
+            FirebaseDao.insert(userProfile, userAccessKey);
+
+            /* Insert givers using Geo Fire */
+            LatLng latLng = DummyDao.createDummyLatLng();
+            String modelDir = FirebaseHelper.getModelDir("giver");
+            FirebaseGeoDao.insert(modelDir, userAccessKey, new GeoLocation(latLng.latitude, latLng.longitude));
+        }
+    }
+
+
+    /* Dummy Invite */
+    public static void insertDummyInvite(){
+        /* Get User Profile */
+        String targetDummyAccessKey = "ZMWAFD3OLF@google_comma_com";
+        String modelDir = FirebaseHelper.getModelDir("userprofile", targetDummyAccessKey);
+
+        /* Create Dummy Invites */
+        final Invite invite = new Invite();
+
+        FirebaseDatabase.getInstance().getReference(modelDir + "userprofile").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                UserProfile userProfile = dataSnapshot.getValue(UserProfile.class);
+                invite.fetchDataFromUserProfile(userProfile);
+                FirebaseDao.insert(invite, Const.MY_USER_KEY);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
 }

@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,12 +18,13 @@ import java.util.List;
 
 public abstract class RecyclerFragment<T> extends Fragment{
 
+    private RecyclerView.Adapter adapter;
     private List<T> dataList;
+
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
         /* Layout Inflating */
         int fragmentLayoutResId = throwFragmentLayoutResId();
         View view = inflater.inflate(fragmentLayoutResId, container, false);
@@ -31,14 +33,21 @@ public abstract class RecyclerFragment<T> extends Fragment{
         int recyclerViewResId = throwRecyclerViewResId();
         RecyclerView recyclerView = (RecyclerView) view.findViewById(recyclerViewResId);
 
-        this.dataList = throwDataList();
+        dataList = throwDataList();
 
         /* Set Recycler View */
-        RecyclerView.Adapter adapter = new CustomRecyclerAdapter();
+        adapter = new CustomRecyclerAdapter();
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
         return view;
+    }
+
+    public void notifySetChanged(){
+        if (adapter == null) {
+            Log.e(getClass().getSimpleName(), "Adapter is Null");
+            return;
+        }
+        adapter.notifyDataSetChanged();
     }
 
     public  class CustomRecyclerAdapter extends RecyclerView.Adapter<CustomViewHolder> {
