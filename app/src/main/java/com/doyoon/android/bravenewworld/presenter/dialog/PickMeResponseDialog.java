@@ -14,12 +14,12 @@ import com.doyoon.android.bravenewworld.R;
  * Created by DOYOON on 7/12/2017.
  */
 
-public class InvitedDialogFragment extends DialogFragment {
+public class PickMeResponseDialog extends DialogFragment {
     // Use this instance of the interface to deliver action events
     DialogListener listener;
 
 
-    public InvitedDialogFragment(DialogListener listener) {
+    public PickMeResponseDialog(DialogListener listener) {
         this.listener = listener;
     }
 
@@ -34,13 +34,13 @@ public class InvitedDialogFragment extends DialogFragment {
         // Pass null as the parent view because its going in the dialog layout
         builder.setView(inflater.inflate(R.layout.dialog_invited, null))
                 // Add action buttons
-                .setPositiveButton("Accept ", new DialogInterface.OnClickListener() {
+                .setPositiveButton("수락", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         listener.onDialogPositiveClick();
                     }
                 })
-                .setNegativeButton("Deny", new DialogInterface.OnClickListener() {
+                .setNegativeButton("거절", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         listener.onDialogNegativeClick();
                     }

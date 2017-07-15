@@ -15,14 +15,15 @@ import com.doyoon.android.bravenewworld.util.Const;
  * Created by DOYOON on 7/12/2017.
  */
 
-public class InvitingDialogFragment extends DialogFragment {
+public class PickMeRequestDialog extends DialogFragment {
 
     // Use this instance of the interface to deliver action events
     DialogListener listener;
     int userType;
 
 
-    public InvitingDialogFragment(int userType, DialogListener listener) {
+    public PickMeRequestDialog(int userType, DialogListener listener) {
+        this.userType = userType;
         this.listener = listener;
     }
 

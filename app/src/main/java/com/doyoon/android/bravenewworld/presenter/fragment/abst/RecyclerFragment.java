@@ -18,6 +18,12 @@ import java.util.List;
 
 public abstract class RecyclerFragment<T> extends Fragment{
 
+    private static final String TAG = RecyclerFragment.class.getSimpleName();
+
+    private boolean loading = true;
+    private LinearLayoutManager linearLayoutManager;
+    int pastVisiblesItems, visibleItemCount, totalItemCount;
+
     private RecyclerView.Adapter adapter;
     private List<T> dataList;
 
@@ -33,12 +39,41 @@ public abstract class RecyclerFragment<T> extends Fragment{
         int recyclerViewResId = throwRecyclerViewResId();
         RecyclerView recyclerView = (RecyclerView) view.findViewById(recyclerViewResId);
 
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if(dy > 0) //check for scroll down
+                {
+                    visibleItemCount = linearLayoutManager.getChildCount();
+                    totalItemCount = linearLayoutManager.getItemCount();
+                    pastVisiblesItems = linearLayoutManager.findFirstVisibleItemPosition();
+
+                    if (loading)
+                    {
+                        // Log.i(TAG, "loading...");
+                        if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
+                        {
+                            // loading = false;
+                            scrollEndCallback();
+                            // Log.i(TAG, "Last Item Wow !");
+                        }
+                    }
+                }
+            }
+        });
+
         dataList = throwDataList();
 
         /* Set Recycler View */
         adapter = new CustomRecyclerAdapter();
         recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        linearLayoutManager = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(linearLayoutManager);
         return view;
     }
 
@@ -102,4 +137,6 @@ public abstract class RecyclerFragment<T> extends Fragment{
     public abstract int throwFragmentLayoutResId();
     public abstract int throwRecyclerViewResId();
     public abstract int throwItemLayoutId();
+
+    public abstract void scrollEndCallback();
 }

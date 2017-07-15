@@ -43,6 +43,7 @@ public class DummyDao {
         String key = commaSignToString(email);
         UserProfile userProfile = new UserProfile("김도윤", 33, Const.Gender.MALE, email);
         userProfile.setKey(key);
+        FirebaseDao.insert(userProfile, key);
         return userProfile;
     }
 
@@ -103,7 +104,7 @@ public class DummyDao {
         return r.nextInt((max - min) + 1) + min;
     }
 
-    public static void createDummy(){
+    public static void createDummies(String userType){
         /* Create MY Dummy */
         UserProfile myUserProfile = DummyDao.createDummyMyProfile();
         String myAccessKey = ConvString.commaSignToString(myUserProfile.getEmail());
@@ -118,7 +119,7 @@ public class DummyDao {
 
             /* Insert givers using Geo Fire */
             LatLng latLng = DummyDao.createDummyLatLng();
-            String modelDir = FirebaseHelper.getModelDir("giver");
+            String modelDir = FirebaseHelper.getModelDir(userType);
             FirebaseGeoDao.insert(modelDir, userAccessKey, new GeoLocation(latLng.latitude, latLng.longitude));
         }
     }

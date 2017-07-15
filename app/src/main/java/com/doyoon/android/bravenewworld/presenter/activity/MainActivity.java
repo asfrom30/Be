@@ -3,37 +3,34 @@ package com.doyoon.android.bravenewworld.presenter.activity;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.domain.firebase.value.ChatProfile;
+import com.doyoon.android.bravenewworld.domain.firebase.value.MatchingComplete;
 import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.domain.reactivenetwork.ReactiveInviteResponse;
 import com.doyoon.android.bravenewworld.presenter.activity.interfaces.InviteDialog;
-import com.doyoon.android.bravenewworld.presenter.activity.interfaces.ViewPagerMover;
+import com.doyoon.android.bravenewworld.presenter.interfaces.ViewPagerMover;
 import com.doyoon.android.bravenewworld.presenter.dialog.DialogListener;
-import com.doyoon.android.bravenewworld.presenter.dialog.InvitedDialogFragment;
-import com.doyoon.android.bravenewworld.presenter.dialog.InvitingDialogFragment;
+import com.doyoon.android.bravenewworld.presenter.dialog.PickMeRequestDialog;
+import com.doyoon.android.bravenewworld.presenter.dialog.PickMeResponseDialog;
 import com.doyoon.android.bravenewworld.presenter.fragment.UserChatFragment;
 import com.doyoon.android.bravenewworld.presenter.fragment.UserMapFragment;
 import com.doyoon.android.bravenewworld.presenter.fragment.UserProfileFragment;
 import com.doyoon.android.bravenewworld.presenter.fragment.UserSelectFragment;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.ConvString;
+import com.doyoon.android.bravenewworld.util.LogUtil;
+import com.doyoon.android.bravenewworld.util.view.ViewPagerBuilder;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class MainActivity extends FragmentActivity implements InviteDialog, ViewPagerMover{
+public class MainActivity extends AppCompatActivity implements InviteDialog, ViewPagerMover{
 
     private static String TAG = MainActivity.class.getSimpleName();
 
@@ -41,6 +38,8 @@ public class MainActivity extends FragmentActivity implements InviteDialog, View
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        LogUtil.logLifeCycle(TAG, "onCreateView()");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -48,58 +47,78 @@ public class MainActivity extends FragmentActivity implements InviteDialog, View
         FirebaseHelper.buildDbStructure(getBaseContext());
 
         /* Create Dummy */
-        // DummyDao.createDummy();
-        // DummyDao.insertDummyPickMeRequest();   // from "ZMWAFD3OLF@google_comma_com" to "miraee05@naver.com"
+        // createDummyData();
 
         /* Log in activity 에서 log in 정보를 받아 온다.... */
-        // get Bundle, get Extra...
-        String email = "miraee05@naver.com";
-        String userKey = ConvString.commaSignToString(email);
-        Const.MY_USER_KEY = userKey;
+        // Get User ID from bundle get Bundle, get Extra...
+        this.setMyUserKeyAndProfile();
 
-
-        /* Dependency Injection */
+        /* make view pager*/
         viewPager = (ViewPager) findViewById(R.id.main_view_pager);
         TabLayout tabLayout = (TabLayout) findViewById(R.id.main_tab_layout);
 
-        /* Add All Fragment */
-        final List<Fragment> fragmentList = new ArrayList<>();
-        fragmentList.add(new UserSelectFragment());
-        fragmentList.add(new UserMapFragment());
-        fragmentList.add(UserChatFragment.getInstance());
-        fragmentList.add(new UserProfileFragment());
+        ViewPagerBuilder.getInstance(viewPager)
+                .addFragment(new UserSelectFragment())
+                .addFragment(new UserMapFragment())
+                .addFragment(UserChatFragment.getInstance())
+                .addFragment(UserProfileFragment.getInstance())
+                .linkTabLayout(tabLayout)
+                .build(getSupportFragmentManager());
+    }
 
-        CustomPageAdapter customPageAdapter = new CustomPageAdapter(getSupportFragmentManager(), fragmentList);
-        viewPager.setAdapter(customPageAdapter);
+    private void setMyUserKeyAndProfile() {
+        // String email = getIntent().getStringExtra()
+        String email = getDummyUserEmail();
+        String userKey = ConvString.commaSignToString(email);
+        Const.MY_USER_KEY = userKey;
 
-        /* Tab Layout Listener */
-        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-        tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(viewPager));
+        FirebaseDao.read(UserProfile.class, new FirebaseDao.ReadCallback<UserProfile>() {
+            @Override
+            public void execute(UserProfile userProfile) {
+                Const.MY_USER_PROFILE = userProfile;
+                Log.i(TAG, "My User Key and User Profile is set Complete");
+            }
+        }, Const.MY_USER_KEY);
+    }
 
+    private String getDummyUserEmail(){
+        int currentApiVersion = android.os.Build.VERSION.SDK_INT;
+        String email;
+        if (currentApiVersion == 25) {
+            email = "miraee05@naver.com";
+        } else if (currentApiVersion == 23) {
+            email = "YDJQ74F025@google.com";
+        } else {
+            email = "miraee05@naver.com";
+        }
+        return email;
     }
 
     /* I'm giver, 초대를 받았습니다.  */
     @Override
     public void showInvitedDialog(final PickMeRequest pickMeRequest){
-        DialogFragment dialog = new InvitedDialogFragment(new DialogListener() {
+        DialogFragment dialog = new PickMeResponseDialog(new DialogListener() {
             @Override
             public void onDialogPositiveClick() {
-                ReactiveInviteResponse.hasActiveUser(pickMeRequest.getKey(), new ReactiveInviteResponse.Callback() {
+                ReactiveInviteResponse.hasActiveUser(pickMeRequest.getFromUserAccessKey(), new ReactiveInviteResponse.Callback() {
                     @Override
-                    public void userExist() {
-                        // 아직 있으면 채팅방을 개설하고
+                    public void userExist() {   // 초대에 응했는데 아직 있다면...
+
                         String modelDir = FirebaseHelper.getModelDir(Const.RefKey.CHAT_ROOM);
                         String chatAccessKey = FirebaseDatabase.getInstance().getReference(modelDir).push().getKey();
 
                         /* ChatProfile Manual Input for Remember Auto Generate Key */
+                        String fromUserAccessKey = pickMeRequest.getFromUserAccessKey();
                         ChatProfile chatProfile = new ChatProfile(chatAccessKey);
+                        chatProfile.setGiverKey(Const.MY_USER_KEY);
+                        chatProfile.setTakerKey(fromUserAccessKey);
                         FirebaseDao.insert(chatProfile, chatAccessKey);
                         // FirebaseDatabase.getInstance().getReference(modelDir + chatAccessKey \).setValue(chatProfile);
 
-                        // 상대방에게 response를 전달합니다.
-
-                        //
                         /* 채팅방을 개설하고 상대방에게 채팅방 키를 전달해줍니다 */
+                        MatchingComplete matchingComplete = new MatchingComplete(Const.MY_USER_KEY, chatAccessKey);
+                        FirebaseDao.insert(matchingComplete, fromUserAccessKey);
+
                         /* 초대가 성사되었습니다. */
                         // onMatching을 true 변경하고 Chat으로 이동합니다.
                         UserChatFragment.chatAccessKey = chatAccessKey;
@@ -124,32 +143,31 @@ public class MainActivity extends FragmentActivity implements InviteDialog, View
 
     /* 초대를 합니다. */
     @Override
-    public void showInvitingDialog(final UserProfile invitingTargetUserProfile, int userType){
+    public void showSendingPickMeRequestDialog(final UserProfile invitingTargetUserProfile, int userType){
         if (invitingTargetUserProfile == null) {
-            Log.i(TAG, "called showInvitingDialog But UserProfile parameter is null");
+            Log.i(TAG, "called showSendingPickMeRequestDialog But UserProfile parameter is null");
             return;
         }
 
         // todo dialog fragment는 저절로 사라지나요?
-        DialogFragment dialog = new InvitingDialogFragment(userType, new DialogListener() {
+        DialogFragment dialog = new PickMeRequestDialog(userType, new DialogListener() {
             @Override
             public void onDialogPositiveClick() {
-                String invitingTargetUserAccessKey = invitingTargetUserProfile.getEmail();
+                String invitingTargetUserAccessKey = ConvString.commaSignToString(invitingTargetUserProfile.getEmail());
                 PickMeRequest pickMeRequest = new PickMeRequest();
-                pickMeRequest.setFrom(Const.MY_USER_KEY);
+                if (Const.MY_USER_PROFILE == null) {
+                    Log.e(TAG, "User Profile is null, can not send pick me request");
+                    return;
+                }
+                pickMeRequest.fetchDataFromUserProfile(Const.MY_USER_PROFILE);
 
+                /* Add Pick Me Request to Target */
                 FirebaseDao.insert(pickMeRequest, invitingTargetUserAccessKey);
-
-                /*
-                ChatProfile chatProfile = new ChatProfile();
-                chatProfile.setTakerKey(Const.MY_USER_KEY);
-                FirebaseDao.insert(chatProfile);
-                */
             }
 
             @Override
             public void onDialogNegativeClick() {
-                /* Show Detail Freind Profile... */
+                /* Show Detail Friend Profile... */
             }
         });
         dialog.show(getSupportFragmentManager(), "Inviting");
@@ -157,34 +175,10 @@ public class MainActivity extends FragmentActivity implements InviteDialog, View
 
     @Override
     public void moveViewPage(int targetViewPage) {
+
         if (viewPager == null) {
             return;
         }
         viewPager.setCurrentItem(targetViewPage);
     }
-
-
-    class CustomPageAdapter extends FragmentStatePagerAdapter {
-
-        private List<Fragment> fragmentList;
-
-        public CustomPageAdapter(FragmentManager fm, List<Fragment> fragmentList) {
-            super(fm);
-            this.fragmentList = fragmentList;
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return fragmentList.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return fragmentList.size();
-        }
-    }
-
-
-
-
 }

@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.doyoon.android.bravenewworld.R;
@@ -15,6 +16,7 @@ import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.domain.firebase.value.Chat;
 import com.doyoon.android.bravenewworld.presenter.fragment.abst.RecyclerFragment;
 import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.util.LogUtil;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -33,11 +35,13 @@ public class UserChatFragment extends RecyclerFragment<Chat> {
 
     public List<Chat> chatList = new ArrayList<>();
     private EditText inputEditText;
+    private ImageButton emojiBtn, sendBtn;
 
     /* Shared Preference */
     public static String chatAccessKey = null;
-
+    private boolean runChatServiceFlag;
     public static UserChatFragment instance;
+
 
     public static UserChatFragment getInstance(){
         if (instance == null) {
@@ -53,25 +57,14 @@ public class UserChatFragment extends RecyclerFragment<Chat> {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.i(TAG, "User Chat Fragment is onCreateView again");
+        LogUtil.logLifeCycle(TAG, "onCreateView()");
 
+        /* View setting */
         View view = super.onCreateView(inflater, container, savedInstanceState);
+        this.dependencyInjection(view);
+        this.addWidgetsListener();
+        // updateUiEnabled();
 
-        inputEditText = (EditText) view.findViewById(R.id.chat_input_text_editText);
-
-        /* Add Listener */
-        view.findViewById(R.id.chat_input_emoji_imageButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onEmojiBtn();
-            }
-        });
-        view.findViewById(R.id.chat_send_imageButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onSendBtn();
-            }
-        });
         return view;
     }
 
@@ -95,8 +88,16 @@ public class UserChatFragment extends RecyclerFragment<Chat> {
 
     public void runChatService(){
         if (chatAccessKey == null) {
+            Log.i(TAG, "Access key is null, runChatService can't start");
             return;
         }
+
+        if (runChatServiceFlag) {
+            Log.i(TAG, "run chat service flag is true, runChatService can't start");
+            return;
+        }
+
+        runChatServiceFlag = true;
 
         String modelDir = FirebaseHelper.getModelDir(Const.RefKey.CHAT, chatAccessKey);
 
@@ -126,6 +127,39 @@ public class UserChatFragment extends RecyclerFragment<Chat> {
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
+            }
+        });
+    }
+
+    private void updateUiEnabled(){
+        if (runChatServiceFlag) {
+            emojiBtn.setEnabled(true);
+            sendBtn.setEnabled(true);
+            inputEditText.setEnabled(true);
+        } else {
+            emojiBtn.setEnabled(false);
+            sendBtn.setEnabled(false);
+            inputEditText.setEnabled(false);
+        }
+    }
+
+    private void dependencyInjection(View view){
+        inputEditText = (EditText) view.findViewById(R.id.chat_input_text_editText);
+        emojiBtn = (ImageButton) view.findViewById(R.id.chat_input_emoji_imageButton);
+        sendBtn = (ImageButton) view.findViewById(R.id.chat_send_imageButton);
+    }
+
+    private void addWidgetsListener() {
+        emojiBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onEmojiBtn();
+            }
+        });
+        sendBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onSendBtn();
             }
         });
     }
@@ -173,6 +207,11 @@ public class UserChatFragment extends RecyclerFragment<Chat> {
     @Override
     public int throwItemLayoutId() {
         return R.layout.item_chat;
+    }
+
+    @Override
+    public void scrollEndCallback() {
+
     }
 
 }

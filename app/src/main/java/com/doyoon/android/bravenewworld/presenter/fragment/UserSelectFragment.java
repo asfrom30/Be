@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.doyoon.android.bravenewworld.R;
+import com.doyoon.android.bravenewworld.util.LogUtil;
 
 /**
  * Created by DOYOON on 7/13/2017.
@@ -16,9 +17,14 @@ import com.doyoon.android.bravenewworld.R;
 
 public class UserSelectFragment extends Fragment {
 
+    private static String TAG = UserSelectFragment.class.getSimpleName();
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        LogUtil.logLifeCycle(TAG, "onCreateView()");
+
         View view = inflater.inflate(R.layout.fragment_user_select, container, false);
         startPreFragment();
         return view;

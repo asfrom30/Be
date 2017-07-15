@@ -8,12 +8,22 @@ import com.google.android.gms.maps.model.LatLng;
 
 public class ActiveUser {
 
+    private boolean isActive;
     private LatLng latLng;
     private String key;
 
     public ActiveUser(String key, LatLng latLng) {
+        this.isActive = true;
         this.latLng = latLng;
         this.key = key;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     public LatLng getLatLng() {
@@ -35,7 +45,8 @@ public class ActiveUser {
     @Override
     public String toString() {
         return "ActiveUser{" +
-                "latLng=" + latLng +
+                "isActive=" + isActive +
+                ", latLng=" + latLng +
                 ", key='" + key + '\'' +
                 '}';
     }

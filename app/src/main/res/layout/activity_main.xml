@@ -9,35 +9,36 @@
     <android.support.design.widget.TabLayout
         android:id="@+id/main_tab_layout"
         android:layout_width="0dp"
-        android:layout_height="15dp"
+        android:layout_height="50dp"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintHorizontal_bias="0.0">
+        app:tabIndicatorColor="#575a5f">
 
         <android.support.design.widget.TabItem
             android:id="@+id/tabItem5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="select" />
+            android:icon="@drawable/tab_layout_select_deactive" />
 
         <android.support.design.widget.TabItem
             android:id="@+id/tabItem4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="map" />
+            android:icon="@drawable/tab_layout_map_deactive" />
 
         <android.support.design.widget.TabItem
             android:id="@+id/tabItem3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="chat" />
+            android:icon="@drawable/tab_layout_chat_deactive" />
 
         <android.support.design.widget.TabItem
             android:id="@+id/tabItem2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="profile" />
+            android:icon="@drawable/tab_layout_profile_deactive" />
     </android.support.design.widget.TabLayout>
 
     <android.support.v4.view.ViewPager

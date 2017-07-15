@@ -8,10 +8,13 @@ import com.doyoon.android.bravenewworld.domain.firebase.FirebaseModel;
 
 public class PickMeRequest extends FirebaseModel {
 
-    private String from;
+    private String fromUserAccessKey;
+    private String imageUrl;
+
+    private String name;
     private int age;
     private int gender;
-    private String name;
+
 
     public PickMeRequest() {
     }
@@ -26,12 +29,12 @@ public class PickMeRequest extends FirebaseModel {
 
     }
 
-    public String getFrom() {
-        return from;
+    public String getFromUserAccessKey() {
+        return fromUserAccessKey;
     }
 
-    public void setFrom(String from) {
-        this.from = from;
+    public void setFromUserAccessKey(String fromUserAccessKey) {
+        this.fromUserAccessKey = fromUserAccessKey;
     }
 
     public int getAge() {
@@ -58,17 +61,26 @@ public class PickMeRequest extends FirebaseModel {
         this.name = name;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
     public void fetchDataFromUserProfile(UserProfile userProfile) {
-        this.from = userProfile.getEmail();
+        this.fromUserAccessKey = userProfile.getEmail();
         this.age = userProfile.getAge();
         this.gender = userProfile.getGender();
         this.name = userProfile.getName();
+        this.imageUrl = userProfile.getImageUri();
     }
 
     @Override
     public String toString() {
         return "PickMeRequest{" +
-                "from='" + from + '\'' +
+                "fromUserAccessKey='" + fromUserAccessKey + '\'' +
                 ", age=" + age +
                 ", gender=" + gender +
                 ", name='" + name + '\'' +

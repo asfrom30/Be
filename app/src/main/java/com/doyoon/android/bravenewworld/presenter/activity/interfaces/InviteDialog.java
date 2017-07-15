@@ -9,5 +9,5 @@ import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 
 public interface InviteDialog {
     void showInvitedDialog(PickMeRequest pickMeRequest);
-    void showInvitingDialog(UserProfile invitingTargetUserProfile, int userType);
+    void showSendingPickMeRequestDialog(UserProfile invitingTargetUserProfile, int userType);
 }

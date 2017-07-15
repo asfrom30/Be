@@ -12,9 +12,12 @@ public class UserProfile extends FirebaseModel{
     private String name;
     private int age;
     private int gender;
+    private String work;
     private String email;
+    private String imageUri;
 
     public UserProfile() {
+
     }
 
     public UserProfile(String name, int age, int gender, String email) {
@@ -54,6 +57,22 @@ public class UserProfile extends FirebaseModel{
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getImageUri() {
+        return imageUri;
+    }
+
+    public void setImageUri(String imageUri) {
+        this.imageUri = imageUri;
+    }
+
+    public String getWork() {
+        return work;
+    }
+
+    public void setWork(String work) {
+        this.work = work;
     }
 
     @Override

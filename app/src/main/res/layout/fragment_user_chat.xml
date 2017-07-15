@@ -35,8 +35,8 @@
             android:layout_height="match_parent"
             android:layout_weight="91.90"
             android:ems="10"
-            android:inputType="textPersonName"
-            android:text="Name" />
+            android:hint="input message"
+            android:inputType="textPersonName" />
 
         <ImageButton
             android:id="@+id/chat_input_emoji_imageButton"

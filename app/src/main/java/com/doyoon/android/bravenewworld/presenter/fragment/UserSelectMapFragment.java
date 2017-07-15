@@ -16,15 +16,18 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.doyoon.android.bravenewworld.R;
+import com.doyoon.android.bravenewworld.domain.RemoteDao;
+import com.doyoon.android.bravenewworld.domain.firebase.FirebaseGeoDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.domain.firebase.geovalue.ActiveUser;
 import com.doyoon.android.bravenewworld.domain.firebase.value.MatchingComplete;
 import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.presenter.activity.interfaces.InviteDialog;
-import com.doyoon.android.bravenewworld.presenter.activity.interfaces.ViewPagerMover;
+import com.doyoon.android.bravenewworld.presenter.interfaces.ViewPagerMover;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.LatLngUtil;
+import com.doyoon.android.bravenewworld.util.LogUtil;
 import com.doyoon.android.bravenewworld.view.UserSelectFragmentView;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -37,14 +40,15 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper.getModelDir;
-import static com.doyoon.android.bravenewworld.util.Const.PAGING_NUMBER_AT_ONCE;
 
 /**
  * Created by DOYOON on 7/10/2017.
@@ -61,6 +64,7 @@ import static com.doyoon.android.bravenewworld.util.Const.PAGING_NUMBER_AT_ONCE;
 public class UserSelectMapFragment extends Fragment implements OnMapReadyCallback {
 
     private static String TAG = UserSelectMapFragment.class.getSimpleName();
+    private static int linkRes = R.layout.fragment_user_select_map;
 
     /* View */
     private UserSelectFragmentView mMainView;
@@ -73,26 +77,32 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
     private Map<String, ActiveUser> activeUserMap = new HashMap<>();
     private List<UserProfile> displayUserList = new ArrayList();
 
-    /* Flag */
-    boolean needListUiUpdate = false;
-
     /* Static Preference */
     public static int USER_TYPE = Const.UserType.Taker;
 
     /* Shared Preference */
     private boolean onMatching = false;
-    private int page = 1;
+    private int startIndexForFetchUser = 0;
     private LatLng lastLatLng;
     private double SEARCH_DISTANCE_KM = 100;
     private float CURRENT_CAMERA_ZOOM = Const.DEFAULT_CAMERA_ZOOM;
+
+    ViewPagerMover viewPagerMover;
+    InviteDialog inviteDialog;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
+        LogUtil.logLifeCycle(TAG, "onCreateView()");
+
         /* Layout Inflating */
         View baseView = inflater.inflate(R.layout.fragment_user_select_map, container, false);
         this.mMainView = new UserSelectFragmentView(this, getContext(), baseView);
+
+        /* interface dependency */
+        this.viewPagerMover = getViewPagerMover(getActivity());
+        this.inviteDialog = getInviteDialog(getActivity());
 
         /* Get Default Setting  */
         SEARCH_DISTANCE_KM = Const.DEFAULT_SEARCH_DISTANCE_KM;
@@ -131,6 +141,16 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
         updateLastLatLng(new PostUpdateLatLng() {
             @Override
             public void callback() {
+
+                /* Register Active User */
+                if(USER_TYPE == Const.UserType.Giver) {
+                    String modelDir = FirebaseHelper.getModelDir(Const.RefKey.ACTIVE_USER_TYPE_GIVER);
+                    FirebaseGeoDao.insert(modelDir, Const.MY_USER_KEY, new GeoLocation(lastLatLng.latitude, lastLatLng.longitude));
+                } else if(USER_TYPE == Const.UserType.Taker){
+                    String modelDir = FirebaseHelper.getModelDir(Const.RefKey.ACTIVE_USER_TYPE_TAKER);
+                    FirebaseGeoDao.insert(modelDir, Const.MY_USER_KEY, new GeoLocation(lastLatLng.latitude, lastLatLng.longitude));
+                }
+
                 /* After Update LatLng focus to LatLng*/
                 setFocusLastLatLng();
 
@@ -142,56 +162,38 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
         });
     }
 
-    /* This is On Btn */
-    public void onTriggeredUpdateUIThread(){
-        Log.i(TAG, "Try to Update UI");
+    public void fetchNextPageUserProfiles(){
 
-        //todo move to domain...
+        if (startIndexForFetchUser + 1 == activeUserList.size()) {
+            return;
+        }
 
-        int endIndex = page * PAGING_NUMBER_AT_ONCE;
-        int startIndex = endIndex - PAGING_NUMBER_AT_ONCE;
+        int endIndex = startIndexForFetchUser + Const.PAGING_NUMBER_AT_ONCE;
 
         if (endIndex > activeUserList.size()) {
             endIndex = activeUserList.size();
-            // todo 페이지의 끝 입니다..... reactive 하게.. 어떻게??
         }
-        Log.i(TAG, startIndex + "부터 " + endIndex + "까지 데이터를 가져오려고 시도 합니다. ");
-        for (int i = startIndex; i < endIndex; i++) {
-            Log.i(TAG, i + "번째 데이터를 가져오려고 시도 합니다. ");
-            String userAccessKey = activeUserList.get(i);
-            String modelDir = FirebaseHelper.getModelDir("userprofile", userAccessKey);
 
-            FirebaseDatabase.getInstance().getReference(modelDir + "userprofile").addListenerForSingleValueEvent(new ValueEventListener() {
+        Log.i(TAG, startIndexForFetchUser + "부터 " + endIndex + "까지 데이터를 가져오려고 시도 합니다. ");
+        fetchUserProfiles(startIndexForFetchUser, endIndex);
+        startIndexForFetchUser = endIndex;
+    }
+
+    private void fetchUserProfiles(int startIndex, int endIndex) {
+        for (int i = startIndex; i < endIndex; i++) {
+            String userAccessKey = activeUserList.get(i);
+            RemoteDao.FetchUserProfile.execute(userAccessKey, new RemoteDao.FetchUserProfile.Callback() {
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
+                public void postExecute(DataSnapshot dataSnapshot) {
                     UserProfile userProfile = dataSnapshot.getValue(UserProfile.class);
                     displayUserList.add(userProfile);
-
-                    Log.i(TAG, userProfile.toString());
-
-                    // 일단은 할때마다 notify set cahnged....
                     mMainView.notifyDataListChanged();
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    Log.e(TAG, databaseError.toString());
+                    Log.i(TAG, "Fetch UserProfile Succesful : " + userProfile.toString());
                 }
             });
-
-            // Increase Page
-        }
-        page += 1;
-
-        /*
-        if(giverList의 사이즈가 변했으면... ){
-            google map을 업데이트하고
-        }
-        */
-        if (needListUiUpdate) {
-
         }
     }
+
 
     private void updateValuesFromBundle(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
@@ -204,8 +206,6 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
         updateListUI();
         updateMapUI();
     }
-
-
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -223,10 +223,37 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
         }
     }
 
+    private void resetMarker (){
+        if (this.mGoogleMap == null) {
+            return;
+        }
+
+        this.mGoogleMap .clear();
+        for (Map.Entry<String, ActiveUser> entry : activeUserMap.entrySet()) {
+            ActiveUser activeUser = entry.getValue();
+
+            if(activeUser.isActive()){
+                this.mGoogleMap.addMarker(new MarkerOptions()
+                        .position(activeUser.getLatLng())
+                        .alpha(Const.MAP_SETTING.MARKER_ALPHA)
+                        .icon(BitmapDescriptorFactory.fromResource(getMapPinResId())));
+            }
+        }
+    }
+
     private void setDefaultMapSetting(GoogleMap googleMap){
-        googleMap.getUiSettings().setZoomControlsEnabled(false);
-        googleMap.setMinZoomPreference(10.0f);
-        googleMap.setMaxZoomPreference(10.0f);
+        // googleMap.getUiSettings().setZoomControlsEnabled(false);
+        googleMap.getUiSettings().setRotateGesturesEnabled(false);
+
+    }
+
+    private int getMapPinResId(){
+        if (USER_TYPE == Const.UserType.Taker) {
+            return Const.MAP_SETTING.GIVER_MAP_PIN_RES_ID;
+        } else {
+            return Const.MAP_SETTING.TAKER_MAP_PIN_RES_ID;
+        }
+
     }
 
     private void setFocusLastLatLng(){
@@ -269,12 +296,13 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
         geoQuery = this.toBuildGeoQuery(lastGeoLocationQuery, userTypeQuery, distanceQuery);
         addGeoQueryListener(geoQuery);
 
+        Log.i(TAG, "Add Geo Query Successfully");
     }
 
     private void detachGeoQuery(GeoQuery geoQuery) {
-        if (geoQuery != null) {
-            geoQuery.removeAllListeners();
-            geoQuery = null;
+        if (this.geoQuery != null) {
+            this.geoQuery.removeAllListeners();
+            this.geoQuery = null;
 
             if (this.geoQuery == null) {
                 Log.i(TAG, "Before Geo Query Is Detached Successful");
@@ -296,22 +324,25 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
+
                 LatLng latLng = new LatLng(location.latitude, location.longitude);
                 ActiveUser activeUser = new ActiveUser(key, latLng);
+
+                // 한번 등록되었다가 등록되지 않은 유저가 다시 active로 올경우 key가 중복될수 있으니 이경우 다시 active를 해줘야 한다.
                 activeUserMap.put(key, activeUser);
                 activeUserList.add(key);
 
                 /* No need this method... validate distance */
-                float distance = LatLngUtil.distanceBetweenTwoLatLngUnitMeter(lastLatLng, activeUser.getLatLng());
-                Log.i(TAG, "ADD User Complete Active User Key is " + activeUser.getKey() + ", distance is " + distance);
+                float distance_m = LatLngUtil.distanceBetweenTwoLatLngUnitMeter(lastLatLng, activeUser.getLatLng());
+                Log.i(TAG, "ADD Active User Complete " + activeUser.getKey() + ", distance(m) is " + distance_m);
             }
 
             @Override
             public void onKeyExited(String key) {
-                // todo need array list set... for remove activeuser using key... and search by order
-                activeUserMap.remove(key);
-                activeUserList.remove(key);
-                Log.i(TAG, "ADD User Complete Active User Key is " + key);
+                /* Don't remove key and object in activeUserMap and activeUserList */
+                activeUserMap.get(key).setActive(false);
+                resetMarker();
+                Log.i(TAG, "Remove Geo Query : Active user [" + key + "] is now deactive");
             }
 
             @Override
@@ -321,7 +352,9 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
 
             @Override
             public void onGeoQueryReady() {
-
+                fetchNextPageUserProfiles();
+                resetMarker();
+                Log.i(TAG, "On Geo Query Ready");
             }
 
             @Override
@@ -333,9 +366,9 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
 
     private String getQueryDependOnUserType(int userType){
         if (userType == Const.UserType.Giver) {
-            return Const.QueryKey.GIVER;
-        } else {
             return Const.QueryKey.TAKER;
+        } else {
+            return Const.QueryKey.GIVER;
         }
     }
 
@@ -349,7 +382,8 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
                 PickMeRequest pickMeRequest = dataSnapshot.getValue(PickMeRequest.class);
-                getInviteDialog(getActivity()).showInvitedDialog(pickMeRequest);
+                // getInviteDialog(getActivity()).showInvitedDialog(pickMeRequest);
+                inviteDialog.showInvitedDialog(pickMeRequest);
 
                 // todo readed pickMeRequest must be deleted...
                 // dataSnapshot.getRef().removeValue();
@@ -391,14 +425,21 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
                 if (!onMatching) {
                     MatchingComplete matchingComplete = dataSnapshot.getValue(MatchingComplete.class);
 
-                    // Delete All Request History...
+                    // todo Delete All Request History...
 
                     // Go Chat...
                     UserChatFragment.chatAccessKey = matchingComplete.getChatAccessKey();
-                    getViewPagerMover(getActivity()).moveViewPage(Const.ViewPagerIndex.CHAT);
+
+                    Log.i(TAG, "matching chat key is" + matchingComplete.getChatAccessKey());
+                    Log.i(TAG, "set chat access key is " + UserChatFragment.chatAccessKey);
+
+                    UserChatFragment.getInstance().runChatService();
+                    // getViewPagerMover(getActivity()).moveViewPage(Const.ViewPagerIndex.CHAT);
+                    viewPagerMover.moveViewPage(Const.ViewPagerIndex.CHAT);
+
 
                     // On Matching false
-                    onMatching = true;
+                    // onMatching = true;
                 }
             }
 
@@ -447,7 +488,8 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
 
     /* View Listener */
     public void onItemClicked(UserProfile userProfile) {
-        getInviteDialog(getActivity()).showInvitingDialog(userProfile, USER_TYPE);
+        //getInviteDialog(getActivity()).showSendingPickMeRequestDialog(userProfile, USER_TYPE);
+        this.inviteDialog.showSendingPickMeRequestDialog(userProfile, USER_TYPE);
     }
 
     /* View Update */

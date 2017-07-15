@@ -1,27 +1,30 @@
 package com.doyoon.android.bravenewworld.domain.firebase.value;
 
+import com.doyoon.android.bravenewworld.domain.firebase.FirebaseModel;
+
 /**
  * Created by DOYOON on 7/13/2017.
  */
 
-public class MatchingComplete {
-    private String from;
+public class MatchingComplete extends FirebaseModel {
+
+    private String fromUserAccessKey;
     private String chatAccessKey;
 
     public MatchingComplete() {
     }
 
-    public MatchingComplete(String from, String chatAccessKey) {
-        this.from = from;
+    public MatchingComplete(String fromUserAccessKey, String chatAccessKey) {
+        this.fromUserAccessKey = fromUserAccessKey;
         this.chatAccessKey = chatAccessKey;
     }
 
-    public String getFrom() {
-        return from;
+    public String getFromUserAccessKey() {
+        return fromUserAccessKey;
     }
 
-    public void setFrom(String from) {
-        this.from = from;
+    public void setFromUserAccessKey(String fromUserAccessKey) {
+        this.fromUserAccessKey = fromUserAccessKey;
     }
 
     public String getChatAccessKey() {
@@ -30,5 +33,15 @@ public class MatchingComplete {
 
     public void setChatAccessKey(String chatAccessKey) {
         this.chatAccessKey = chatAccessKey;
+    }
+
+    @Override
+    public String getKey() {
+        return null;
+    }
+
+    @Override
+    public void setKey(String key) {
+
     }
 }

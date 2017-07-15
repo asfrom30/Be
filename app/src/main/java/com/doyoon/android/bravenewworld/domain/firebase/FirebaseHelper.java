@@ -131,6 +131,11 @@ public class FirebaseHelper {
         HashMap<String, String> modelAttributeMap = getModelAttribute(modelName);
         String modelDir = modelAttributeMap.get("modelDir");
 
+        if (modelDir == null) {
+            Log.e(TAG, "Can not read Model Path, Model Dir is null");
+            return null;
+        }
+
         List<String> needParamList = FirebaseHelper.findNeedParams(modelDir);
         if (accessKeys.length < needParamList.size()) {
             Log.e(TAG, "Model Dir : " + modelDir);
@@ -138,11 +143,32 @@ public class FirebaseHelper {
             throw new NullPointerException("Not enough params, if you want to access this Model, you need more param(key)..");
         }
 
+        boolean accessKeyNullFlag = false;
+
         for(int i =0; i <needParamList.size(); i ++) {
+            if (accessKeys[i] == null) {
+                accessKeyNullFlag = true;
+                continue;
+            }
             modelDir = modelDir.replace(needParamList.get(i), accessKeys[i]);
         }
 
+        if (accessKeyNullFlag) {
+            Log.e(TAG, "One of the AccessKeys null, Can' not return model dir");
+            return null;
+        }
+
         return modelDir;
+    }
+    // Model Path = Model Dir + Model Key..
+    public static String getModelPath(String modelName, String... accessKeys) {
+        String modelDir = getModelDir(modelName, accessKeys);
+        if (modelDir == null) {
+            return null;
+        }
+        // todo need validate check
+
+        return modelDir + modelName + "/";
     }
 
     public static void printAllModelKey(){
