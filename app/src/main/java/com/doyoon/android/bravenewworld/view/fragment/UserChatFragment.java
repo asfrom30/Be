@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.presenter.fragment;
+package com.doyoon.android.bravenewworld.view.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -14,7 +14,7 @@ import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.domain.firebase.value.Chat;
-import com.doyoon.android.bravenewworld.presenter.fragment.abst.RecyclerFragment;
+import com.doyoon.android.bravenewworld.presenter.base.fragment.RecyclerFragment;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.LogUtil;
 import com.google.firebase.database.ChildEventListener;
@@ -52,6 +52,12 @@ public class UserChatFragment extends RecyclerFragment<Chat> {
 
     private UserChatFragment() {
 
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        LogUtil.logLifeCycle(TAG, "on Create");
     }
 
     @Nullable
@@ -93,7 +99,7 @@ public class UserChatFragment extends RecyclerFragment<Chat> {
         }
 
         if (runChatServiceFlag) {
-            Log.i(TAG, "run chat service flag is true, runChatService can't start");
+            Log.i(TAG, "runWithPermission chat service flag is true, runChatService can't start");
             return;
         }
 

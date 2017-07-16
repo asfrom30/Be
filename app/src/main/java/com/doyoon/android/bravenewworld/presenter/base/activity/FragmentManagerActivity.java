@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.presenter.activity.abst;
+package com.doyoon.android.bravenewworld.presenter.base.activity;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;

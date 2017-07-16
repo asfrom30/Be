@@ -30,9 +30,9 @@
             </giver_history>
             <taker_history type="reference-key">
                 <matchingcompletes type="reference-key">
-                    <matchingcomplete type="value" isBundle="true" isAutoGenerateModelKey="true" refer=""></matchingcomplete>
                 </matchingcompletes>
             </taker_history>
+            <matchingcomplete type="value" isBundle="false" isAutoGenerateModelKey="false" refer=""></matchingcomplete>
         </user>
     </users>
     <matchinglogs type="reference-key">

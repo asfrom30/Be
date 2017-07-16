@@ -63,7 +63,7 @@ set CMD_LINE_ARGS=%*
 goto execute
 
 :4NT_args
-@rem Get arguments fromUserAccessKey the 4NT Shell fromUserAccessKey JP Software
+@rem Get arguments takerAccessKey the 4NT Shell takerAccessKey JP Software
 set CMD_LINE_ARGS=%$
 
 :execute

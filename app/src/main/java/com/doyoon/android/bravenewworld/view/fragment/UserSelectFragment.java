@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.presenter.fragment;
+package com.doyoon.android.bravenewworld.view.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -19,6 +19,12 @@ public class UserSelectFragment extends Fragment {
 
     private static String TAG = UserSelectFragment.class.getSimpleName();
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        LogUtil.logLifeCycle(TAG, "on Create");
+        super.onCreate(savedInstanceState);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -26,7 +32,7 @@ public class UserSelectFragment extends Fragment {
         LogUtil.logLifeCycle(TAG, "onCreateView()");
 
         View view = inflater.inflate(R.layout.fragment_user_select, container, false);
-        startPreFragment();
+        // startPreFragment();
         return view;
     }
 

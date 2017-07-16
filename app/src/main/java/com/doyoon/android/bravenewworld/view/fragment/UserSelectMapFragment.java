@@ -1,30 +1,25 @@
-package com.doyoon.android.bravenewworld.presenter.fragment;
+package com.doyoon.android.bravenewworld.view.fragment;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
+import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.RemoteDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseGeoDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.domain.firebase.geovalue.ActiveUser;
-import com.doyoon.android.bravenewworld.domain.firebase.value.MatchingComplete;
 import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
-import com.doyoon.android.bravenewworld.presenter.activity.interfaces.InviteDialog;
-import com.doyoon.android.bravenewworld.presenter.interfaces.ViewPagerMover;
+import com.doyoon.android.bravenewworld.presenter.base.fragment.PermissionFragment;
+import com.doyoon.android.bravenewworld.presenter.dialog.PickmeRequestNoticeDialog;
+import com.doyoon.android.bravenewworld.presenter.dialog.PickmeRequestSendingDialog;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.LatLngUtil;
 import com.doyoon.android.bravenewworld.util.LogUtil;
@@ -49,6 +44,7 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +57,7 @@ import static com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper.ge
  * Created by DOYOON on 7/10/2017.
  */
 
-public class UserSelectMapFragment extends Fragment implements OnMapReadyCallback {
+public class UserSelectMapFragment extends PermissionFragment implements OnMapReadyCallback {
 
     private static String TAG = UserSelectMapFragment.class.getSimpleName();
     private static int linkRes = R.layout.fragment_user_select_map;
@@ -78,62 +74,101 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
     private List<UserProfile> displayUserList = new ArrayList();
 
     /* Static Preference */
-    public static int USER_TYPE = Const.UserType.Taker;
+    public static int USER_TYPE = Const.UserType.NOT_YET_CHOOSED;
 
     /* Shared Preference */
-    private boolean onMatching = false;
+    private boolean onMatchingFlag = true;
     private int startIndexForFetchUser = 0;
     private LatLng lastLatLng;
     private double SEARCH_DISTANCE_KM = 100;
     private float CURRENT_CAMERA_ZOOM = Const.DEFAULT_CAMERA_ZOOM;
 
-    ViewPagerMover viewPagerMover;
-    InviteDialog inviteDialog;
+    public static UserSelectMapFragment instance;
+
+    public static UserSelectMapFragment getInstance(){
+        if (instance == null) {
+            instance = new UserSelectMapFragment();
+        }
+        Log.e(TAG, "return instance");
+        return instance;
+    }
+
+    private UserSelectMapFragment() {
+
+    }
+
+    private View baseView;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        LogUtil.logLifeCycle(TAG, "on Create");
+    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
         LogUtil.logLifeCycle(TAG, "onCreateView()");
 
         /* Layout Inflating */
-        View baseView = inflater.inflate(R.layout.fragment_user_select_map, container, false);
-        this.mMainView = new UserSelectFragmentView(this, getContext(), baseView);
-
-        /* interface dependency */
-        this.viewPagerMover = getViewPagerMover(getActivity());
-        this.inviteDialog = getInviteDialog(getActivity());
+        if (baseView == null) {
+            baseView = inflater.inflate(R.layout.fragment_user_select_map, container, false);
+            this.mMainView = new UserSelectFragmentView(this, getContext(), baseView);
 
         /* Get Default Setting  */
-        SEARCH_DISTANCE_KM = Const.DEFAULT_SEARCH_DISTANCE_KM;
+            SEARCH_DISTANCE_KM = Const.DEFAULT_SEARCH_DISTANCE_KM;
 
         /* Bundle */
-        updateValuesFromBundle(savedInstanceState);
+            updateValuesFromBundle(savedInstanceState);
 
         /* Map View Dependency */
-        // Gets the MapView from the XML layout and creates it
-        mMapView = (MapView) baseView.findViewById(R.id.mapView);
-        mMapView.onCreate(savedInstanceState);
+            // Gets the MapView from the XML layout and creates it
+            mMapView = (MapView) baseView.findViewById(R.id.mapView);
+            mMapView.onCreate(savedInstanceState);
 
-        // Gets to GoogleMap from the MapView and does initialization stuff
-        mMapView.getMapAsync(this);
-
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
-
-        this.toGetLocationPermission();
-
+            // Gets to GoogleMap from the MapView and does initialization stuff
+            mMapView.getMapAsync(this);
+            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
+        }
         return baseView;
     }
 
-    public void runService(){
+    public void reset(int userType){
 
-        if(USER_TYPE == Const.UserType.Giver) {
-            this.addPickMeRequestListener();
-        } else if(USER_TYPE == Const.UserType.Taker){
+        this.removeMatchingCompleteListener();
+
+        onMatchingFlag = false;
+        UserSelectMapFragment.USER_TYPE = userType;
+
+    }
+
+    public void runService(){
+        if (matchingCompleteListener == null) {
+            initializeMatchingCompleteListener();
             this.addMatchingCompleteListener();
         }
 
-        if (!onMatching) {
+        checkRuntimePermission(new Callback() {
+            @Override
+            public void runWithPermission() {
+                run();
+            }
+
+            @Override
+            public void runWithoutPermission() {
+
+            }
+        });
+    }
+
+    private void run(){
+        Log.e(TAG, "On SElect Map Fragment Run Service");
+
+        if(USER_TYPE == Const.UserType.Giver) {
+            this.addPickMeRequestListener();
+        }
+
+        if (!onMatchingFlag) {
             // todo insertMyUser to giver or taker...
         }
 
@@ -141,7 +176,6 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
         updateLastLatLng(new PostUpdateLatLng() {
             @Override
             public void callback() {
-
                 /* Register Active User */
                 if(USER_TYPE == Const.UserType.Giver) {
                     String modelDir = FirebaseHelper.getModelDir(Const.RefKey.ACTIVE_USER_TYPE_GIVER);
@@ -162,8 +196,70 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
         });
     }
 
-    public void fetchNextPageUserProfiles(){
+    private void runFragmentWithoutPermission() {
 
+    }
+
+    private void stop(){
+
+    }
+
+    /* Matching Complete Listener on Firebase */
+    private ValueEventListener matchingCompleteListener;
+
+    private void initializeMatchingCompleteListener(){
+        matchingCompleteListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                Log.e(TAG, "Value Changed");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+    }
+
+    private void addMatchingCompleteListener(){
+        final String modelPath = FirebaseHelper.getModelPath(Const.RefKey.MATCHING_COMPLETE, Const.MY_USER_KEY);
+        FirebaseDatabase.getInstance().getReference(modelPath).addValueEventListener(matchingCompleteListener);
+    }
+
+    private void removeMatchingCompleteListener(){
+        final String modelPath = FirebaseHelper.getModelPath(Const.RefKey.MATCHING_COMPLETE, Const.MY_USER_KEY);
+        FirebaseDatabase.getInstance().getReference(modelPath).removeEventListener(matchingCompleteListener);
+    }
+
+    /* Core Business Logic */
+    private void receivePickMeRequest(PickMeRequest pickMeRequest){
+        DialogFragment dialogFragment = new PickmeRequestNoticeDialog(pickMeRequest, new PickmeRequestNoticeDialog.Callback(){
+            @Override
+            public void onPostExecuteInPositiveClicked() {
+                viewPagerMover.moveViewPage(Const.ViewPagerIndex.CHAT);
+            }
+        });
+        dialogFragment.show(getFragmentManager(), null);
+        // Create Pick Me Response
+
+        // and send
+        // inviteDialog.showInvitedDialog(pickMeRequest);
+
+        // todo readed pickMeRequest must be deleted...
+        // dataSnapshot.getRef().removeValue();
+    }
+
+    public void onActiveUserItemClicked(UserProfile clickedUserProfile) {
+        DialogFragment dialogFragment = new PickmeRequestSendingDialog(USER_TYPE, clickedUserProfile,new PickmeRequestSendingDialog.Callback() {
+            /* Show Detail Profile */
+
+            /* Sending */
+        });
+        dialogFragment.show(getFragmentManager(), null);
+    }
+
+    public void fetchNextPageUserProfiles(){
         if (startIndexForFetchUser + 1 == activeUserList.size()) {
             return;
         }
@@ -376,89 +472,53 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
     private void addPickMeRequestListener(){
 
         String modelDir = FirebaseHelper.getModelDir(Const.RefKey.PICK_ME_REQUEST, Const.MY_USER_KEY);
-
         FirebaseDatabase.getInstance().getReference(modelDir).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
+                // todo  남은 메세지수 몇개... 방향키로 메세지 이동할 수 있게 할 것...
+                // todo Message를 add만 하고 update ui하게끔 onChilAdded와 같은 Thread를 쓰면 안된다.
+                // todo 이것은 그냥 데이터만 추가하고.... 다른 쓰레드에서 update를 갱신할 수 있도록
+                // todo 여기에 다 추가하면... firebase firebase 업데이트 속도가 느려질 수 있겠지만 큰 상관은 없을듯...
                 PickMeRequest pickMeRequest = dataSnapshot.getValue(PickMeRequest.class);
-                // getInviteDialog(getActivity()).showInvitedDialog(pickMeRequest);
-                inviteDialog.showInvitedDialog(pickMeRequest);
-
-                // todo readed pickMeRequest must be deleted...
-                // dataSnapshot.getRef().removeValue();
+                receivePickMeRequest(pickMeRequest);
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Log.i(TAG, "on Child Added called ");
+                Log.i(TAG, "onChildChanged");
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-                Log.i(TAG, "on Child Added called ");
+                Log.i(TAG, "onChildRemoved");
             }
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                Log.i(TAG, "on Child Added called ");
+                Log.i(TAG, "onChildMoved");
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.i(TAG, "on Child Added called ");
+                Log.i(TAG, "onCancelled");
             }
         });
     }
 
-    /* Add Firebase Listener, refer key is "invite" */
-    //todo if matching complete detach Matching Complete Listener
-    private void addMatchingCompleteListener(){
+    private void changeOnMatchingStatus(boolean bool) {
+        if (bool) {
+            onMatchingFlag = true;
+        } else {
 
-        String modelDir = FirebaseHelper.getModelDir(Const.RefKey.MATCHING_COMPLETE, Const.MY_USER_KEY);
+            onMatchingFlag = false;
+        }
+    }
 
-        FirebaseDatabase.getInstance().getReference(modelDir).addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
-                // matching 중이 아닐때만...
-                if (!onMatching) {
-                    MatchingComplete matchingComplete = dataSnapshot.getValue(MatchingComplete.class);
-
-                    // todo Delete All Request History...
-
-                    // Go Chat...
-                    UserChatFragment.chatAccessKey = matchingComplete.getChatAccessKey();
-
-                    Log.i(TAG, "matching chat key is" + matchingComplete.getChatAccessKey());
-                    Log.i(TAG, "set chat access key is " + UserChatFragment.chatAccessKey);
-
-                    UserChatFragment.getInstance().runChatService();
-                    // getViewPagerMover(getActivity()).moveViewPage(Const.ViewPagerIndex.CHAT);
-                    viewPagerMover.moveViewPage(Const.ViewPagerIndex.CHAT);
-
-
-                    // On Matching false
-                    // onMatching = true;
-                }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        });
+    private void runChatService(String otherUserAccessKey, String chatAccessKey){
+        // todo Delete All Request History...
+        UserChatFragment.getInstance().runChatService();
+        // getViewPagerMover(getActivity()).moveViewPage(Const.ViewPagerIndex.CHAT);
+        viewPagerMover.moveViewPage(Const.ViewPagerIndex.CHAT);
     }
 
     /* Location... */
@@ -480,16 +540,6 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
                         }
                     }
                 });
-    }
-
-    public interface PostUpdateLatLng {
-        void callback();
-    }
-
-    /* View Listener */
-    public void onItemClicked(UserProfile userProfile) {
-        //getInviteDialog(getActivity()).showSendingPickMeRequestDialog(userProfile, USER_TYPE);
-        this.inviteDialog.showSendingPickMeRequestDialog(userProfile, USER_TYPE);
     }
 
     /* View Update */
@@ -518,18 +568,29 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
     /* Activity Life Cycler */
     @Override
     public void onResume() {
+        LogUtil.logLifeCycle(TAG, "on Resume");
         super.onResume();
         mMapView.onResume();
     }
 
     @Override
     public void onPause() {
+        LogUtil.logLifeCycle(TAG, "onPause");
         super.onPause();
         mMapView.onPause();
     }
 
     @Override
+    public void onStop() {
+        LogUtil.logLifeCycle(TAG, "onStop");
+        super.onStop();
+    }
+
+
+
+    @Override
     public void onDestroy() {
+        LogUtil.logLifeCycle(TAG, "onDestroy");
         super.onDestroy();
         mMapView.onDestroy();
     }
@@ -546,41 +607,7 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
         mMapView.onLowMemory();
     }
 
-    /* Runtime Permission Check for getting My Location */
-    private void toGetLocationPermission() {
-        if (isPermissionsGranted()) {
-            this.runService();
-        } else {
-            /* If permission is not granted, Request permission at once  */
-            String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(permissions, Const.LOCATION_REQ_CODE);
-            } else {
-                // Permission이 없으면 서비스를 정상적으로 이용할수 없습니다.
-            }
-        }
-    }
 
-    public boolean isPermissionsGranted(){
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                || ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == Const.LOCATION_REQ_CODE) {
-            if (isPermissionsGranted()) {
-                runService();
-            } else {
-                Log.e(TAG, "권한이 없으면 서비스를 정상적으로 이용할 수 없습니다.");
-                Toast.makeText(getActivity(), "권한이 없으면 서비스를 정상적으로 이용할 수 없습니다.", Toast.LENGTH_SHORT).show();
-            }
-            // lastTryToSetEnableMyLocation();
-        }
-    }
 
 
     /* Getter and Setter */
@@ -588,23 +615,10 @@ public class UserSelectMapFragment extends Fragment implements OnMapReadyCallbac
         return this.displayUserList;
     }
 
-    // todo make to inclue baseFragment...
-    private InviteDialog getInviteDialog(Object object){
-        if (object instanceof InviteDialog) {
-            return (InviteDialog) object;
-        } else {
-            throw new RuntimeException("You have to implement PickMeRequest Dialog Interface");
-        }
+    private interface PostUpdateLatLng {
+        void callback();
     }
 
-    // todo make to inclue baseFragment...
-    private ViewPagerMover getViewPagerMover(Object object) {
-        if (object instanceof InviteDialog) {
-            return (ViewPagerMover) object;
-        } else {
-            throw new RuntimeException("You have to implement PickMeRequest Dialog Interface");
-        }
-    }
 }
 
 

@@ -7,24 +7,25 @@ import com.doyoon.android.bravenewworld.domain.firebase.FirebaseModel;
  */
 
 public class MatchingComplete extends FirebaseModel {
-
-    private String fromUserAccessKey;
+    private String giverAccessKey;
+    private String takerAccessKey;
     private String chatAccessKey;
 
     public MatchingComplete() {
     }
 
-    public MatchingComplete(String fromUserAccessKey, String chatAccessKey) {
-        this.fromUserAccessKey = fromUserAccessKey;
+    public MatchingComplete(String giverAccessKey, String takerAccessKey, String chatAccessKey) {
+        this.takerAccessKey = takerAccessKey;
+        this.giverAccessKey = giverAccessKey;
         this.chatAccessKey = chatAccessKey;
     }
 
-    public String getFromUserAccessKey() {
-        return fromUserAccessKey;
+    public String getTakerAccessKey() {
+        return takerAccessKey;
     }
 
-    public void setFromUserAccessKey(String fromUserAccessKey) {
-        this.fromUserAccessKey = fromUserAccessKey;
+    public void setTakerAccessKey(String takerAccessKey) {
+        this.takerAccessKey = takerAccessKey;
     }
 
     public String getChatAccessKey() {
@@ -33,6 +34,15 @@ public class MatchingComplete extends FirebaseModel {
 
     public void setChatAccessKey(String chatAccessKey) {
         this.chatAccessKey = chatAccessKey;
+    }
+
+
+    public String getGiverAccessKey() {
+        return giverAccessKey;
+    }
+
+    public void setGiverAccessKey(String giverAccessKey) {
+        this.giverAccessKey = giverAccessKey;
     }
 
     @Override

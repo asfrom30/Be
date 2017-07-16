@@ -1,36 +1,28 @@
 package com.doyoon.android.bravenewworld.presenter.activity;
 
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
-import com.doyoon.android.bravenewworld.domain.firebase.value.ChatProfile;
-import com.doyoon.android.bravenewworld.domain.firebase.value.MatchingComplete;
-import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
-import com.doyoon.android.bravenewworld.domain.reactivenetwork.ReactiveInviteResponse;
-import com.doyoon.android.bravenewworld.presenter.activity.interfaces.InviteDialog;
+import com.doyoon.android.bravenewworld.view.fragment.UserChatFragment;
+import com.doyoon.android.bravenewworld.view.fragment.UserMapFragment;
+import com.doyoon.android.bravenewworld.view.fragment.UserProfileFragment;
+import com.doyoon.android.bravenewworld.view.fragment.UserSelectFragment;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ViewPagerMover;
-import com.doyoon.android.bravenewworld.presenter.dialog.DialogListener;
-import com.doyoon.android.bravenewworld.presenter.dialog.PickMeRequestDialog;
-import com.doyoon.android.bravenewworld.presenter.dialog.PickMeResponseDialog;
-import com.doyoon.android.bravenewworld.presenter.fragment.UserChatFragment;
-import com.doyoon.android.bravenewworld.presenter.fragment.UserMapFragment;
-import com.doyoon.android.bravenewworld.presenter.fragment.UserProfileFragment;
-import com.doyoon.android.bravenewworld.presenter.fragment.UserSelectFragment;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.ConvString;
 import com.doyoon.android.bravenewworld.util.LogUtil;
 import com.doyoon.android.bravenewworld.util.view.ViewPagerBuilder;
-import com.google.firebase.database.FirebaseDatabase;
 
-public class MainActivity extends AppCompatActivity implements InviteDialog, ViewPagerMover{
+public class MainActivity extends AppCompatActivity implements ViewPagerMover{
 
     private static String TAG = MainActivity.class.getSimpleName();
 
@@ -38,7 +30,7 @@ public class MainActivity extends AppCompatActivity implements InviteDialog, Vie
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        LogUtil.logLifeCycle(TAG, "onCreateView()");
+        LogUtil.logLifeCycle(TAG, "on Create");
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -54,16 +46,21 @@ public class MainActivity extends AppCompatActivity implements InviteDialog, Vie
         this.setMyUserKeyAndProfile();
 
         /* make view pager*/
-        viewPager = (ViewPager) findViewById(R.id.main_view_pager);
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.main_tab_layout);
+        if (viewPager == null) {
+            viewPager = (ViewPager) findViewById(R.id.main_view_pager);
+            TabLayout tabLayout = (TabLayout) findViewById(R.id.main_tab_layout);
 
-        ViewPagerBuilder.getInstance(viewPager)
-                .addFragment(new UserSelectFragment())
-                .addFragment(new UserMapFragment())
-                .addFragment(UserChatFragment.getInstance())
-                .addFragment(UserProfileFragment.getInstance())
-                .linkTabLayout(tabLayout)
-                .build(getSupportFragmentManager());
+            ViewPagerBuilder.getInstance(viewPager)
+                    .addFragment(new UserSelectFragment())
+                    .addFragment(new UserMapFragment())
+                    .addFragment(UserChatFragment.getInstance())
+                    .addFragment(UserProfileFragment.getInstance())
+                    .linkTabLayout(tabLayout)
+                    .build(getSupportFragmentManager());
+        }
+
+
+
     }
 
     private void setMyUserKeyAndProfile() {
@@ -94,91 +91,20 @@ public class MainActivity extends AppCompatActivity implements InviteDialog, Vie
         return email;
     }
 
-    /* I'm giver, 초대를 받았습니다.  */
-    @Override
-    public void showInvitedDialog(final PickMeRequest pickMeRequest){
-        DialogFragment dialog = new PickMeResponseDialog(new DialogListener() {
-            @Override
-            public void onDialogPositiveClick() {
-                ReactiveInviteResponse.hasActiveUser(pickMeRequest.getFromUserAccessKey(), new ReactiveInviteResponse.Callback() {
-                    @Override
-                    public void userExist() {   // 초대에 응했는데 아직 있다면...
-
-                        String modelDir = FirebaseHelper.getModelDir(Const.RefKey.CHAT_ROOM);
-                        String chatAccessKey = FirebaseDatabase.getInstance().getReference(modelDir).push().getKey();
-
-                        /* ChatProfile Manual Input for Remember Auto Generate Key */
-                        String fromUserAccessKey = pickMeRequest.getFromUserAccessKey();
-                        ChatProfile chatProfile = new ChatProfile(chatAccessKey);
-                        chatProfile.setGiverKey(Const.MY_USER_KEY);
-                        chatProfile.setTakerKey(fromUserAccessKey);
-                        FirebaseDao.insert(chatProfile, chatAccessKey);
-                        // FirebaseDatabase.getInstance().getReference(modelDir + chatAccessKey \).setValue(chatProfile);
-
-                        /* 채팅방을 개설하고 상대방에게 채팅방 키를 전달해줍니다 */
-                        MatchingComplete matchingComplete = new MatchingComplete(Const.MY_USER_KEY, chatAccessKey);
-                        FirebaseDao.insert(matchingComplete, fromUserAccessKey);
-
-                        /* 초대가 성사되었습니다. */
-                        // onMatching을 true 변경하고 Chat으로 이동합니다.
-                        UserChatFragment.chatAccessKey = chatAccessKey;
-                        UserChatFragment.getInstance().runChatService();
-                        moveViewPage(Const.ViewPagerIndex.CHAT);
-                    }
-
-                    @Override
-                    public void userNotExist() {
-                        // todo Another Dialog... 사용자가 다른 사용자와 매칭 되었습니다.
-                    }
-                });
-            }
-
-            @Override
-            public void onDialogNegativeClick() {
-
-            }
-        });
-        dialog.show(getSupportFragmentManager(), "Invited");
-    }
-
-    /* 초대를 합니다. */
-    @Override
-    public void showSendingPickMeRequestDialog(final UserProfile invitingTargetUserProfile, int userType){
-        if (invitingTargetUserProfile == null) {
-            Log.i(TAG, "called showSendingPickMeRequestDialog But UserProfile parameter is null");
-            return;
-        }
-
-        // todo dialog fragment는 저절로 사라지나요?
-        DialogFragment dialog = new PickMeRequestDialog(userType, new DialogListener() {
-            @Override
-            public void onDialogPositiveClick() {
-                String invitingTargetUserAccessKey = ConvString.commaSignToString(invitingTargetUserProfile.getEmail());
-                PickMeRequest pickMeRequest = new PickMeRequest();
-                if (Const.MY_USER_PROFILE == null) {
-                    Log.e(TAG, "User Profile is null, can not send pick me request");
-                    return;
-                }
-                pickMeRequest.fetchDataFromUserProfile(Const.MY_USER_PROFILE);
-
-                /* Add Pick Me Request to Target */
-                FirebaseDao.insert(pickMeRequest, invitingTargetUserAccessKey);
-            }
-
-            @Override
-            public void onDialogNegativeClick() {
-                /* Show Detail Friend Profile... */
-            }
-        });
-        dialog.show(getSupportFragmentManager(), "Inviting");
-    }
-
     @Override
     public void moveViewPage(int targetViewPage) {
-
         if (viewPager == null) {
             return;
         }
         viewPager.setCurrentItem(targetViewPage);
+    }
+
+    private void showSnackbar(final int mainTextStringId, final int actionStringId,
+                              View.OnClickListener listener) {
+        Snackbar.make(
+                findViewById(android.R.id.content),
+                getString(mainTextStringId),
+                Snackbar.LENGTH_INDEFINITE)
+                .setAction(getString(actionStringId), listener).show();
     }
 }

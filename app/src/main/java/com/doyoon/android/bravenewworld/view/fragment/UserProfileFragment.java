@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.presenter.fragment;
+package com.doyoon.android.bravenewworld.view.fragment;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -21,6 +21,7 @@ import com.doyoon.android.bravenewworld.domain.firebase.FirebaseUploader;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.DateUtil;
+import com.doyoon.android.bravenewworld.util.LogUtil;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -51,9 +52,16 @@ public class UserProfileFragment extends Fragment {
     private UserProfileFragment() {
 
     }
+
     private EditText textViewName, textViewWork, textViewAge;
     private Spinner spinnerGender;
     private ImageView imageView;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        LogUtil.logLifeCycle(TAG, "on Create");
+    }
 
     @Nullable
     @Override

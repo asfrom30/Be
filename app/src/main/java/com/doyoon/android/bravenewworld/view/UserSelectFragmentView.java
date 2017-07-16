@@ -11,8 +11,8 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
-import com.doyoon.android.bravenewworld.presenter.fragment.UserSelectMapFragment;
-import com.doyoon.android.bravenewworld.presenter.fragment.abst.RecyclerFragment;
+import com.doyoon.android.bravenewworld.view.fragment.UserSelectMapFragment;
+import com.doyoon.android.bravenewworld.presenter.base.fragment.RecyclerFragment;
 import com.doyoon.android.bravenewworld.util.Const;
 
 import java.util.List;
@@ -74,7 +74,7 @@ public class UserSelectFragmentView {
     }
 
     public void onItemClicked(UserProfile userProfile){
-        this.presenter.onItemClicked(userProfile);
+        this.presenter.onActiveUserItemClicked(userProfile);
     }
 
     public void onScrollEnded(){

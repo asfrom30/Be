@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.presenter.fragment.abst;
+package com.doyoon.android.bravenewworld.presenter.base.fragment;
 
 import android.support.v4.app.Fragment;
 

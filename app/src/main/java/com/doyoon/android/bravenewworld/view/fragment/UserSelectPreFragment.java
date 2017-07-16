@@ -1,16 +1,14 @@
-package com.doyoon.android.bravenewworld.presenter.fragment;
+package com.doyoon.android.bravenewworld.view.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
 import com.doyoon.android.bravenewworld.R;
-import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.LogUtil;
 
 /**
@@ -20,6 +18,12 @@ import com.doyoon.android.bravenewworld.util.LogUtil;
 public class UserSelectPreFragment extends Fragment {
 
     public static final String TAG = UserSelectPreFragment.class.getSimpleName();
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        LogUtil.logLifeCycle(TAG, "on Create");
+    }
 
     @Nullable
     @Override
@@ -36,20 +40,51 @@ public class UserSelectPreFragment extends Fragment {
         imGiverBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                UserSelectMapFragment.USER_TYPE = Const.UserType.Giver;
+                // UserSelectMapFragment.getInstance().reset(Const.UserType.Giver);
                 goUserSelectMapFragment();
+                // rerun service
+
+                // go User
             }
         });
 
         imTakerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                UserSelectMapFragment.USER_TYPE = Const.UserType.Taker;
+                // UserSelectMapFragment.getInstance().reset(Const.UserType.Taker);
                 goUserSelectMapFragment();
             }
         });
 
-        //todo For Motion Listener, Later....
+        return view;
+    }
+
+    public void goUserSelectMapFragment() {
+        String fragTag = "UserMap";
+
+        if(getFragmentManager().findFragmentByTag(fragTag) == UserSelectMapFragment.getInstance()){
+            getFragmentManager().beginTransaction().remove(UserSelectMapFragment.getInstance()).commit();
+        }
+
+        getFragmentManager().beginTransaction().add(R.id.user_select_frame_layout, UserSelectMapFragment.getInstance(), fragTag).commit();
+
+    }
+
+    /* Didn't work */
+    /*
+    public void goUserSelectMapFragment() {
+        String fragTag = "UserMap";
+        if(getFragmentManager().findFragmentByTag(fragTag) == UserSelectMapFragment.getInstance()){
+            getFragmentManager().beginTransaction().replace(R.id.user_select_frame_layout, UserSelectMapFragment.getInstance()).commit();
+        } else {
+            getFragmentManager().beginTransaction().add(R.id.user_select_frame_layout, UserSelectMapFragment.getInstance(), fragTag).commit();
+        }
+    }
+    */
+
+
+
+    //todo For Motion Listener, Later....
         /*
         imGiverBtn.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -93,13 +128,4 @@ public class UserSelectPreFragment extends Fragment {
             }
         });
         */
-        return view;
-    }
-
-    public void goUserSelectMapFragment() {
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.add(R.id.user_select_frame_layout, new UserSelectMapFragment());
-        transaction.addToBackStack(null);
-        transaction.commit();
-    }
 }
