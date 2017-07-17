@@ -52,8 +52,6 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
     private double SEARCH_DISTANCE_KM = 100;
     private float CURRENT_CAMERA_ZOOM = Const.DEFAULT_CAMERA_ZOOM;
 
-    public static ActiveUserFragment instance;
-
     public static ActiveUserFragment newInstance() {
 
         Bundle args = new Bundle();
@@ -95,6 +93,13 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
         // Gets to GoogleMap from the MapView and does initialization stuff
         mMapView.getMapAsync(this);
 
+        if (displayUserList.size() != 0) {
+            notifySetChanged();
+        }
+
+        Log.e(TAG, "display user list size is ... " + displayUserList.size());
+
+
         // todo move to pre Select Fragment
         checkRuntimePermission(new Callback() {
             @Override
@@ -134,6 +139,10 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
         //noinspection MissingPermission
         mGoogleMap.setMyLocationEnabled(true);
         setFocusMyLatlng();
+
+        if (Presenter.getInstance().getActiveUserMap() != null) {
+            resetMarker(Presenter.getInstance().getActiveUserMap());
+        }
     }
 
     private void setFocusMyLatlng(){

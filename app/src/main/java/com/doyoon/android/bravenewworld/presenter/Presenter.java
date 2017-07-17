@@ -550,6 +550,13 @@ public class Presenter {
         return userType;
     }
 
+    public Map<String, ActiveUser> getActiveUserMap() {
+        if (this.activeUserMap == null) {
+            return null;
+        }
+        return this.activeUserMap;
+    }
+
     public void setViewPagerMover(ViewPagerMover viewPagerMover) {
         this.viewPagerMover = viewPagerMover;
     }
