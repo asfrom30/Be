@@ -160,6 +160,8 @@ public class FirebaseHelper {
 
         return modelDir;
     }
+
+    /* Can not use, value type database */
     // Model Path = Model Dir + Model Key..
     public static String getModelPath(String modelName, String... accessKeys) {
         String modelDir = getModelDir(modelName, accessKeys);

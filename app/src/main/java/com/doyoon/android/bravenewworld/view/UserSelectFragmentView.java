@@ -10,8 +10,10 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.doyoon.android.bravenewworld.R;
+import com.doyoon.android.bravenewworld.domain.DummyDao;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
-import com.doyoon.android.bravenewworld.view.fragment.UserSelectMapFragment;
+import com.doyoon.android.bravenewworld.presenter.Presenter;
+import com.doyoon.android.bravenewworld.view.fragment.ActiveUserFragment;
 import com.doyoon.android.bravenewworld.presenter.base.fragment.RecyclerFragment;
 import com.doyoon.android.bravenewworld.util.Const;
 
@@ -29,16 +31,16 @@ public class UserSelectFragmentView {
     int linkRes = R.layout.fragment_user_select_map;
 
     private Context context;
-    private UserSelectMapFragment presenter;
+    private ActiveUserFragment presenter;
     private View baseView;
 
     private ProgressDialog progressDialog;
 
     private RecyclerFragment displayUserListFragment;
 
-    public UserSelectFragmentView(UserSelectMapFragment userSelectMapFragment, Context context, View baseView) {
+    public UserSelectFragmentView(ActiveUserFragment activeUserFragment, Context context, View baseView) {
 
-        this.presenter = userSelectMapFragment;
+        this.presenter = activeUserFragment;
         this.context = context;
         this.baseView = baseView;
 
@@ -78,7 +80,7 @@ public class UserSelectFragmentView {
     }
 
     public void onScrollEnded(){
-        this.presenter.fetchNextPageUserProfiles();
+        Presenter.getInstance().fetchNextPageUserProfiles();
     }
 
     public static class DisplayUserListFragment extends RecyclerFragment<UserProfile> {
@@ -105,10 +107,16 @@ public class UserSelectFragmentView {
                 @Override
                 public void updateRecyclerItemView(View view, UserProfile userProfile) {
                     //todo make thumbnail
-                    Glide.with(getContext()).load(userProfile.getImageUri()).bitmapTransform(new CropCircleTransformation(getContext())).into(imageView);
+                    if (userProfile.getImageUri() == null) {
+                        int resID = DummyDao.getDummyDrawable(userProfile.getGender());
+                        Glide.with(getContext()).load(resID).bitmapTransform(new CropCircleTransformation(getContext())).into(imageView);
+                    } else {
+                        Glide.with(getContext()).load(userProfile.getImageUri()).bitmapTransform(new CropCircleTransformation(getContext())).into(imageView);
+                    }
                     textViewKey.setText(userProfile.getKey());
                     textViewName.setText(userProfile.getName());
                     textViewAge.setText(userProfile.getAge() + "");
+
                     if (userProfile.getGender() == Const.Gender.FEMALE) {
                         textViewGender.setText("여자");
                     } else {

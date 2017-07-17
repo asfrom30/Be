@@ -12,15 +12,12 @@ import android.widget.TextView;
 
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
-import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.domain.firebase.value.Chat;
+import com.doyoon.android.bravenewworld.presenter.Presenter;
 import com.doyoon.android.bravenewworld.presenter.base.fragment.RecyclerFragment;
+import com.doyoon.android.bravenewworld.presenter.interfaces.ChatUIController;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.LogUtil;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,29 +26,22 @@ import java.util.List;
  * Created by DOYOON on 7/10/2017.
  */
 
-public class UserChatFragment extends RecyclerFragment<Chat> {
+public class ChatFragment extends RecyclerFragment<Chat> implements ChatUIController{
 
-    public static String TAG = UserChatFragment.class.getSimpleName();
+    public static String TAG = ChatFragment.class.getSimpleName();
 
+    public String chatAccessKey;
     public List<Chat> chatList = new ArrayList<>();
     private EditText inputEditText;
     private ImageButton emojiBtn, sendBtn;
 
-    /* Shared Preference */
-    public static String chatAccessKey = null;
-    private boolean runChatServiceFlag;
-    public static UserChatFragment instance;
+    public static ChatFragment newInstance() {
 
+        Bundle args = new Bundle();
 
-    public static UserChatFragment getInstance(){
-        if (instance == null) {
-            instance = new UserChatFragment();
-        }
-        return instance;
-    }
-
-    private UserChatFragment() {
-
+        ChatFragment fragment = new ChatFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -65,13 +55,41 @@ public class UserChatFragment extends RecyclerFragment<Chat> {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         LogUtil.logLifeCycle(TAG, "onCreateView()");
 
+        /* Link to Presenter */
+        Presenter.getInstance().setChatUIController(this);
+
         /* View setting */
         View view = super.onCreateView(inflater, container, savedInstanceState);
         this.dependencyInjection(view);
         this.addWidgetsListener();
-        // updateUiEnabled();
+
+        this.chatAccessKey = Presenter.getInstance().getCurrentChatAccessKey();
+        if (this.chatAccessKey == null || "".equals(this.chatAccessKey)) {
+            Log.e(TAG, "button Disabled");
+            updateBtnEnabled(false);
+        } else {
+            Log.e(TAG, this.chatAccessKey);
+            updateBtnEnabled(true);
+        }
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        LogUtil.logLifeCycle(TAG, "onResume()");
+        super.onResume();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.e(TAG, "On save Instance");
+    }
+
+    @Override
+    public void addChat(Chat chat) {
+        chatList.add(chat);
     }
 
     private void onSendBtn(){
@@ -86,67 +104,17 @@ public class UserChatFragment extends RecyclerFragment<Chat> {
         Chat chat = new Chat(inputText, Const.MY_USER_KEY);
 
         FirebaseDao.insert(chat, chatAccessKey);
+        inputEditText.setText("");
     }
 
     private void onEmojiBtn(){
 
     }
 
-    public void runChatService(){
-        if (chatAccessKey == null) {
-            Log.i(TAG, "Access key is null, runChatService can't start");
-            return;
-        }
-
-        if (runChatServiceFlag) {
-            Log.i(TAG, "runWithPermission chat service flag is true, runChatService can't start");
-            return;
-        }
-
-        runChatServiceFlag = true;
-
-        String modelDir = FirebaseHelper.getModelDir(Const.RefKey.CHAT, chatAccessKey);
-
-        FirebaseDatabase.getInstance().getReference(modelDir).addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Chat chat = dataSnapshot.getValue(Chat.class);
-                chatList.add(chat);
-                notifySetChanged();
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void updateUiEnabled(){
-        if (runChatServiceFlag) {
-            emojiBtn.setEnabled(true);
-            sendBtn.setEnabled(true);
-            inputEditText.setEnabled(true);
-        } else {
-            emojiBtn.setEnabled(false);
-            sendBtn.setEnabled(false);
-            inputEditText.setEnabled(false);
-        }
+    private void updateBtnEnabled(boolean bool){
+        emojiBtn.setEnabled(bool);
+        sendBtn.setEnabled(bool);
+        inputEditText.setEnabled(bool);
     }
 
     private void dependencyInjection(View view){

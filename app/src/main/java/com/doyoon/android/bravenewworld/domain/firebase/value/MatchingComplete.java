@@ -54,4 +54,13 @@ public class MatchingComplete extends FirebaseModel {
     public void setKey(String key) {
 
     }
+
+    @Override
+    public String toString() {
+        return "MatchingComplete{" +
+                "giverAccessKey='" + giverAccessKey + '\'' +
+                ", takerAccessKey='" + takerAccessKey + '\'' +
+                ", chatAccessKey='" + chatAccessKey + '\'' +
+                '}';
+    }
 }

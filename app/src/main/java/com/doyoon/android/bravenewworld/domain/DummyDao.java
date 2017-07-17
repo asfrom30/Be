@@ -2,6 +2,7 @@ package com.doyoon.android.bravenewworld.domain;
 
 import android.util.Log;
 
+import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseGeoDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
@@ -148,6 +149,55 @@ public class DummyDao {
 
             }
         });
+    }
+
+    public static int getDummyDrawable(int gender){
+        int index = getRandomInt(1, 5);
+        int resId;
+        if (gender == Const.Gender.MALE) {
+            switch (index) {
+                case 1:
+                    resId = R.drawable.male_1;
+                    break;
+                case 2:
+                    resId = R.drawable.male_2;
+                    break;
+                case 3:
+                    resId = R.drawable.male_3;
+                    break;
+                case 4:
+                    resId = R.drawable.male_4;
+                    break;
+                case 5:
+                    resId = R.drawable.male_5;
+                    break;
+                default:
+                    resId = R.drawable.male_5;
+                    break;
+            }
+        } else {
+            switch (index) {
+                case 1:
+                    resId = R.drawable.female_1;
+                    break;
+                case 2:
+                    resId = R.drawable.female_2;
+                    break;
+                case 3:
+                    resId = R.drawable.female_3;
+                    break;
+                case 4:
+                    resId = R.drawable.female_4;
+                    break;
+                case 5:
+                    resId = R.drawable.female_5;
+                    break;
+                default:
+                    resId = R.drawable.female_5;
+                    break;
+            }
+        }
+        return resId;
     }
 
 }

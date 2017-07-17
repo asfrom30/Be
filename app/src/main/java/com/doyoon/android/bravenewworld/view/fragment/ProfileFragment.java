@@ -36,26 +36,22 @@ import static com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper.ge
  * Created by DOYOON on 7/12/2017.
  */
 
-public class UserProfileFragment extends Fragment {
+public class ProfileFragment extends Fragment {
 
-    public static final String TAG = UserProfileFragment.class.getSimpleName();
-
-    public static UserProfileFragment instance;
-
-    public static UserProfileFragment getInstance() {
-        if (instance == null) {
-            instance = new UserProfileFragment();
-        }
-        return instance;
-    }
-
-    private UserProfileFragment() {
-
-    }
+    public static final String TAG = ProfileFragment.class.getSimpleName();
 
     private EditText textViewName, textViewWork, textViewAge;
     private Spinner spinnerGender;
     private ImageView imageView;
+
+    public static ProfileFragment newInstance() {
+
+        Bundle args = new Bundle();
+
+        ProfileFragment fragment = new ProfileFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {

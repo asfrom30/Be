@@ -32,14 +32,25 @@ public class FirebaseGeoDao {
                 if (error != null) {
                     Log.i(TAG, "There was an error saving the location to GeoFire: " + error);
                 } else {
-                    Log.i(TAG, "Location saved on server successfully!");
+                    Log.i(TAG, "Location saved on server successfully in GeoFire");
                 }
             }
         });
     }
 
-    public static void delete(){
-        //geoFire.removeLocation("firebase-hq");
+    public static void delete(String dir, String key){
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference(dir);
+        GeoFire geoFire = new GeoFire(ref);
+        geoFire.removeLocation(key, new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, DatabaseError error) {
+                if (error != null) {
+                    Log.i(TAG, "There was an error removing the location to GeoFire: " + error);
+                } else {
+                    Log.i(TAG, "Location removed on server successfully!");
+                }
+            }
+        });
     }
 
     public static void geoQuery(String dir, GeoLocation coordiGeoLocation, double distance){

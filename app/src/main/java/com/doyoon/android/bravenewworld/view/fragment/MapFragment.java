@@ -10,9 +10,18 @@ import com.doyoon.android.bravenewworld.util.LogUtil;
  * Created by DOYOON on 7/12/2017.
  */
 
-public class UserMapFragment extends Fragment {
+public class MapFragment extends Fragment {
 
-    private static final String TAG = UserMapFragment.class.getSimpleName();
+    private static final String TAG = MapFragment.class.getSimpleName();
+
+    public static MapFragment newInstance() {
+
+        Bundle args = new Bundle();
+
+        MapFragment fragment = new MapFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {

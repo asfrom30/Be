@@ -6,8 +6,13 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
@@ -15,9 +20,11 @@ import com.doyoon.android.bravenewworld.domain.firebase.value.ChatProfile;
 import com.doyoon.android.bravenewworld.domain.firebase.value.MatchingComplete;
 import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.reactivenetwork.ReactiveInviteResponse;
-import com.doyoon.android.bravenewworld.view.fragment.UserChatFragment;
 import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.util.ConvString;
 import com.google.firebase.database.FirebaseDatabase;
+
+import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
 /**
  * Created by DOYOON on 7/12/2017.
@@ -42,7 +49,22 @@ public class PickmeRequestNoticeDialog extends DialogFragment {
 
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
-        builder.setView(inflater.inflate(R.layout.dialog_invited, null))
+        View view = inflater.inflate(R.layout.dialog_invited, null);
+
+        /* Custom View */
+        TextView textView = (TextView) view.findViewById(R.id.response_sending_textview);
+        textView.setText(pickMeRequest.getName() + ", "
+                + pickMeRequest.getAge() + ", "
+                + ConvString.getGender(pickMeRequest.getGender()));
+
+        if (pickMeRequest.getImageUrl() != null) {
+            ImageView imageView = (ImageView) view.findViewById(R.id.request_sending_imageView);
+            Glide.with(this).load(pickMeRequest.getImageUrl()).bitmapTransform(new CropCircleTransformation(getContext())).into(imageView);
+        }
+
+        Log.e("TAG", pickMeRequest.toString());
+
+        builder.setView(view)
                 // Add action buttons
                 .setPositiveButton("수락", new DialogInterface.OnClickListener() {
                     @Override
@@ -96,11 +118,6 @@ public class PickmeRequestNoticeDialog extends DialogFragment {
                 MatchingComplete matchingComplete = new MatchingComplete(Const.MY_USER_KEY, fromUserAccessKey, chatAccessKey);
                 FirebaseDao.insert(matchingComplete, fromUserAccessKey);
                 FirebaseDao.insert(matchingComplete, Const.MY_USER_KEY);
-
-                /* 초대가 성사되었습니다. */
-                // onMatching을 true 변경하고 Chat으로 이동합니다.
-                UserChatFragment.chatAccessKey = chatAccessKey;
-                UserChatFragment.getInstance().runChatService();
             }
 
             @Override

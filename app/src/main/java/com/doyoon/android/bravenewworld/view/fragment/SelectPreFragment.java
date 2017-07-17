@@ -9,21 +9,36 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 
 import com.doyoon.android.bravenewworld.R;
+import com.doyoon.android.bravenewworld.presenter.Presenter;
+import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.LogUtil;
 
 /**
  * Created by DOYOON on 7/13/2017.
  */
 
-public class UserSelectPreFragment extends Fragment {
+public class SelectPreFragment extends Fragment {
 
-    public static final String TAG = UserSelectPreFragment.class.getSimpleName();
+    public static final String TAG = SelectPreFragment.class.getSimpleName();
 
+    public static SelectPreFragment newInstance() {
+
+        Bundle args = new Bundle();
+
+        SelectPreFragment fragment = new SelectPreFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    /* Activity Life Cycle */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         LogUtil.logLifeCycle(TAG, "on Create");
     }
+
+    private ImageButton imGiverBtn;
+    private ImageButton imTakerBtn;
 
     @Nullable
     @Override
@@ -32,56 +47,38 @@ public class UserSelectPreFragment extends Fragment {
         LogUtil.logLifeCycle(TAG, "onCreateView()");
 
         View view = inflater.inflate(R.layout.fragment_user_select_pre, container, false);
+        this.dependencyInjection(view);
+        this.addButtonListener();
 
-        final ImageButton imGiverBtn = (ImageButton) view.findViewById(R.id.imGiverBtn);
-        final ImageButton imTakerBtn = (ImageButton) view.findViewById(R.id.imTakerBtn);
+        return view;
+    }
 
-        /* Listener */
+    private void dependencyInjection(View view){
+        imGiverBtn = (ImageButton) view.findViewById(R.id.imGiverBtn);
+        imTakerBtn = (ImageButton) view.findViewById(R.id.imTakerBtn);
+    }
+
+    private void addButtonListener(){
         imGiverBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // UserSelectMapFragment.getInstance().reset(Const.UserType.Giver);
+                Presenter.getInstance().runOnFinding(Const.UserType.Giver);
                 goUserSelectMapFragment();
-                // rerun service
-
-                // go User
             }
         });
 
         imTakerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // UserSelectMapFragment.getInstance().reset(Const.UserType.Taker);
+                Presenter.getInstance().runOnFinding(Const.UserType.Taker);
                 goUserSelectMapFragment();
             }
         });
-
-        return view;
     }
 
-    public void goUserSelectMapFragment() {
-        String fragTag = "UserMap";
-
-        if(getFragmentManager().findFragmentByTag(fragTag) == UserSelectMapFragment.getInstance()){
-            getFragmentManager().beginTransaction().remove(UserSelectMapFragment.getInstance()).commit();
-        }
-
-        getFragmentManager().beginTransaction().add(R.id.user_select_frame_layout, UserSelectMapFragment.getInstance(), fragTag).commit();
-
+    private void goUserSelectMapFragment() {
+        getFragmentManager().beginTransaction().add(R.id.user_select_frame_layout, ActiveUserFragment.newInstance(), null).commit();
     }
-
-    /* Didn't work */
-    /*
-    public void goUserSelectMapFragment() {
-        String fragTag = "UserMap";
-        if(getFragmentManager().findFragmentByTag(fragTag) == UserSelectMapFragment.getInstance()){
-            getFragmentManager().beginTransaction().replace(R.id.user_select_frame_layout, UserSelectMapFragment.getInstance()).commit();
-        } else {
-            getFragmentManager().beginTransaction().add(R.id.user_select_frame_layout, UserSelectMapFragment.getInstance(), fragTag).commit();
-        }
-    }
-    */
-
 
 
     //todo For Motion Listener, Later....

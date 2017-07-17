@@ -12,6 +12,7 @@ import java.util.HashMap;
 import static com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper.dbStructureMap;
 import static com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper.getModelAttribute;
 import static com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper.getModelDir;
+import static com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper.getModelPath;
 import static com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper.toMakeModelKey;
 
 /**
@@ -55,11 +56,18 @@ public class FirebaseDao {
         return modelPath;
     }
 
+    @Deprecated
+    public static void delete(String modelName, String modelKey, String... accessKeys){
+        String modelDir = FirebaseHelper.getModelPath(modelName, accessKeys);
+        Log.e(TAG, modelDir + " Try to remove");
+        FirebaseDatabase.getInstance().getReference(modelDir + modelKey).setValue(null);
+    }
+
     public static <T extends FirebaseModel> void read (final Class<T> t, final FirebaseDao.ReadCallback<T> readCallback, String... accessKeys) {
         String modelName = t.getSimpleName().toLowerCase();
         Log.i(TAG, "model name은..." + modelName);
 
-        String modelPath = FirebaseHelper.getModelPath(modelName, accessKeys);
+        String modelPath = getModelPath(modelName, accessKeys);
 
         if (modelPath == null) {
             Log.e(TAG, "Getting [" + modelName + "]'s path is null, you can not read Firebase Model Value, Model Name is incorrect or accesskeys null");

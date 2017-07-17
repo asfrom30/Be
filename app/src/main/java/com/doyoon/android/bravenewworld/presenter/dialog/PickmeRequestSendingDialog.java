@@ -8,13 +8,19 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.ConvString;
+
+import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
 /**
  * Created by DOYOON on 7/12/2017.
@@ -40,12 +46,27 @@ public class PickmeRequestSendingDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
         // Get the layout inflater
         LayoutInflater inflater = getActivity().getLayoutInflater();
+        View view = inflater.inflate(R.layout.dialog_invite, null);
+
+        /* Custom View */
+        TextView textView = (TextView) view.findViewById(R.id.request_sending_textview);
+        textView.setText(targetUserProfile.getName() + ", "
+                + targetUserProfile.getAge() + ", "
+                + ConvString.getGender(targetUserProfile.getGender()));
+
+        if (targetUserProfile.getImageUri() != null) {
+            ImageView imageView = (ImageView) view.findViewById(R.id.request_sending_imageView);
+            Glide.with(this).load(targetUserProfile.getImageUri()).bitmapTransform(new CropCircleTransformation(getContext())).into(imageView);
+        }
+
 
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
-        builder.setView(inflater.inflate(R.layout.dialog_invite, null))
+
+        builder.setView(view)
                 // Add action buttons
                 .setNegativeButton("Show Detail Profile ", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -60,6 +81,8 @@ public class PickmeRequestSendingDialog extends DialogFragment {
                         }
                     }
                 });
+
+
 
         if(userType == Const.UserType.Taker){
             builder.setPositiveButton("PickMeRequest", new DialogInterface.OnClickListener() {

@@ -1,26 +1,25 @@
 package com.doyoon.android.bravenewworld.presenter.activity;
 
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
 
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
-import com.doyoon.android.bravenewworld.view.fragment.UserChatFragment;
-import com.doyoon.android.bravenewworld.view.fragment.UserMapFragment;
-import com.doyoon.android.bravenewworld.view.fragment.UserProfileFragment;
-import com.doyoon.android.bravenewworld.view.fragment.UserSelectFragment;
+import com.doyoon.android.bravenewworld.presenter.Presenter;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ViewPagerMover;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.ConvString;
 import com.doyoon.android.bravenewworld.util.LogUtil;
 import com.doyoon.android.bravenewworld.util.view.ViewPagerBuilder;
+import com.doyoon.android.bravenewworld.view.fragment.ChatFragment;
+import com.doyoon.android.bravenewworld.view.fragment.MapFragment;
+import com.doyoon.android.bravenewworld.view.fragment.ProfileFragment;
+import com.doyoon.android.bravenewworld.view.fragment.SelectFragment;
 
 public class MainActivity extends AppCompatActivity implements ViewPagerMover{
 
@@ -45,22 +44,22 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
         // Get User ID from bundle get Bundle, get Extra...
         this.setMyUserKeyAndProfile();
 
+        /* Build Presenter */
+        // todo what difference between baseContext and applicationContext
+        Presenter.getInstance().initialize(this);
+        Presenter.getInstance().setViewPagerMover(this);
+
         /* make view pager*/
-        if (viewPager == null) {
-            viewPager = (ViewPager) findViewById(R.id.main_view_pager);
-            TabLayout tabLayout = (TabLayout) findViewById(R.id.main_tab_layout);
+        viewPager = (ViewPager) findViewById(R.id.main_view_pager);
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.main_tab_layout);
 
-            ViewPagerBuilder.getInstance(viewPager)
-                    .addFragment(new UserSelectFragment())
-                    .addFragment(new UserMapFragment())
-                    .addFragment(UserChatFragment.getInstance())
-                    .addFragment(UserProfileFragment.getInstance())
-                    .linkTabLayout(tabLayout)
-                    .build(getSupportFragmentManager());
-        }
-
-
-
+        ViewPagerBuilder.getInstance(viewPager)
+                .addFragment(SelectFragment.newInstance())
+                .addFragment(MapFragment.newInstance())
+                .addFragment(ChatFragment.newInstance())
+                .addFragment(ProfileFragment.newInstance())
+                .linkTabLayout(tabLayout)
+                .build(getSupportFragmentManager());
     }
 
     private void setMyUserKeyAndProfile() {
@@ -73,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
             @Override
             public void execute(UserProfile userProfile) {
                 Const.MY_USER_PROFILE = userProfile;
-                Log.i(TAG, "My User Key and User Profile is set Complete");
+                Log.i(TAG, "My User Key and User Profile is set Complete" + Const.MY_USER_PROFILE.toString());
             }
         }, Const.MY_USER_KEY);
     }
@@ -97,14 +96,5 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
             return;
         }
         viewPager.setCurrentItem(targetViewPage);
-    }
-
-    private void showSnackbar(final int mainTextStringId, final int actionStringId,
-                              View.OnClickListener listener) {
-        Snackbar.make(
-                findViewById(android.R.id.content),
-                getString(mainTextStringId),
-                Snackbar.LENGTH_INDEFINITE)
-                .setAction(getString(actionStringId), listener).show();
     }
 }
