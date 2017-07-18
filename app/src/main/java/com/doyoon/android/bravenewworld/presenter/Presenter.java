@@ -129,12 +129,16 @@ public class Presenter {
     }
 
     public void stopOnFinding(){
-        // todo remove geo listener
+        //fixme remove geo listener
         removeMatchingCompleteListener();
         removePickMeRequestListener();
         isOnFinding = false;
     }
 
+    /**
+     *
+     * @param latLng
+     */
     private void registerActiveUser(LatLng latLng){
         if (this.userType == Const.UserType.NOT_YET_CHOOSED) {
             Log.e(TAG, "Try to register at geo fire, but user type is not yet choosed.");
@@ -143,10 +147,13 @@ public class Presenter {
 
         String modelDir = "";
 
-        if(this.userType == Const.UserType.Giver) {
-            modelDir = getModelDir(Const.RefKey.ACTIVE_USER_TYPE_GIVER);
-        } else if(this.userType == Const.UserType.Taker){
-            modelDir = getModelDir(Const.RefKey.ACTIVE_USER_TYPE_TAKER);
+        switch(userType){
+            case Const.UserType.Giver:
+                modelDir = getModelDir(Const.RefKey.ACTIVE_USER_TYPE_GIVER);
+                break;
+            case Const.UserType.Taker:
+                modelDir = getModelDir(Const.RefKey.ACTIVE_USER_TYPE_TAKER);
+                break;
         }
 
         FirebaseGeoDao.insert(modelDir, Const.MY_USER_KEY, new GeoLocation(latLng.latitude, latLng.longitude));
@@ -507,6 +514,8 @@ public class Presenter {
         this.currentChatAccessKey = null;
     }
 
+    private List<UserProfile> activeUserProfileList = new ArrayList();
+
     public void fetchNextPageUserProfiles(){
         // start = 0 ~ 0
         if (startIndexForFetchUser >= activeUserList.size()) {
@@ -533,9 +542,10 @@ public class Presenter {
                 public void postExecute(DataSnapshot dataSnapshot) {
                     UserProfile userProfile = dataSnapshot.getValue(UserProfile.class);
                     /* Update UI */
-                    activeUserListUIController.addActiveUser(userProfile);
-                    activeUserListUIController.notifySetChanged();
-                    Log.i(TAG, "Fetch UserProfile Succesful : " + userProfile.toString());
+                    activeUserProfileList.add(userProfile);
+                    activeUserListUIController.update();
+
+                    Log.i(TAG, "Fetch UserProfile Successful : " + userProfile.toString());
                 }
             });
         }
@@ -551,10 +561,14 @@ public class Presenter {
     }
 
     public Map<String, ActiveUser> getActiveUserMap() {
-        if (this.activeUserMap == null) {
+        return this.activeUserMap == null ? null : this.activeUserMap;
+    }
+
+    public List<UserProfile> getActiveUserProfileList(){
+        if (this.activeUserProfileList == null) {
             return null;
         }
-        return this.activeUserMap;
+        return activeUserProfileList;
     }
 
     public void setViewPagerMover(ViewPagerMover viewPagerMover) {

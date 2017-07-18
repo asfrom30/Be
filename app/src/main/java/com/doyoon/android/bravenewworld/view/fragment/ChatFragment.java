@@ -188,4 +188,6 @@ public class ChatFragment extends RecyclerFragment<Chat> implements ChatUIContro
 
     }
 
+
+
 }

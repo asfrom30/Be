@@ -20,9 +20,9 @@
         android:theme="@style/Theme.Design.Light.NoActionBar">
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
+            android:value="AIzaSyAiB8vZL_G8A65key3mpsipI5A8FnG9rxY" />
 
-        <activity android:name=".presenter.activity.MainActivity">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -30,7 +30,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".presenter.activity.LoginActivity"
+            android:name=".LoginActivity"
             android:label="@string/title_activity_login">
         </activity>
     </application>

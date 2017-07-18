@@ -10,6 +10,7 @@
     <color name="google_green">#34A853</color>
 
     <color name="transparent_green">#b4f90000</color>
+    <color name="be_pinkish_grey">#c2c2c2</color>
 
     <integer-array name="google_glyph_colors">
         <item>@android:color/white</item>

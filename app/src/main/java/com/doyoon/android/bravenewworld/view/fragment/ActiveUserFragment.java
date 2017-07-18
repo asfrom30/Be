@@ -28,12 +28,11 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Created by DOYOON on 7/10/2017.
+ * 설명
  */
 
 public class ActiveUserFragment extends PermissionFragment implements OnMapReadyCallback, ActiveUserMapController, ActiveUserListUIController {
@@ -46,7 +45,7 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
     private MapView mMapView;
     private GoogleMap mGoogleMap;
 
-    private List<UserProfile> displayUserList = new ArrayList();
+    // private List<UserProfile> displayUserList = new ArrayList();
 
     /* Shared Preference */
     private double SEARCH_DISTANCE_KM = 100;
@@ -93,12 +92,9 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
         // Gets to GoogleMap from the MapView and does initialization stuff
         mMapView.getMapAsync(this);
 
-        if (displayUserList.size() != 0) {
-            notifySetChanged();
+        if (Presenter.getInstance().getActiveUserProfileList().size() != 0) {
+            update();
         }
-
-        Log.e(TAG, "display user list size is ... " + displayUserList.size());
-
 
         // todo move to pre Select Fragment
         checkRuntimePermission(new Callback() {
@@ -223,17 +219,13 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
 
     /* Getter and Setter */
     public List<UserProfile> getDataList() {
-        return this.displayUserList;
+        return Presenter.getInstance().getActiveUserProfileList();
+        //return this.displayUserList;
     }
 
     /* Interface for presenter */
     @Override
-    public void addActiveUser(UserProfile userProfile) {
-        displayUserList.add(userProfile);
-    }
-
-    @Override
-    public void notifySetChanged() {
+    public void update() {
         mActiveUserListView.notifyDataListChanged();
     }
 

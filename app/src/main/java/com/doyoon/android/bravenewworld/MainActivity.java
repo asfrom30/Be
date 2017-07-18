@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.presenter.activity;
+package com.doyoon.android.bravenewworld;
 
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -6,7 +6,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
@@ -19,8 +18,11 @@ import com.doyoon.android.bravenewworld.util.view.ViewPagerBuilder;
 import com.doyoon.android.bravenewworld.view.fragment.ChatFragment;
 import com.doyoon.android.bravenewworld.view.fragment.MapFragment;
 import com.doyoon.android.bravenewworld.view.fragment.ProfileFragment;
-import com.doyoon.android.bravenewworld.view.fragment.SelectFragment;
+import com.doyoon.android.bravenewworld.view.fragment.TestChatFragment;
 
+/**
+ * 나는 뭐하는 놈입니다~
+ */
 public class MainActivity extends AppCompatActivity implements ViewPagerMover{
 
     private static String TAG = MainActivity.class.getSimpleName();
@@ -54,7 +56,8 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
         TabLayout tabLayout = (TabLayout) findViewById(R.id.main_tab_layout);
 
         ViewPagerBuilder.getInstance(viewPager)
-                .addFragment(SelectFragment.newInstance())
+                .addFragment(TestChatFragment.newInstance())
+                // .addFragment(SelectFragment.newInstance())
                 .addFragment(MapFragment.newInstance())
                 .addFragment(ChatFragment.newInstance())
                 .addFragment(ProfileFragment.newInstance())
@@ -62,6 +65,9 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
                 .build(getSupportFragmentManager());
     }
 
+    /**
+     * 나는 뭐하는 놈입니다~
+     */
     private void setMyUserKeyAndProfile() {
         // String email = getIntent().getStringExtra()
         String email = getDummyUserEmail();
@@ -89,6 +95,22 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
         }
         return email;
     }
+
+    /*
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        Typekit.getInstance()
+                .addNormal(Typekit.createFromAsset(this, "Wedding Chardonnay.ttf"))
+                .addBold(Typekit.createFromAsset(this, "Double_Bubble_shadow.otf"))
+                .addItalic(Typekit.createFromAsset(this, "Double_Bubble_shadow_italic.otf"))
+                .addBoldItalic(Typekit.createFromAsset(this, "Double_Bubble_shadow_italic.otf"))
+                .addCustom1(Typekit.createFromAsset(this, "soopafre.ttf"))
+                .addCustom2(Typekit.createFromAsset(this, "Break It Down.ttf"));
+
+        super.attachBaseContext(TypekitContextWrapper.wrap(newBase));
+    }
+    */
+
 
     @Override
     public void moveViewPage(int targetViewPage) {

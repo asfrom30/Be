@@ -62,6 +62,10 @@ public class DummyDao {
         return random + "@google.com";
     }
 
+    public static String getRandomMsg(){
+        return getSaltString(10);
+    }
+
     private static String getSaltString(int length) {
         String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         StringBuilder salt = new StringBuilder();

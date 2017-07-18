@@ -61,9 +61,9 @@ public class Const {
     }
 
     public static class UserType {
-        public static int Taker = -1;
-        public static int NOT_YET_CHOOSED = 0;
-        public static int Giver = 1;
+        public static final int Taker = -1;
+        public static final int NOT_YET_CHOOSED = 0;
+        public static final int Giver = 1;
     }
 
     public static class Gender {

@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.presenter.activity;
+package com.doyoon.android.bravenewworld;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -26,8 +26,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
-import com.doyoon.android.bravenewworld.R;
 
 import java.util.ArrayList;
 import java.util.List;
