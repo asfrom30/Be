@@ -19,6 +19,7 @@ import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseUploader;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
+import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.DateUtil;
 import com.doyoon.android.bravenewworld.util.LogUtil;
@@ -101,7 +102,7 @@ public class ProfileFragment extends Fragment {
 
     private void updateProfileFromRemote(){
         /* Get User Profile */
-        String modelDir = FirebaseHelper.getModelDir(Const.RefKey.USER_PROFILE, Const.MY_USER_KEY) + Const.RefKey.USER_PROFILE;
+        String modelDir = FirebaseHelper.getModelDir(Const.RefKey.USER_PROFILE, UserStatusPresenter.myUserAccessKey) + Const.RefKey.USER_PROFILE;
         FirebaseDatabase.getInstance().getReference(modelDir).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -129,11 +130,11 @@ public class ProfileFragment extends Fragment {
 
     private void uploadProfileImage(String strFileUri){
         // todo random key...
-        String fileName = DateUtil.getCurrentDate() + "_" + Const.MY_USER_KEY;// 시간값 + UUID 추가해서 만듦...
+        String fileName = DateUtil.getCurrentDate() + "_" + UserStatusPresenter.myUserAccessKey;// 시간값 + UUID 추가해서 만듦...
         FirebaseUploader.execute(strFileUri, Const.StorageRefKey.USER_PROFILE, fileName, new FirebaseUploader.Callback() {
             @Override
             public void postExecute(Uri uploadedFileUri) {
-                String modelDir = getModelDir(Const.RefKey.USER_PROFILE, Const.MY_USER_KEY)
+                String modelDir = getModelDir(Const.RefKey.USER_PROFILE, UserStatusPresenter.myUserAccessKey)
                         + Const.RefKey.USER_PROFILE + "/" + Const.RefKey.USER_PROFILE_IMAGE_URI;
                 FirebaseDatabase.getInstance().getReference(modelDir).setValue(uploadedFileUri.toString());
                 Log.i(TAG, "정상적으로 추가되었습니다." + uploadedFileUri);

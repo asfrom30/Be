@@ -9,4 +9,6 @@ import com.doyoon.android.bravenewworld.domain.firebase.value.Chat;
 public interface ChatUIController {
     void addChat(Chat chat);
     void notifySetChanged();
+    void setFocusLastItem();
+    void updateProfileView();
 }

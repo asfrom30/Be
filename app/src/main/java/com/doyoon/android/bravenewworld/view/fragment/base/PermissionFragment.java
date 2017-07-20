@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.presenter.base.fragment;
+package com.doyoon.android.bravenewworld.view.fragment.base;
 
 import android.Manifest;
 import android.content.pm.PackageManager;

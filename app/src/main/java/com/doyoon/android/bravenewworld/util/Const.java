@@ -1,7 +1,7 @@
 package com.doyoon.android.bravenewworld.util;
 
 import com.doyoon.android.bravenewworld.R;
-import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
+import com.google.android.gms.location.LocationRequest;
 
 /**
  * Created by DOYOON on 7/10/2017.
@@ -10,11 +10,19 @@ import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 public class Const {
 
     /* not final */
-    public static String MY_USER_KEY;
-    public static UserProfile MY_USER_PROFILE;
+    // public static String MY_USER_KEY;
+    // public static UserProfile MY_USER_PROFILE;
 
     /* TAG */
     public static final String LIFE_CYCLE_TAG = "Life Cycle : ";
+
+    /* MapFragment Setting */
+    public static class GoogleMap {
+        public static final int REQUEST_CHECK_SETTING = 0x01;
+        public static final int UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
+        public static final int FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+        public static final int PRIORITY = LocationRequest.PRIORITY_HIGH_ACCURACY;
+    }
 
 
     /* DAO REF KEY */

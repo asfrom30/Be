@@ -1,25 +1,35 @@
-package com.doyoon.android.bravenewworld.view.fragment;
+ package com.doyoon.android.bravenewworld.view.fragment;
 
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageButton;
+ import android.Manifest;
+ import android.animation.AnimatorSet;
+ import android.animation.ObjectAnimator;
+ import android.os.Bundle;
+ import android.support.annotation.NonNull;
+ import android.support.annotation.Nullable;
+ import android.support.v4.app.Fragment;
+ import android.view.LayoutInflater;
+ import android.view.View;
+ import android.view.ViewGroup;
+ import android.widget.ImageButton;
 
-import com.doyoon.android.bravenewworld.R;
-import com.doyoon.android.bravenewworld.presenter.Presenter;
-import com.doyoon.android.bravenewworld.util.Const;
-import com.doyoon.android.bravenewworld.util.LogUtil;
+ import com.bumptech.glide.Glide;
+ import com.doyoon.android.bravenewworld.R;
+ import com.doyoon.android.bravenewworld.presenter.AppPresenter;
+ import com.doyoon.android.bravenewworld.util.Const;
+ import com.doyoon.android.bravenewworld.util.LogUtil;
+ import com.doyoon.android.bravenewworld.util.RuntimePermissionUtil;
+ import com.doyoon.android.bravenewworld.util.view.SnackBarHelper;
 
-/**
+ /**
  * Created by DOYOON on 7/13/2017.
  */
 
 public class SelectPreFragment extends Fragment {
 
     public static final String TAG = SelectPreFragment.class.getSimpleName();
+
+    /* */
+
 
     public static SelectPreFragment newInstance() {
 
@@ -33,10 +43,22 @@ public class SelectPreFragment extends Fragment {
     /* Activity Life Cycle */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         LogUtil.logLifeCycle(TAG, "on Create");
+
+        super.onCreate(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            selectedBtn = savedInstanceState.getInt(BTN_INSTANCE_STATE_TAG);
+        }
     }
 
+    private static final String BTN_INSTANCE_STATE_TAG = "selectedBtn";
+    private static final int BTN_UMB_SELECTED = -1;
+    private static final int NOT_YET_SELECTED = 0;
+    private static final int BTN_RAIN_SELECTED = 1;
+
+    private int selectedBtn = NOT_YET_SELECTED;
+    private boolean guideSnackBarFlag;
     private ImageButton imGiverBtn;
     private ImageButton imTakerBtn;
 
@@ -46,12 +68,63 @@ public class SelectPreFragment extends Fragment {
 
         LogUtil.logLifeCycle(TAG, "onCreateView()");
 
+        if (savedInstanceState != null) {
+            selectedBtn = savedInstanceState.getInt(BTN_INSTANCE_STATE_TAG);
+        }
+
         View view = inflater.inflate(R.layout.fragment_user_select_pre, container, false);
         this.dependencyInjection(view);
         this.addButtonListener();
 
+        guideSnackBarFlag = false;
+        updateButtonView();
+
+        /* Runtime Permission Check */
+        setButtonsEnabled(false);
+        requestRunOrNot();
+
+
         return view;
     }
+
+    private void requestRunOrNot(){
+        String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
+
+        RuntimePermissionUtil.requestAndRunOrNot(getActivity(), permissions, new RuntimePermissionUtil.Callback() {
+            @Override
+            public void run() {
+                setButtonsEnabled(true);
+            }
+
+            @Override
+            public void cancel() {
+                /* nothing to do */
+            }
+        });
+    }
+
+     @Override
+     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+         RuntimePermissionUtil.postPermissionResult(requestCode, permissions, grantResults, new RuntimePermissionUtil.Callback() {
+
+             @Override
+             public void run() {
+                 setButtonsEnabled(true);
+             }
+
+             @Override
+             public void cancel() {
+                 SnackBarHelper.show(getActivity(), "서비스를 정상적으로 이용하시려면 위치서비스가 필요합니다", null, null);
+             }
+
+         });
+     }
+
+     private void setButtonsEnabled(boolean flag) {
+         imGiverBtn.setEnabled(flag);
+         imTakerBtn.setEnabled(flag);
+     }
 
     private void dependencyInjection(View view){
         imGiverBtn = (ImageButton) view.findViewById(R.id.imGiverBtn);
@@ -59,70 +132,84 @@ public class SelectPreFragment extends Fragment {
     }
 
     private void addButtonListener(){
+        // UMB
         imGiverBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Presenter.getInstance().runOnFinding(Const.UserType.Giver);
-                goUserSelectMapFragment();
+                showOrNotGuideSnackBar();
+                if (selectedBtn == BTN_UMB_SELECTED) {
+                    AppPresenter.getInstance().runOnFinding(Const.UserType.Giver);
+                    goUserSelectMapFragment();
+                } else {
+                    selectedBtn = BTN_UMB_SELECTED;
+                    updateButtonView();
+                }
             }
         });
 
+        // Rain
         imTakerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Presenter.getInstance().runOnFinding(Const.UserType.Taker);
-                goUserSelectMapFragment();
+                showOrNotGuideSnackBar();
+                if (selectedBtn == BTN_RAIN_SELECTED) {
+                    AppPresenter.getInstance().runOnFinding(Const.UserType.Taker);
+                    goUserSelectMapFragment();
+                } else {
+                    selectedBtn = BTN_RAIN_SELECTED;
+                    updateButtonView();
+                }
+
             }
         });
+    }
+
+    private void showOrNotGuideSnackBar(){
+        if (!guideSnackBarFlag){
+            guideSnackBarFlag = true;
+            SnackBarHelper.show(getActivity(), "한번 더 누르시면 서비스를 시작합니다.", null, null);
+        }
     }
 
     private void goUserSelectMapFragment() {
         getFragmentManager().beginTransaction().add(R.id.user_select_frame_layout, ActiveUserFragment.newInstance(), null).commit();
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
 
-    //todo For Motion Listener, Later....
-        /*
-        imGiverBtn.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch(event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        imGiverBtn.setImageResource(R.drawable.select_fragment_umb_active);
-                        return true; // if you want to handle the touch event
-                    case MotionEvent.ACTION_UP:
-                        imGiverBtn.setImageResource(R.drawable.select_fragment_umb_deactive);
-                        return true; // if you want to handle the touch event
-                }
-                return false;
-            }
-        });
-        imTakerBtn.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = MotionEventCompat.getActionMasked(event);
+        outState.putInt(BTN_INSTANCE_STATE_TAG, selectedBtn);
+    }
 
-                switch(action) {
-                    case (MotionEvent.ACTION_DOWN) :
-                        Log.i(TAG,"Action was DOWN");
-                        return true;
-                    case (MotionEvent.ACTION_MOVE) :
-                        //Log.d(TAG,"Action was MOVE");
-                        return true;
-                    case (MotionEvent.ACTION_UP) :
-                        Log.i(TAG,"Action was UP");
-                        return true;
-                    case (MotionEvent.ACTION_CANCEL) :
-                        Log.i(TAG,"Action was CANCEL");
-                        return true;
-                    case (MotionEvent.ACTION_OUTSIDE) :
-                        Log.i(TAG,"Movement occurred outside bounds " +
-                                "of current screen element");
-                        return true;
-                    default :
-                        return getActivity().onTouchEvent(event);
-                }
-            }
-        });
-        */
+    private void updateButtonView(){
+        if (selectedBtn == BTN_UMB_SELECTED) {
+            Glide.with(getActivity()).load(R.drawable.select_btn_umb_on).into(imGiverBtn);
+            Glide.with(getActivity()).load(R.drawable.select_btn_rain_off).into(imTakerBtn);
+            /* Animation */
+            scaleUp(imGiverBtn, 1.2f);
+            scaleUp(imTakerBtn, 0.8f);
+
+        } else if (selectedBtn == BTN_RAIN_SELECTED) {
+            Glide.with(getActivity()).load(R.drawable.select_btn_umb_off).into(imGiverBtn);
+            Glide.with(getActivity()).load(R.drawable.select_btn_rain_on).into(imTakerBtn);
+
+            /* Animation */
+            scaleUp(imTakerBtn, 1.2f);
+            scaleUp(imGiverBtn, 0.8f);
+        }
+    }
+
+    private void scaleUp(View view, float scale) {
+        ObjectAnimator scaleUpX = ObjectAnimator.ofFloat(view, "scaleX", scale);
+        ObjectAnimator scaleUpY = ObjectAnimator.ofFloat(view, "scaleY", scale);
+        scaleUpX.setDuration(700);
+        scaleUpY.setDuration(700);
+
+        AnimatorSet scaleUp = new AnimatorSet();
+        scaleUp.playTogether(scaleUpX, scaleUpY);
+
+        scaleUp.start();
+    }
+
 }

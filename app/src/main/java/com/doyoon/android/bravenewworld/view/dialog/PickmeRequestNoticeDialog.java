@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.presenter.dialog;
+package com.doyoon.android.bravenewworld.view.dialog;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -20,6 +20,7 @@ import com.doyoon.android.bravenewworld.domain.firebase.value.ChatProfile;
 import com.doyoon.android.bravenewworld.domain.firebase.value.MatchingComplete;
 import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.reactivenetwork.ReactiveInviteResponse;
+import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.ConvString;
 import com.google.firebase.database.FirebaseDatabase;
@@ -102,22 +103,21 @@ public class PickmeRequestNoticeDialog extends DialogFragment {
         ReactiveInviteResponse.hasActiveUser(pickMeRequest.getFromUserAccessKey(), new ReactiveInviteResponse.Callback() {
             @Override
             public void userExist() {   // 초대에 응했는데 아직 있다면...
-
                 String modelDir = FirebaseHelper.getModelDir(Const.RefKey.CHAT_ROOM);
                 String chatAccessKey = FirebaseDatabase.getInstance().getReference(modelDir).push().getKey();
 
                  /* ChatProfile Manual Input for Remember Auto Generate Key */
-                String fromUserAccessKey = pickMeRequest.getFromUserAccessKey();
+                String otherUserAccesskey = pickMeRequest.getFromUserAccessKey();
                 ChatProfile chatProfile = new ChatProfile(chatAccessKey);
-                chatProfile.setGiverKey(Const.MY_USER_KEY);
-                chatProfile.setTakerKey(fromUserAccessKey);
+                chatProfile.setGiverKey(UserStatusPresenter.myUserAccessKey);
+                chatProfile.setTakerKey(otherUserAccesskey);
                 FirebaseDao.insert(chatProfile, chatAccessKey);
                 // FirebaseDatabase.getInstance().getReference(modelDir + chatAccessKey \).setValue(chatProfile);
 
                 /* 채팅방을 개설하고 상대방에게 채팅방 키를 전달해줍니다 */
-                MatchingComplete matchingComplete = new MatchingComplete(Const.MY_USER_KEY, fromUserAccessKey, chatAccessKey);
-                FirebaseDao.insert(matchingComplete, fromUserAccessKey);
-                FirebaseDao.insert(matchingComplete, Const.MY_USER_KEY);
+                MatchingComplete matchingComplete = new MatchingComplete(UserStatusPresenter.myUserAccessKey, otherUserAccesskey, chatAccessKey);
+                FirebaseDao.insert(matchingComplete, otherUserAccesskey);
+                FirebaseDao.insert(matchingComplete, UserStatusPresenter.myUserAccessKey);
             }
 
             @Override

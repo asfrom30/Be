@@ -11,14 +11,13 @@ import android.view.ViewGroup;
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.geovalue.ActiveUser;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
-import com.doyoon.android.bravenewworld.presenter.Presenter;
-import com.doyoon.android.bravenewworld.presenter.base.fragment.PermissionFragment;
-import com.doyoon.android.bravenewworld.presenter.dialog.PickmeRequestSendingDialog;
+import com.doyoon.android.bravenewworld.presenter.AppPresenter;
+import com.doyoon.android.bravenewworld.view.fragment.base.PermissionFragment;
+import com.doyoon.android.bravenewworld.view.dialog.PickmeRequestSendingDialog;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ActiveUserListUIController;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ActiveUserMapController;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.LogUtil;
-import com.doyoon.android.bravenewworld.view.UserSelectFragmentView;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -41,7 +40,7 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
     private static int linkRes = R.layout.fragment_user_select_map;
 
     /* View */
-    private UserSelectFragmentView mActiveUserListView;
+    private ActiveUserFragmentView mActiveUserListView;
     private MapView mMapView;
     private GoogleMap mGoogleMap;
 
@@ -73,13 +72,13 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         LogUtil.logLifeCycle(TAG, "onCreateView()");
 
-        /* Link to Presenter */
-        Presenter.getInstance().setActiveUserListUIController(this);
-        Presenter.getInstance().setActiveUserMapController(this);
+        /* Link to AppPresenter */
+        AppPresenter.getInstance().setActiveUserListUIController(this);
+        AppPresenter.getInstance().setActiveUserMapController(this);
 
         /* Layout Inflating */
         baseView = inflater.inflate(R.layout.fragment_user_select_map, container, false);
-        this.mActiveUserListView = new UserSelectFragmentView(this, getContext(), baseView);
+        this.mActiveUserListView = new ActiveUserFragmentView(this, getContext(), baseView);
 
         /* Get Default Setting  */
         SEARCH_DISTANCE_KM = Const.DEFAULT_SEARCH_DISTANCE_KM;
@@ -92,7 +91,7 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
         // Gets to GoogleMap from the MapView and does initialization stuff
         mMapView.getMapAsync(this);
 
-        if (Presenter.getInstance().getActiveUserProfileList().size() != 0) {
+        if (AppPresenter.getInstance().getActiveUserProfileList().size() != 0) {
             update();
         }
 
@@ -113,7 +112,7 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
     }
 
     public void onActiveUserItemClicked(UserProfile clickedUserProfile) {
-        int userType = Presenter.getInstance().getUserType();
+        int userType = AppPresenter.getInstance().getUserType();
         DialogFragment dialogFragment = new PickmeRequestSendingDialog( userType
                 , clickedUserProfile
                 , new PickmeRequestSendingDialog.Callback() {
@@ -136,8 +135,8 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
         mGoogleMap.setMyLocationEnabled(true);
         setFocusMyLatlng();
 
-        if (Presenter.getInstance().getActiveUserMap() != null) {
-            resetMarker(Presenter.getInstance().getActiveUserMap());
+        if (AppPresenter.getInstance().getActiveUserMap() != null) {
+            resetMarker(AppPresenter.getInstance().getActiveUserMap());
         }
     }
 
@@ -147,7 +146,7 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
             return;
         }
 
-        Presenter.getInstance().getLastLocation(new Presenter.LocationCallback() {
+        AppPresenter.getInstance().getLastLocation(new AppPresenter.LocationCallback() {
             @Override
             public void execute(LatLng latLng) {
                 CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, CURRENT_CAMERA_ZOOM);
@@ -164,14 +163,14 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
     }
 
     private int getMapPinResId(){
-        int userType = Presenter.getInstance().getUserType();
+        int userType = AppPresenter.getInstance().getUserType();
 
         if (userType == Const.UserType.Taker) {
             return Const.MAP_SETTING.GIVER_MAP_PIN_RES_ID;
         } else if (userType == Const.UserType.Giver) {
             return Const.MAP_SETTING.TAKER_MAP_PIN_RES_ID;
         } else {
-            throw new IllegalStateException("Presenter User Type is not declared, can't get Map Pin Resource ID`");
+            throw new IllegalStateException("AppPresenter User Type is not declared, can't get Map Pin Resource ID`");
         }
     }
 
@@ -209,6 +208,7 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mMapView.onSaveInstanceState(outState);
+        LogUtil.logLifeCycle(TAG, "onSaveInstanceState");
     }
 
     @Override
@@ -219,7 +219,7 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
 
     /* Getter and Setter */
     public List<UserProfile> getDataList() {
-        return Presenter.getInstance().getActiveUserProfileList();
+        return AppPresenter.getInstance().getActiveUserProfileList();
         //return this.displayUserList;
     }
 
@@ -235,7 +235,7 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
             return;
         }
 
-        this.mGoogleMap .clear();
+        this.mGoogleMap.clear();
         for (Map.Entry<String, ActiveUser> entry : activeUserMap.entrySet()) {
             ActiveUser activeUser = entry.getValue();
 

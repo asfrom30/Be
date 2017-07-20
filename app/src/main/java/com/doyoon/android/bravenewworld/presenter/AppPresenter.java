@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.doyoon.android.bravenewworld.domain.RemoteDao;
+import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseGeoDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.domain.firebase.geovalue.ActiveUser;
@@ -13,12 +14,12 @@ import com.doyoon.android.bravenewworld.domain.firebase.value.Chat;
 import com.doyoon.android.bravenewworld.domain.firebase.value.MatchingComplete;
 import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
-import com.doyoon.android.bravenewworld.presenter.dialog.PickmeRequestNoticeDialog;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ActiveUserListUIController;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ActiveUserMapController;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ChatUIController;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ViewPagerMover;
 import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.view.dialog.PickmeRequestNoticeDialog;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
@@ -45,15 +46,15 @@ import static com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper.ge
  * Created by DOYOON on 7/16/2017.
  */
 
-public class Presenter {
+public class AppPresenter {
 
-    private static final String TAG = Presenter.class.getSimpleName();
+    private static final String TAG = AppPresenter.class.getSimpleName();
 
-    public static Presenter instance;
+    public static AppPresenter instance;
 
-    public static Presenter getInstance(){
+    public static AppPresenter getInstance(){
         if (instance == null) {
-            instance = new Presenter();
+            instance = new AppPresenter();
         }
         return instance;
     }
@@ -73,7 +74,7 @@ public class Presenter {
     private int userType;
     private int startIndexForFetchUser = 0;
 
-    private Presenter() {
+    private AppPresenter() {
 
     }
 
@@ -145,8 +146,8 @@ public class Presenter {
             return;
         }
 
-        String modelDir = "";
 
+        String modelDir = "";
         switch(userType){
             case Const.UserType.Giver:
                 modelDir = getModelDir(Const.RefKey.ACTIVE_USER_TYPE_GIVER);
@@ -156,7 +157,7 @@ public class Presenter {
                 break;
         }
 
-        FirebaseGeoDao.insert(modelDir, Const.MY_USER_KEY, new GeoLocation(latLng.latitude, latLng.longitude));
+        FirebaseGeoDao.insert(modelDir, UserStatusPresenter.myUserAccessKey, new GeoLocation(latLng.latitude, latLng.longitude));
     }
 
     private void removeActiveUser() {
@@ -173,7 +174,7 @@ public class Presenter {
             modelDir = getModelDir(Const.RefKey.ACTIVE_USER_TYPE_TAKER);
         }
 
-        FirebaseGeoDao.delete(modelDir, Const.MY_USER_KEY);
+        FirebaseGeoDao.delete(modelDir, UserStatusPresenter.myUserAccessKey);
     }
 
     @SuppressWarnings("MissingPermission")
@@ -203,24 +204,24 @@ public class Presenter {
         void execute(LatLng latLng);
     }
 
+    private UserProfile chatOtherUserProfile;
+
+    public UserProfile getChatOtherUserProfile(){
+        return this.chatOtherUserProfile;
+    };
+
 
     private void receiveMatchingComplete(MatchingComplete matchingComplete){
 
         isOnMatching = true;
 
-        /* Add chat Listener */
-        String chatAccessKey = matchingComplete.getChatAccessKey();
-        addChatListener(chatAccessKey);
-
-        this.viewPagerMover.moveViewPage(2);
-
         /* Remove Matching Complete Value */
-        String modelPath = FirebaseHelper.getModelPath(Const.RefKey.MATCHING_COMPLETE, Const.MY_USER_KEY);
+        String modelPath = FirebaseHelper.getModelPath(Const.RefKey.MATCHING_COMPLETE, UserStatusPresenter.myUserAccessKey);
         FirebaseDatabase.getInstance().getReference(modelPath).removeValue();
 
         /* Remove PickMe Request */
         if (userType == Const.UserType.Giver) {
-            String modelDir = FirebaseHelper.getModelDir(Const.RefKey.PICK_ME_REQUEST, Const.MY_USER_KEY);
+            String modelDir = FirebaseHelper.getModelDir(Const.RefKey.PICK_ME_REQUEST, UserStatusPresenter.myUserAccessKey);
             FirebaseDatabase.getInstance().getReference(modelDir).removeValue();
         }
 
@@ -228,6 +229,29 @@ public class Presenter {
         removeActiveUser();
         removeMatchingCompleteListener();
         removePickMeRequestListener();
+
+        /* Get Another User Profile from remote */
+        String otherUserAccessKey;
+        if (userType == Const.UserType.Giver) {
+            otherUserAccessKey = matchingComplete.getTakerAccessKey();
+        } else {
+            otherUserAccessKey = matchingComplete.getGiverAccessKey();
+        }
+
+        FirebaseDao.read(UserProfile.class, new FirebaseDao.ReadCallback<UserProfile>() {
+            @Override
+            public void execute(UserProfile userProfile) {
+                chatOtherUserProfile = userProfile;
+                chatUIController.updateProfileView();
+            }
+        }, otherUserAccessKey);
+
+        /* Add chat Listener */
+        String chatAccessKey = matchingComplete.getChatAccessKey();
+        addChatListener(chatAccessKey);
+
+        /* go chat page */
+        this.viewPagerMover.moveViewPage(2);
     }
 
     private void receivePickMeRequest(PickMeRequest pickMeRequest){
@@ -251,7 +275,7 @@ public class Presenter {
             removeMatchingCompleteListener();
         }
 
-        final String modelPath = FirebaseHelper.getModelPath(Const.RefKey.MATCHING_COMPLETE, Const.MY_USER_KEY);
+        final String modelPath = FirebaseHelper.getModelPath(Const.RefKey.MATCHING_COMPLETE, UserStatusPresenter.myUserAccessKey);
         Log.e(TAG, "matching complete model path is " + modelPath);
         this.matchingCompleteListener = new ValueEventListener() {
             @Override
@@ -280,7 +304,7 @@ public class Presenter {
             Log.e(TAG, "matchingCompleteListener already null, can't remove complete listener");
             return;
         }
-        String modelPath = FirebaseHelper.getModelPath(Const.RefKey.MATCHING_COMPLETE, Const.MY_USER_KEY);
+        String modelPath = FirebaseHelper.getModelPath(Const.RefKey.MATCHING_COMPLETE, UserStatusPresenter.myUserAccessKey);
         FirebaseDatabase.getInstance().getReference(modelPath).removeEventListener(this.matchingCompleteListener);
         Log.i(TAG, "removeMatchingCompleteListener Succesfully");
     }
@@ -294,7 +318,7 @@ public class Presenter {
             removePickMeRequestListener();
         }
 
-        String modelDir = getModelDir(Const.RefKey.PICK_ME_REQUEST, Const.MY_USER_KEY);
+        String modelDir = getModelDir(Const.RefKey.PICK_ME_REQUEST, UserStatusPresenter.myUserAccessKey);
         FirebaseDatabase.getInstance().getReference(modelDir).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -334,7 +358,7 @@ public class Presenter {
             return;
         }
 
-        String modelDir = getModelDir(Const.RefKey.PICK_ME_REQUEST, Const.MY_USER_KEY);
+        String modelDir = getModelDir(Const.RefKey.PICK_ME_REQUEST, UserStatusPresenter.myUserAccessKey);
         FirebaseDatabase.getInstance().getReference(modelDir).removeEventListener(pickmeRequestListener);
         Log.i(TAG, "removePickMeRequestListener Succesfully");
     }
@@ -412,6 +436,7 @@ public class Presenter {
             @Override
             public void onKeyExited(String key) {
                 /* Don't remove key and object in activeUserMap and activeUserList */
+                // todo remove or not??
                 activeUserMap.get(key).setActive(false);
                 activeUserMapController.resetMarker(activeUserMap);
                 Log.i(TAG, "Remove Geo Query : Active user [" + key + "] is now deactive");
@@ -473,6 +498,7 @@ public class Presenter {
                 }
                 chatUIController.addChat(chat);
                 chatUIController.notifySetChanged();
+                chatUIController.setFocusLastItem();
             }
 
             @Override

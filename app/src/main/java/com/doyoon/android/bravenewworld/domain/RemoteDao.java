@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
+import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -42,12 +43,12 @@ public class RemoteDao {
 
     public static class FetchMyProfile {
         public static void execute(){
-            String modelDir = FirebaseHelper.getModelDir(Const.RefKey.USER_PROFILE, Const.MY_USER_KEY) + Const.RefKey.USER_PROFILE;
+            String modelDir = FirebaseHelper.getModelDir(Const.RefKey.USER_PROFILE, UserStatusPresenter.myUserAccessKey) + Const.RefKey.USER_PROFILE;
             FirebaseDatabase.getInstance().getReference(modelDir).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     UserProfile userProfile = dataSnapshot.getValue(UserProfile.class);
-                    Const.MY_USER_PROFILE = userProfile;
+                    UserStatusPresenter.myUserProfile = userProfile;
                 }
 
                 @Override

@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.presenter.dialog;
+package com.doyoon.android.bravenewworld.view.dialog;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -43,7 +43,7 @@ public class NoticeDialogFragment extends DialogFragment {
                         // sign in the user ...
                     }
                 })
-                .setNegativeButton("cancle", new DialogInterface.OnClickListener() {
+                .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         NoticeDialogFragment.this.getDialog().cancel();
                     }

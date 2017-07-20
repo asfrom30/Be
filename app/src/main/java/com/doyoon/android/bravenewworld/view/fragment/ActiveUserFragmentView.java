@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.view;
+package com.doyoon.android.bravenewworld.view.fragment;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -12,9 +12,8 @@ import com.bumptech.glide.Glide;
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.DummyDao;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
-import com.doyoon.android.bravenewworld.presenter.Presenter;
-import com.doyoon.android.bravenewworld.view.fragment.ActiveUserFragment;
-import com.doyoon.android.bravenewworld.presenter.base.fragment.RecyclerFragment;
+import com.doyoon.android.bravenewworld.presenter.AppPresenter;
+import com.doyoon.android.bravenewworld.view.fragment.base.RecyclerFragment;
 import com.doyoon.android.bravenewworld.util.Const;
 
 import java.util.List;
@@ -25,9 +24,9 @@ import jp.wasabeef.glide.transformations.CropCircleTransformation;
  * Created by DOYOON on 7/12/2017.
  */
 
-public class UserSelectFragmentView {
+public class ActiveUserFragmentView {
 
-    private static String TAG = UserSelectFragmentView.class.getSimpleName();
+    private static String TAG = ActiveUserFragmentView.class.getSimpleName();
     int linkRes = R.layout.fragment_user_select_map;
 
     private Context context;
@@ -38,7 +37,7 @@ public class UserSelectFragmentView {
 
     private RecyclerFragment displayUserListFragment;
 
-    public UserSelectFragmentView(ActiveUserFragment activeUserFragment, Context context, View baseView) {
+    public ActiveUserFragmentView(ActiveUserFragment activeUserFragment, Context context, View baseView) {
 
         this.presenter = activeUserFragment;
         this.context = context;
@@ -80,19 +79,19 @@ public class UserSelectFragmentView {
     }
 
     public void onScrollEnded(){
-        Presenter.getInstance().fetchNextPageUserProfiles();
+        AppPresenter.getInstance().fetchNextPageUserProfiles();
     }
 
     public static class DisplayUserListFragment extends RecyclerFragment<UserProfile> {
 
-        private UserSelectFragmentView parent;
+        private ActiveUserFragmentView parent;
         private List<UserProfile> displayUserList;
 
         public DisplayUserListFragment() {
 
         }
 
-        public DisplayUserListFragment(UserSelectFragmentView parent, List<UserProfile> displayUserList) {
+        public DisplayUserListFragment(ActiveUserFragmentView parent, List<UserProfile> displayUserList) {
             this.parent = parent;
             this.displayUserList = displayUserList;
         }

@@ -8,6 +8,7 @@ import com.doyoon.android.bravenewworld.domain.firebase.FirebaseGeoDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
+import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.ConvString;
 import com.firebase.geofire.GeoLocation;
@@ -145,7 +146,7 @@ public class DummyDao {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 UserProfile userProfile = dataSnapshot.getValue(UserProfile.class);
                 pickMeRequest.fetchDataFromUserProfile(userProfile);
-                FirebaseDao.insert(pickMeRequest, Const.MY_USER_KEY);
+                FirebaseDao.insert(pickMeRequest, UserStatusPresenter.myUserAccessKey);
             }
 
             @Override

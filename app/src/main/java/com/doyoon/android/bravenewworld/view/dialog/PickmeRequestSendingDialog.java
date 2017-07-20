@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.presenter.dialog;
+package com.doyoon.android.bravenewworld.view.dialog;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -17,6 +17,7 @@ import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
+import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.ConvString;
 
@@ -107,11 +108,11 @@ public class PickmeRequestSendingDialog extends DialogFragment {
     private void onPositiveClicked(){
         String invitingTargetUserAccessKey = ConvString.commaSignToString(targetUserProfile.getEmail());
         PickMeRequest pickMeRequest = new PickMeRequest();
-        if (Const.MY_USER_PROFILE == null) {
+        if (UserStatusPresenter.myUserAccessKey == null) {
             Log.e(TAG, "User Profile is null, can not send pick me request");
             return;
         }
-        pickMeRequest.fetchDataFromUserProfile(Const.MY_USER_PROFILE);
+        pickMeRequest.fetchDataFromUserProfile(UserStatusPresenter.myUserProfile);
 
         /* Add Pick Me Request to Target */
         FirebaseDao.insert(pickMeRequest, invitingTargetUserAccessKey);

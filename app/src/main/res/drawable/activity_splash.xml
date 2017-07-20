@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:drawable="@color/white"
+        android:gravity="fill_horizontal|fill_vertical"/>
+
+    <item
+        android:top="56dp"
+        android:width="35dp"
+        android:height="60dp"
+        android:gravity="center_horizontal">
+        <bitmap android:src="@drawable/splash_icon_symbol"/>
+    </item>
+
+    <item
+        android:top="150dp"
+        android:bottom="300dp">
+        <bitmap android:src="@drawable/splash_pic_concept"
+            android:gravity="fill_horizontal|top|clip_vertical">
+
+        </bitmap>
+    </item>
+
+    <item
+        android:top="612dp"
+        android:width="115dp"
+        android:height="12dp"
+        android:gravity="center_horizontal">
+        <bitmap android:src="@drawable/splash_text_copylight"/>
+    </item>
+
+
+    <!--<item-->
+        <!--android:top="150dp"-->
+        <!--android:width="360dp"-->
+        <!--android:height="267dp">-->
+        <!--<bitmap android:src="@drawable/splash_pic_concept"/>-->
+    <!--</item>-->
+
+
+
+    <!-- Success -->
+
+
+
+</layer-list>

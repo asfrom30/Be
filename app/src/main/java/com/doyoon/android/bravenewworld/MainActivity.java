@@ -1,24 +1,23 @@
 package com.doyoon.android.bravenewworld;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
-import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
-import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
-import com.doyoon.android.bravenewworld.presenter.Presenter;
+import com.doyoon.android.bravenewworld.presenter.AppPresenter;
+import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ViewPagerMover;
-import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.ConvString;
 import com.doyoon.android.bravenewworld.util.LogUtil;
 import com.doyoon.android.bravenewworld.util.view.ViewPagerBuilder;
 import com.doyoon.android.bravenewworld.view.fragment.ChatFragment;
 import com.doyoon.android.bravenewworld.view.fragment.MapFragment;
 import com.doyoon.android.bravenewworld.view.fragment.ProfileFragment;
-import com.doyoon.android.bravenewworld.view.fragment.TestChatFragment;
+import com.doyoon.android.bravenewworld.view.fragment.SelectFragment;
+import com.tsengvn.typekit.TypekitContextWrapper;
 
 /**
  * 나는 뭐하는 놈입니다~
@@ -44,20 +43,20 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
 
         /* Log in activity 에서 log in 정보를 받아 온다.... */
         // Get User ID from bundle get Bundle, get Extra...
-        this.setMyUserKeyAndProfile();
+        String dummyUserAccessKey = getMyDummyUserAccessKey();
 
-        /* Build Presenter */
-        // todo what difference between baseContext and applicationContext
-        Presenter.getInstance().initialize(this);
-        Presenter.getInstance().setViewPagerMover(this);
+        /* Build AppPresenter */
+        buildPresenter(dummyUserAccessKey);
+
+        /* Load Default Data from Remote*/
+        UserStatusPresenter.getInstance().loadMyUserProfileFromRemote();
 
         /* make view pager*/
         viewPager = (ViewPager) findViewById(R.id.main_view_pager);
         TabLayout tabLayout = (TabLayout) findViewById(R.id.main_tab_layout);
 
         ViewPagerBuilder.getInstance(viewPager)
-                .addFragment(TestChatFragment.newInstance())
-                // .addFragment(SelectFragment.newInstance())
+                .addFragment(SelectFragment.newInstance())
                 .addFragment(MapFragment.newInstance())
                 .addFragment(ChatFragment.newInstance())
                 .addFragment(ProfileFragment.newInstance())
@@ -68,21 +67,6 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
     /**
      * 나는 뭐하는 놈입니다~
      */
-    private void setMyUserKeyAndProfile() {
-        // String email = getIntent().getStringExtra()
-        String email = getDummyUserEmail();
-        String userKey = ConvString.commaSignToString(email);
-        Const.MY_USER_KEY = userKey;
-
-        FirebaseDao.read(UserProfile.class, new FirebaseDao.ReadCallback<UserProfile>() {
-            @Override
-            public void execute(UserProfile userProfile) {
-                Const.MY_USER_PROFILE = userProfile;
-                Log.i(TAG, "My User Key and User Profile is set Complete" + Const.MY_USER_PROFILE.toString());
-            }
-        }, Const.MY_USER_KEY);
-    }
-
     private String getDummyUserEmail(){
         int currentApiVersion = android.os.Build.VERSION.SDK_INT;
         String email;
@@ -96,21 +80,27 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
         return email;
     }
 
-    /*
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        Typekit.getInstance()
-                .addNormal(Typekit.createFromAsset(this, "Wedding Chardonnay.ttf"))
-                .addBold(Typekit.createFromAsset(this, "Double_Bubble_shadow.otf"))
-                .addItalic(Typekit.createFromAsset(this, "Double_Bubble_shadow_italic.otf"))
-                .addBoldItalic(Typekit.createFromAsset(this, "Double_Bubble_shadow_italic.otf"))
-                .addCustom1(Typekit.createFromAsset(this, "soopafre.ttf"))
-                .addCustom2(Typekit.createFromAsset(this, "Break It Down.ttf"));
+    private String getMyDummyUserAccessKey(){
+        String email = getDummyUserEmail();
+        String userKey = ConvString.commaSignToString(email);
+        return userKey;
+    }
 
+    private void buildPresenter(String myUserAccessKey){
+        /* UserStatusPresenter */
+        UserStatusPresenter.myUserAccessKey = myUserAccessKey;
+
+        // todo Search what difference between baseContext and applicationContext
+        /* App Presenter */
+        AppPresenter.getInstance().initialize(this);
+        AppPresenter.getInstance().setViewPagerMover(this);
+    }
+
+
+
+    @Override protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(TypekitContextWrapper.wrap(newBase));
     }
-    */
-
 
     @Override
     public void moveViewPage(int targetViewPage) {

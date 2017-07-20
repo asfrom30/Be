@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.presenter.base.activity;
+package com.doyoon.android.bravenewworld.base.activity;
 
 import android.app.Activity;
 import android.content.Context;

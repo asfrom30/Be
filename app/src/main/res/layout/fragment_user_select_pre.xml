@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/cast_expanded_controller_seek_bar_progress_background_tint_color"
+    android:alpha="1.0"
+    android:background="@color/be_pinkish_grey"
     android:orientation="vertical"
     tools:layout_editor_absoluteX="0dp"
     tools:layout_editor_absoluteY="81dp">
@@ -24,6 +25,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:text="@string/fragment_select_pre_umb"
+        android:textColor="@color/cardview_light_background"
         app:layout_constraintBottom_toTopOf="@+id/imGiverBtn"
         app:layout_constraintLeft_toLeftOf="@+id/imGiverBtn"
         app:layout_constraintRight_toRightOf="@+id/imGiverBtn" />
@@ -32,11 +34,14 @@
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="79dp"
+        android:layout_marginBottom="120dp"
         android:text="@string/fragment_select_pre_title"
+        android:textColor="#575a5f"
+        android:textSize="24dp"
         app:layout_constraintBottom_toBottomOf="@+id/textView4"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.507" />
 
     <TextView
         android:id="@+id/textView4"
@@ -46,6 +51,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:text="@string/fragment_select_pre_rain"
+        android:textColor="@color/cardview_light_background"
         app:layout_constraintBottom_toTopOf="@+id/imTakerBtn"
         app:layout_constraintHorizontal_bias="0.507"
         app:layout_constraintLeft_toLeftOf="@+id/imTakerBtn"
@@ -53,12 +59,12 @@
 
     <ImageButton
         android:id="@+id/imGiverBtn"
-        android:layout_width="180dp"
-        android:layout_height="180dp"
-        android:layout_marginBottom="0dp"
-        android:layout_marginRight="8dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginBottom="32dp"
+        android:layout_marginRight="32dp"
         android:layout_marginTop="0dp"
-        android:background="@drawable/select_fragment_umb_deactive"
+        android:background="@drawable/select_btn_umb_off"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toLeftOf="@+id/guideline"
         app:layout_constraintTop_toTopOf="parent"
@@ -66,12 +72,12 @@
 
     <ImageButton
         android:id="@+id/imTakerBtn"
-        android:layout_width="180dp"
-        android:layout_height="180dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
         android:layout_marginBottom="0dp"
-        android:layout_marginLeft="8dp"
+        android:layout_marginLeft="32dp"
         android:layout_marginTop="0dp"
-        android:background="@drawable/select_fragment_rain_deactive"
+        android:background="@drawable/select_btn_rain_off"
         app:layout_constraintBottom_toBottomOf="@+id/imGiverBtn"
         app:layout_constraintLeft_toLeftOf="@+id/guideline"
         app:layout_constraintTop_toTopOf="@+id/imGiverBtn"
