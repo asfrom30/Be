@@ -8,7 +8,15 @@ import android.util.Log;
 
 public class LogUtil {
 
+    /* TAG */
+    public static final String LIFE_CYCLE_TAG = "Life Cycle : ";
+    public static final String AUTH = "AUTH : ";
+
     public static void logLifeCycle(String tag, String lifecycleStatus){
-        Log.i(StringUtil.padRight(Const.LIFE_CYCLE_TAG + "     [ " + tag, 45) + " ] : ", lifecycleStatus);
+        Log.i(StringUtil.padRight(LIFE_CYCLE_TAG + "     [ " + tag, 45) + " ] : ", lifecycleStatus);
+    }
+
+    public static void auth(String tag, String autStatus) {
+        Log.i(StringUtil.padRight(AUTH + "     [ " + tag, 45) + " ] : ", autStatus);
     }
 }

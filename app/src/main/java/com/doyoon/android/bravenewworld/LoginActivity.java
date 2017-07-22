@@ -5,11 +5,11 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -17,6 +17,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -26,6 +27,15 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.doyoon.android.bravenewworld.util.ConvString;
+import com.doyoon.android.bravenewworld.util.LogUtil;
+import com.doyoon.android.bravenewworld.util.regex.EmailValidator;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,22 +47,12 @@ import static android.Manifest.permission.READ_CONTACTS;
  */
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
+    private static final String TAG = LoginActivity.class.getSimpleName();
+
     /**
      * Id to identity READ_CONTACTS permission request.
      */
     private static final int REQUEST_READ_CONTACTS = 0;
-
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -142,10 +142,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
-
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
@@ -183,19 +179,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+            tryToLogIn(email, password);
         }
     }
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
-        return email.contains("@");
+        return EmailValidator.validate(email);
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return password.length() > 5;
     }
 
     /**
@@ -288,61 +281,95 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int IS_PRIMARY = 1;
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    /* Custom Login Activity */
 
-        private final String mEmail;
-        private final String mPassword;
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LogUtil.logLifeCycle(TAG, "on start");
+        FirebaseAuth.getInstance().addAuthStateListener(mFirebaseAuth);
+    }
 
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LogUtil.logLifeCycle(TAG, "on stop");
+        FirebaseAuth.getInstance().removeAuthStateListener(mFirebaseAuth);
 
+    }
+
+    private FirebaseUser firebaseUser;
+    private FirebaseAuth.AuthStateListener mFirebaseAuth = new FirebaseAuth.AuthStateListener() {
         @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
+        public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+            firebaseUser = firebaseAuth.getCurrentUser();
+            if (firebaseUser != null) {
+                Log.i(TAG, "Firebase User Logged in automatically,");
+                String myUserAccessKey = ConvString.commaSignToString(firebaseUser.getEmail());
+                startMainActivity(myUserAccessKey);
             }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
             showProgress(false);
-
-            if (success) {
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
         }
+    };
 
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
+    private void tryToLogIn(final String email, final String password){
+        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        logTryToLogin(task.isSuccessful());
+
+                        if (!task.isSuccessful()) {
+                            createNewUser(email, password);
+                        }
+                    }
+        });
+    }
+
+    private void createNewUser(String email, String password){
+        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        logCreateNewUser(task.isSuccessful());
+                        showProgress(false);
+                    }
+                });
+    }
+
+    private void startMainActivity(String myUserAccessKey) {
+        if (myUserAccessKey == null) {
+            return;
+        }
+        Log.i(TAG, " start main activity");
+
+        Intent intent = new Intent(getBaseContext(), MainActivity.class);
+        //intent.putExtra(Const.ExtraKey.USER_ACCESS_KEY, myUserAccessKey);
+        startActivity(intent);
+        finish();
+    }
+
+    private void logTryToLogin(boolean success) {
+         /* If Log In successfully call Auth state changed automatically */
+        LogUtil.auth(TAG, "Try to Log in :onComplete:");
+
+        if (success) {
+            LogUtil.auth(TAG, "Log in Successful");
+        } else {
+            LogUtil.auth(TAG, "Log in Failed");
         }
     }
+
+    private void logCreateNewUser(boolean success){
+        /* If Log In successfully call Auth state changed automatically */
+        LogUtil.auth(TAG, "createUserWithEmail:onComplete:");
+
+        if (success) {
+            LogUtil.auth(TAG, "Register New User Success");
+        } else {
+            LogUtil.auth(TAG, "Register New User Failed");
+        }
+    }
+
 }
 

@@ -1,12 +1,6 @@
 package com.doyoon.android.bravenewworld.presenter;
 
-import android.util.Log;
-
-import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by DOYOON on 7/20/2017.
@@ -40,39 +34,17 @@ public class UserStatusPresenter {
     public static UserProfile myUserProfile;
     public static UserProfile otherUserProfile;
 
-    private List<UserProfileUI> userProfileUIList;
 
     private UserStatusPresenter() {
         userStatus = USER_INITIAL_STATE;
-        userProfileUIList = new ArrayList<>();
     }
 
     public void loadMyProfileFromLocal(){
-
-    }
-
-    public void loadMyUserProfileFromRemote(){
-        FirebaseDao.read(UserProfile.class, new FirebaseDao.ReadCallback<UserProfile>() {
-            @Override
-            public void execute(UserProfile userProfile) {
-                myUserProfile = userProfile;
-
-                /* Update All UI which relates to User Profile */
-                for (UserProfileUI userProfileUI : userProfileUIList) {
-                    userProfileUI.update();
-                }
-
-                Log.i(TAG, "load my userProfile successful from remote" + myUserProfile.toString());
-            }
-        }, myUserAccessKey);
+        //todo using shared preference
     }
 
 
 
-
-    public interface UserProfileUI {
-        void update();
-    }
 
 
 }

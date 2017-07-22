@@ -75,7 +75,7 @@ public class ChatFragment extends Fragment implements ChatUIController {
         AppPresenter.getInstance().setChatUIController(this);
         this.chatAccessKey = AppPresenter.getInstance().getCurrentChatAccessKey();
 
-        /* View setting */
+        /* UserProfileView setting */
         View view = inflater.inflate(R.layout.fragment_user_chat, container, false);
         this.dependencyInjection(view);
         this.addWidgetsListener();
@@ -274,7 +274,6 @@ public class ChatFragment extends Fragment implements ChatUIController {
         }
 
     }
-
 
 
 

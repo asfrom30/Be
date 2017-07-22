@@ -39,7 +39,7 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
     private static String TAG = ActiveUserFragment.class.getSimpleName();
     private static int linkRes = R.layout.fragment_user_select_map;
 
-    /* View */
+    /* UserProfileView */
     private ActiveUserFragmentView mActiveUserListView;
     private MapView mMapView;
     private GoogleMap mGoogleMap;
@@ -83,7 +83,7 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
         /* Get Default Setting  */
         SEARCH_DISTANCE_KM = Const.DEFAULT_SEARCH_DISTANCE_KM;
 
-        /* Map View Dependency */
+        /* Map UserProfileView Dependency */
         // Gets the MapView from the XML layout and creates it
         mMapView = (MapView) baseView.findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);

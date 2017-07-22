@@ -5,7 +5,7 @@
     android:id="@+id/te"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/be_pinkish_grey"
+    android:background="@color/custom_pinkish_grey"
     android:orientation="vertical">
 
     <LinearLayout

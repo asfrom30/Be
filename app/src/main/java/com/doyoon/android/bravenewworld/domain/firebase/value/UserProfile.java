@@ -15,6 +15,8 @@ public class UserProfile extends FirebaseModel{
     private String work;
     private String email;
     private String imageUri;
+    private String umbCount;
+    private String rainCount;
 
     public UserProfile() {
 
@@ -73,6 +75,22 @@ public class UserProfile extends FirebaseModel{
 
     public void setWork(String work) {
         this.work = work;
+    }
+
+    public String getUmbCount() {
+        return umbCount;
+    }
+
+    public void setUmbCount(String umbCount) {
+        this.umbCount = umbCount;
+    }
+
+    public String getRainCount() {
+        return rainCount;
+    }
+
+    public void setRainCount(String rainCount) {
+        this.rainCount = rainCount;
     }
 
     @Override

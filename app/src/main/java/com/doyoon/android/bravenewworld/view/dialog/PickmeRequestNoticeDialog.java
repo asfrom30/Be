@@ -52,7 +52,7 @@ public class PickmeRequestNoticeDialog extends DialogFragment {
         // Pass null as the parent view because its going in the dialog layout
         View view = inflater.inflate(R.layout.dialog_invited, null);
 
-        /* Custom View */
+        /* Custom UserProfileView */
         TextView textView = (TextView) view.findViewById(R.id.response_sending_textview);
         textView.setText(pickMeRequest.getName() + ", "
                 + pickMeRequest.getAge() + ", "

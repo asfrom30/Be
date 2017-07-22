@@ -10,7 +10,11 @@
     <color name="google_green">#34A853</color>
 
     <color name="transparent_green">#b4f90000</color>
-    <color name="be_pinkish_grey">#aac2c2c2</color>
+
+    <color name="custom_slate_grey">#575a5f</color>
+    <color name="custom_pinkish_grey">#c2c2c2</color>
+    <color name="custom_grey_blue">#799eb3</color>
+
 
     <color name="white">#ffffff</color>
     <integer-array name="google_glyph_colors">

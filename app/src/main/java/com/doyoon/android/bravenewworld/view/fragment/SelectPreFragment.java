@@ -1,34 +1,33 @@
- package com.doyoon.android.bravenewworld.view.fragment;
+package com.doyoon.android.bravenewworld.view.fragment;
 
- import android.Manifest;
- import android.animation.AnimatorSet;
- import android.animation.ObjectAnimator;
- import android.os.Bundle;
- import android.support.annotation.NonNull;
- import android.support.annotation.Nullable;
- import android.support.v4.app.Fragment;
- import android.view.LayoutInflater;
- import android.view.View;
- import android.view.ViewGroup;
- import android.widget.ImageButton;
+import android.Manifest;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
- import com.bumptech.glide.Glide;
- import com.doyoon.android.bravenewworld.R;
- import com.doyoon.android.bravenewworld.presenter.AppPresenter;
- import com.doyoon.android.bravenewworld.util.Const;
- import com.doyoon.android.bravenewworld.util.LogUtil;
- import com.doyoon.android.bravenewworld.util.RuntimePermissionUtil;
- import com.doyoon.android.bravenewworld.util.view.SnackBarHelper;
+import com.bumptech.glide.Glide;
+import com.doyoon.android.bravenewworld.R;
+import com.doyoon.android.bravenewworld.presenter.AppPresenter;
+import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.util.LogUtil;
+import com.doyoon.android.bravenewworld.util.RuntimePermissionUtil;
+import com.doyoon.android.bravenewworld.util.view.SnackBarHelper;
 
- /**
+/**
  * Created by DOYOON on 7/13/2017.
  */
 
 public class SelectPreFragment extends Fragment {
 
     public static final String TAG = SelectPreFragment.class.getSimpleName();
-
-    /* */
 
 
     public static SelectPreFragment newInstance() {
@@ -61,6 +60,8 @@ public class SelectPreFragment extends Fragment {
     private boolean guideSnackBarFlag;
     private ImageButton imGiverBtn;
     private ImageButton imTakerBtn;
+    private TextView imGiverTextView;
+    private TextView imTakerTextView;
 
     @Nullable
     @Override
@@ -87,7 +88,7 @@ public class SelectPreFragment extends Fragment {
         return view;
     }
 
-    private void requestRunOrNot(){
+    private void requestRunOrNot() {
         String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
 
         RuntimePermissionUtil.requestAndRunOrNot(getActivity(), permissions, new RuntimePermissionUtil.Callback() {
@@ -103,35 +104,37 @@ public class SelectPreFragment extends Fragment {
         });
     }
 
-     @Override
-     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-         RuntimePermissionUtil.postPermissionResult(requestCode, permissions, grantResults, new RuntimePermissionUtil.Callback() {
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        RuntimePermissionUtil.postPermissionResult(requestCode, permissions, grantResults, new RuntimePermissionUtil.Callback() {
 
-             @Override
-             public void run() {
-                 setButtonsEnabled(true);
-             }
+            @Override
+            public void run() {
+                setButtonsEnabled(true);
+            }
 
-             @Override
-             public void cancel() {
-                 SnackBarHelper.show(getActivity(), "서비스를 정상적으로 이용하시려면 위치서비스가 필요합니다", null, null);
-             }
+            @Override
+            public void cancel() {
+                SnackBarHelper.show(getActivity(), "서비스를 정상적으로 이용하시려면 위치서비스가 필요합니다", null, null);
+            }
 
-         });
-     }
-
-     private void setButtonsEnabled(boolean flag) {
-         imGiverBtn.setEnabled(flag);
-         imTakerBtn.setEnabled(flag);
-     }
-
-    private void dependencyInjection(View view){
-        imGiverBtn = (ImageButton) view.findViewById(R.id.imGiverBtn);
-        imTakerBtn = (ImageButton) view.findViewById(R.id.imTakerBtn);
+        });
     }
 
-    private void addButtonListener(){
+    private void setButtonsEnabled(boolean flag) {
+        imGiverBtn.setEnabled(flag);
+        imTakerBtn.setEnabled(flag);
+    }
+
+    private void dependencyInjection(View view) {
+        imGiverBtn = (ImageButton) view.findViewById(R.id.imGiverBtn);
+        imTakerBtn = (ImageButton) view.findViewById(R.id.imTakerBtn);
+        imGiverTextView = (TextView) view.findViewById(R.id.imGiverTextView);
+        imTakerTextView = (TextView) view.findViewById(R.id.imTakerTextView);
+    }
+
+    private void addButtonListener() {
         // UMB
         imGiverBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -164,8 +167,8 @@ public class SelectPreFragment extends Fragment {
         });
     }
 
-    private void showOrNotGuideSnackBar(){
-        if (!guideSnackBarFlag){
+    private void showOrNotGuideSnackBar() {
+        if (!guideSnackBarFlag) {
             guideSnackBarFlag = true;
             SnackBarHelper.show(getActivity(), "한번 더 누르시면 서비스를 시작합니다.", null, null);
         }
@@ -182,13 +185,19 @@ public class SelectPreFragment extends Fragment {
         outState.putInt(BTN_INSTANCE_STATE_TAG, selectedBtn);
     }
 
-    private void updateButtonView(){
+    private void updateButtonView() {
+
+        imGiverTextView.setTextColor(getResources().getColor(R.color.white));
+        imTakerTextView.setTextColor(getResources().getColor(R.color.white));
+
         if (selectedBtn == BTN_UMB_SELECTED) {
             Glide.with(getActivity()).load(R.drawable.select_btn_umb_on).into(imGiverBtn);
             Glide.with(getActivity()).load(R.drawable.select_btn_rain_off).into(imTakerBtn);
             /* Animation */
             scaleUp(imGiverBtn, 1.2f);
             scaleUp(imTakerBtn, 0.8f);
+            /* color */
+            imGiverTextView.setTextColor(getResources().getColor(R.color.custom_slate_grey));
 
         } else if (selectedBtn == BTN_RAIN_SELECTED) {
             Glide.with(getActivity()).load(R.drawable.select_btn_umb_off).into(imGiverBtn);
@@ -197,6 +206,9 @@ public class SelectPreFragment extends Fragment {
             /* Animation */
             scaleUp(imTakerBtn, 1.2f);
             scaleUp(imGiverBtn, 0.8f);
+
+            /* color */
+            imTakerTextView.setTextColor(getResources().getColor(R.color.custom_slate_grey));
         }
     }
 
@@ -211,5 +223,4 @@ public class SelectPreFragment extends Fragment {
 
         scaleUp.start();
     }
-
 }

@@ -52,7 +52,7 @@ public class PickmeRequestSendingDialog extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_invite, null);
 
-        /* Custom View */
+        /* Custom UserProfileView */
         TextView textView = (TextView) view.findViewById(R.id.request_sending_textview);
         textView.setText(targetUserProfile.getName() + ", "
                 + targetUserProfile.getAge() + ", "

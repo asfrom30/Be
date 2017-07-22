@@ -59,7 +59,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapUpda
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        LogUtil.logLifeCycle(TAG, "on Create View");
+        LogUtil.logLifeCycle(TAG, "on Create UserProfileView");
         View view = inflater.inflate(R.layout.fragment_user_map, container, false);
 
 

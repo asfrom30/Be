@@ -17,4 +17,5 @@ public class BaseApplication extends Application {
                 .addNormal(Typekit.createFromAsset(this, "AppleSDGothicNeoM00.ttf"))
                 .addBold(Typekit.createFromAsset(this, "AppleSDGothicNeoR00.ttf"));
     }
+
 }

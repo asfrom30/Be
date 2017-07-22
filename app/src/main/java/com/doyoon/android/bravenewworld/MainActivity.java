@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
+import com.doyoon.android.bravenewworld.presenter.UserProfilePresenter;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ViewPagerMover;
 import com.doyoon.android.bravenewworld.util.ConvString;
@@ -41,15 +42,18 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
         /* Create Dummy */
         // createDummyData();
 
-        /* Log in activity 에서 log in 정보를 받아 온다.... */
-        // Get User ID from bundle get Bundle, get Extra...
-        String dummyUserAccessKey = getMyDummyUserAccessKey();
+        /* Get User Access Key */
+        String myUserAcessKey = getMyDummyUserAccessKey();
+        // String myUserAcessKey = getIntent().getStringExtra(Const.ExtraKey.USER_ACCESS_KEY);
+        if (myUserAcessKey == null) {
+            /* ??? 어떻게??? */
+        }
 
         /* Build AppPresenter */
-        buildPresenter(dummyUserAccessKey);
+        buildPresenter(myUserAcessKey);
 
         /* Load Default Data from Remote*/
-        UserStatusPresenter.getInstance().loadMyUserProfileFromRemote();
+        // UserProfilePresenter.getInstance().loadMyUserProfileFromRemote();
 
         /* make view pager*/
         viewPager = (ViewPager) findViewById(R.id.main_view_pager);
@@ -89,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
     private void buildPresenter(String myUserAccessKey){
         /* UserStatusPresenter */
         UserStatusPresenter.myUserAccessKey = myUserAccessKey;
+        UserProfilePresenter.getInstance();
 
         // todo Search what difference between baseContext and applicationContext
         /* App Presenter */

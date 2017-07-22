@@ -21,4 +21,11 @@
     <string name="fragment_select_pre_title">지금 어떤 상태 이신가요?</string>
     <string name="fragment_select_pre_umb">우산을 쓰고 있어요</string>
     <string name="fragment_select_pre_rain">비를 맞고 있어요</string>
+    <string name="fragment_profile_umb_count">우산이 되어준 횟수</string>
+    <string name="fragment_profile_rain_count">우산을 받은 횟수</string>
+    <string name="fragment_profile_my_log">내 기록</string>
+    <string name="fragment_profile_alarm_setting">알림설정</string>
+    <string name="fragment_profile_security">보안설정</string>
+    <string name="fragment_profile_sticker">내 스티커</string>
+
 </resources>

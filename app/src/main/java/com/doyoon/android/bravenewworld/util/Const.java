@@ -9,12 +9,10 @@ import com.google.android.gms.location.LocationRequest;
 
 public class Const {
 
-    /* not final */
-    // public static String MY_USER_KEY;
-    // public static UserProfile MY_USER_PROFILE;
-
-    /* TAG */
-    public static final String LIFE_CYCLE_TAG = "Life Cycle : ";
+    /* Extra Key */
+    public static final class ExtraKey {
+        public static final String USER_ACCESS_KEY = "user_access_key";
+    }
 
     /* MapFragment Setting */
     public static class GoogleMap {
@@ -60,7 +58,7 @@ public class Const {
 
     public static class ACTIVITY_REQ_CODE {
         public static final int CAMERA = 101;
-        public static final int GALLERY = 102;
+        public static final int SELECT_PROFILE_IMAGE = 102;
     }
 
     public static class QueryKey {

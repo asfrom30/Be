@@ -219,7 +219,7 @@ public class ActiveUserFragmentView {
     //     * @param text The Snackbar text.
     //     */
     //    private void showSnackbar(final String text) {
-    //        View container = findViewById(R.id.main_activity_container);
+    //        UserProfileView container = findViewById(R.id.main_activity_container);
     //        if (container != null) {
     //            Snackbar.make(container, text, Snackbar.LENGTH_LONG).show();
     //        }
@@ -233,7 +233,7 @@ public class ActiveUserFragmentView {
     //     * @param listener         The listener associated with the Snackbar action.
     //     */
     //    private void showSnackbar(final int mainTextStringId, final int actionStringId,
-    //                              View.OnClickListener listener) {
+    //                              UserProfileView.OnClickListener listener) {
     //        Snackbar.make(findViewById(android.R.id.content),
     //                getString(mainTextStringId),
     //                Snackbar.LENGTH_INDEFINITE)
