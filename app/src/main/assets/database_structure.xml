@@ -20,6 +20,11 @@
             </chats>
         </chatroom>
     </chatrooms>
+    <locationservices type="reference-key">
+        <locationservice type="primary-key" isBundle="true" isAutoGenerateModelKey="true">
+            <locationfinder type="value" isBundle="true" isAutoGenerateModelKey="false"></locationfinder>
+        </locationservice>
+    </locationservices>
     <users type="reference-key">
         <user type="primary-key" isBundle="true" isAutoGenerateModelKey="false" refer="user email address">
             <userprofile type="value" isBundle="false" isAutoGenerateModelKey="false" refer=""/>

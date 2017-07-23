@@ -165,9 +165,9 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
     private int getMapPinResId(){
         int userType = AppPresenter.getInstance().getUserType();
 
-        if (userType == Const.UserType.Taker) {
+        if (userType == Const.ActiveUserType.Taker) {
             return Const.MAP_SETTING.GIVER_MAP_PIN_RES_ID;
-        } else if (userType == Const.UserType.Giver) {
+        } else if (userType == Const.ActiveUserType.Giver) {
             return Const.MAP_SETTING.TAKER_MAP_PIN_RES_ID;
         } else {
             throw new IllegalStateException("AppPresenter User Type is not declared, can't get Map Pin Resource ID`");

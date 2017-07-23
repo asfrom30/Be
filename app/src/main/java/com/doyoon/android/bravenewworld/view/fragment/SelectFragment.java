@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.doyoon.android.bravenewworld.R;
-import com.doyoon.android.bravenewworld.presenter.AppPresenter;
+import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.util.LogUtil;
 
 /**
@@ -42,7 +42,7 @@ public class SelectFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_user_select, container, false);
 
-        if (AppPresenter.getInstance().isOnFinding()) {
+        if (UserStatusPresenter.getInstance().isOnFinding()) {
             getFragmentManager().beginTransaction().add(R.id.user_select_frame_layout, ActiveUserFragment.newInstance(), null).commit();
         } else {
             startPreFragment();

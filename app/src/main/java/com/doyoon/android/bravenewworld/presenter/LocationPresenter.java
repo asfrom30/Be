@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.doyoon.android.bravenewworld.domain.RemoteDao;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -20,6 +21,7 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -32,15 +34,15 @@ import java.util.Date;
  * Created by DOYOON on 7/19/2017.
  */
 
-public class MapPresenter {
+public class LocationPresenter {
 
-    private static final String TAG = MapPresenter.class.getSimpleName();
-    private static MapPresenter instance;
+    private static final String TAG = LocationPresenter.class.getSimpleName();
+    private static LocationPresenter instance;
 
-    public static MapPresenter getInstance(){
+    public static LocationPresenter getInstance(){
 
         if (instance == null) {
-            instance = new MapPresenter();
+            instance = new LocationPresenter();
         }
 
         return instance;
@@ -49,7 +51,7 @@ public class MapPresenter {
     private LocationCallback locationCallback;
     private OnCompleteListener onStopLocationCompleteListener;
 
-    private MapPresenter() {
+    private LocationPresenter() {
 
     }
 
@@ -65,11 +67,6 @@ public class MapPresenter {
         if (locationCallback == null) {
             locationCallback = createLocationCallback();
         }
-
-        /* Firebase handling */
-
-
-        /* Call back */
         startLocationUpdates(locationCallback);
     }
 
@@ -89,9 +86,11 @@ public class MapPresenter {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
-                /* here is what you write logic */
                 Location currentLocation = locationResult.getLastLocation();
+                LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
                 String lastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+
+                RemoteDao.LocationFinder.updateMyLocation(currentLatLng, UserStatusPresenter.locationFinderAccessKey, UserStatusPresenter.myUserAccessKey);
 
                 Log.e(TAG, currentLocation.getLatitude() + ", " + currentLocation.getLongitude() + ", " + lastUpdateTime);
             }

@@ -11,4 +11,5 @@ public interface ChatUIController {
     void notifySetChanged();
     void setFocusLastItem();
     void updateProfileView();
+    void updateTitle();
 }

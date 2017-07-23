@@ -4,6 +4,7 @@
     android:id="@+id/chat_item_linearlayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="left"
     android:orientation="vertical">
 
     <LinearLayout
@@ -13,18 +14,26 @@
         android:orientation="horizontal">
 
         <ImageView
-            android:id="@+id/chat_profile_imageView"
+            android:id="@+id/chat_profile_imageView_left"
             android:layout_width="50dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.22"
+            android:layout_weight="1"
             app:srcCompat="@drawable/common_google_signin_btn_icon_dark" />
 
         <TextView
             android:id="@+id/chat_name_textView"
-            android:layout_width="100dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="TextView" />
+            android:text="TextView"
+            android:textColor="@android:color/black" />
+
+        <ImageView
+            android:id="@+id/chat_profile_imageView_right"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.22"
+            app:srcCompat="@drawable/common_google_signin_btn_icon_dark" />
 
     </LinearLayout>
 
@@ -38,8 +47,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:paddingBottom="5dp"
+            android:paddingLeft="25dp"
+            android:paddingRight="25dp"
+            android:paddingTop="5dp"
             android:text="TextView"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+            android:textColor="@color/custom_slate_grey"
+            android:textSize="15dp" />
     </LinearLayout>
 
 </LinearLayout>

@@ -6,16 +6,18 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
+import com.doyoon.android.bravenewworld.domain.RemoteDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
 import com.doyoon.android.bravenewworld.presenter.UserProfilePresenter;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ViewPagerMover;
+import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.ConvString;
 import com.doyoon.android.bravenewworld.util.LogUtil;
 import com.doyoon.android.bravenewworld.util.view.ViewPagerBuilder;
 import com.doyoon.android.bravenewworld.view.fragment.ChatFragment;
-import com.doyoon.android.bravenewworld.view.fragment.MapFragment;
+import com.doyoon.android.bravenewworld.view.fragment.LocationFragment;
 import com.doyoon.android.bravenewworld.view.fragment.ProfileFragment;
 import com.doyoon.android.bravenewworld.view.fragment.SelectFragment;
 import com.tsengvn.typekit.TypekitContextWrapper;
@@ -39,9 +41,6 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
         /* Construct DB Structure */
         FirebaseHelper.buildDbStructure(getBaseContext());
 
-        /* Create Dummy */
-        // createDummyData();
-
         /* Get User Access Key */
         String myUserAcessKey = getMyDummyUserAccessKey();
         // String myUserAcessKey = getIntent().getStringExtra(Const.ExtraKey.USER_ACCESS_KEY);
@@ -49,23 +48,40 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
             /* ??? 어떻게??? */
         }
 
+        /* Create Dummy */
+        // UserProfile userProfile = DummyDao.createDummyMyProfile();
+        // FirebaseDao.insert(userProfile, myUserAcessKey);
+
         /* Build AppPresenter */
         buildPresenter(myUserAcessKey);
 
         /* Load Default Data from Remote*/
-        // UserProfilePresenter.getInstance().loadMyUserProfileFromRemote();
+        UserProfilePresenter.getInstance().loadMyUserProfileFromRemote();
 
         /* make view pager*/
         viewPager = (ViewPager) findViewById(R.id.main_view_pager);
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.main_tab_layout);
+        TabLayout tabLayout = (TabLayout)  findViewById(R.id.main_tab_layout);
 
         ViewPagerBuilder.getInstance(viewPager)
                 .addFragment(SelectFragment.newInstance())
-                .addFragment(MapFragment.newInstance())
+                .addFragment(LocationFragment.newInstance())
                 .addFragment(ChatFragment.newInstance())
                 .addFragment(ProfileFragment.newInstance())
                 .linkTabLayout(tabLayout)
                 .build(getSupportFragmentManager());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LogUtil.logLifeCycle(TAG, "On Pause");
+        RemoteDao.ActiveUser.remove(Const.ActiveUserType.Giver);
+        RemoteDao.ActiveUser.remove(Const.ActiveUserType.Taker);
     }
 
     /**

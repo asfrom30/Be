@@ -24,6 +24,9 @@ import com.doyoon.android.bravenewworld.domain.firebase.value.Chat;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ChatUIController;
+import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.util.ConvString;
+import com.doyoon.android.bravenewworld.util.LogUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,12 +59,13 @@ public class ChatFragment extends Fragment implements ChatUIController {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        AppPresenter.getInstance().setChatUIController(this);
+        LogUtil.logLifeCycle(TAG, "On Create");
     }
 
     private String chatAccessKey;
     private ChatAdapter chatAdapter;
+
+    private TextView titleTextView;
     private ListView listView;
     private EditText inputEditText;
     private ImageButton emojiBtn, sendBtn;
@@ -69,7 +73,7 @@ public class ChatFragment extends Fragment implements ChatUIController {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
+        LogUtil.logLifeCycle(TAG, "On Create View");
 
         /* Set AppPresenter */
         AppPresenter.getInstance().setChatUIController(this);
@@ -79,12 +83,20 @@ public class ChatFragment extends Fragment implements ChatUIController {
         View view = inflater.inflate(R.layout.fragment_user_chat, container, false);
         this.dependencyInjection(view);
         this.addWidgetsListener();
+
+        /* Update View */
         updateBtnEnabled();
+        updateTitle();
 
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        LogUtil.logLifeCycle(TAG, "On Resume View");
 
+    }
 
     private void dependencyInjection(View view) {
         if (listView == null) {
@@ -97,6 +109,7 @@ public class ChatFragment extends Fragment implements ChatUIController {
             listView.setAdapter(chatAdapter);
         }
 
+        titleTextView = (TextView) view.findViewById(R.id.chat_title);
         inputEditText = (EditText) view.findViewById(R.id.chat_input_text_editText);
         emojiBtn = (ImageButton) view.findViewById(R.id.chat_input_emoji_imageButton);
         sendBtn = (ImageButton) view.findViewById(R.id.chat_send_imageButton);
@@ -169,6 +182,41 @@ public class ChatFragment extends Fragment implements ChatUIController {
 
     }
 
+    @Override
+    public void updateTitle() {
+        String myName = "-";
+        String otherName = "-";
+
+        if (UserStatusPresenter.getInstance().myUserAccessKey != null) {
+            String myAccessKey = UserStatusPresenter.getInstance().myUserAccessKey;
+            myName = ConvString.commaStringToSign(myAccessKey);
+            if (UserStatusPresenter.getInstance().myUserProfile != null) {
+                if(UserStatusPresenter.getInstance().myUserProfile.getName() != null){
+                    myName = UserStatusPresenter.getInstance().myUserProfile.getName();
+                }
+            }
+        }
+
+        if (UserStatusPresenter.getInstance().otherUserAccessKey != null) {
+
+            String otherAccessKey = UserStatusPresenter.getInstance().otherUserAccessKey;
+            otherName = ConvString.commaStringToSign(otherAccessKey);
+
+            if(UserStatusPresenter.getInstance().otherUserProfile != null){
+                if(UserStatusPresenter.getInstance().otherUserProfile.getName() != null) {
+                    otherName = UserStatusPresenter.getInstance().otherUserProfile.getName();
+                }
+            }
+        }
+
+
+        if (UserStatusPresenter.getInstance().activeUserType == Const.ActiveUserType.Giver) {
+            titleTextView.setText(myName + "님이 " + otherName +"에게 우산이 되어 주었습니다.");
+        } else if (UserStatusPresenter.getInstance().activeUserType == Const.ActiveUserType.Taker) {
+            titleTextView.setText(otherName + "님이 " + myName +"에게 우산이 되어 주었습니다.");
+        }
+    }
+
     private class ChatAdapter extends BaseAdapter {
 
         private LayoutInflater inflater;
@@ -177,6 +225,11 @@ public class ChatFragment extends Fragment implements ChatUIController {
         public ChatAdapter(Context context) {
             chatList = new ArrayList<>();
             inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
+
+        @Override
+        public boolean isEnabled(int position) {
+            return false;
         }
 
         @Override
@@ -197,17 +250,14 @@ public class ChatFragment extends Fragment implements ChatUIController {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
 
+            //todo need to recycle view(not create every time)
             View view = inflater.inflate(R.layout.item_chat, parent, false);
             LinearLayout linearLayout = (LinearLayout) view.findViewById(R.id.chat_item_linearlayout);
 
-            boolean isMyChat = (chatList.get(position).getOwnerKey() == UserStatusPresenter.myUserAccessKey) ? true : false;
-
-            if(isMyChat){
-                linearLayout.setGravity(Gravity.RIGHT);
-            } else {
-                linearLayout.setGravity(Gravity.LEFT);
-            }
-
+            boolean isMyChat = (chatList.get(position).getOwnerKey().equals(UserStatusPresenter.myUserAccessKey)) ? true : false;
+            Log.i(TAG, "owner key is " + chatList.get(position).getOwnerKey());
+            Log.i(TAG, "user key is " + UserStatusPresenter.myUserAccessKey);
+            Log.i(TAG, "=====" + isMyChat);
 
             boolean userChangedFlag = false;
 
@@ -223,9 +273,23 @@ public class ChatFragment extends Fragment implements ChatUIController {
             }
 
             /* ItemView Dependency Injection */
-            ImageView profileImageView = (ImageView) view.findViewById(R.id.chat_profile_imageView);
+            ImageView profileImageViewLeft = (ImageView) view.findViewById(R.id.chat_profile_imageView_left);
+            ImageView profileImageViewRight = (ImageView) view.findViewById(R.id.chat_profile_imageView_right);
             TextView textViewName = (TextView) view.findViewById(R.id.chat_name_textView);
             TextView textViewMsg = (TextView) view.findViewById(R.id.chat_message_textView);
+
+            /* View Setting */
+            ImageView profileImageView = null;
+
+            if(isMyChat){
+                linearLayout.setGravity(Gravity.RIGHT);
+                profileImageViewLeft.setVisibility(View.GONE);
+                profileImageView = profileImageViewRight;
+            } else {
+                linearLayout.setGravity(Gravity.LEFT);
+                profileImageViewRight.setVisibility(View.GONE);
+                profileImageView = profileImageViewLeft;
+            }
 
             /* User Profile Visibility */
             if (userChangedFlag == true) {
@@ -251,11 +315,11 @@ public class ChatFragment extends Fragment implements ChatUIController {
         }
 
         private String getOwnerName(boolean isMyChat) {
-            return (isMyChat) ? UserStatusPresenter.myUserProfile.getName() : AppPresenter.getInstance().getChatOtherUserProfile().getName();
+            return (isMyChat) ? UserStatusPresenter.myUserProfile.getName() : UserStatusPresenter.otherUserProfile.getName();
         }
 
         private String getImageUri(boolean isMyChat) {
-            return (isMyChat) ? UserStatusPresenter.myUserProfile.getImageUri() : AppPresenter.getInstance().getChatOtherUserProfile().getImageUri();
+            return (isMyChat) ? UserStatusPresenter.myUserProfile.getImageUri() : UserStatusPresenter.otherUserProfile.getImageUri();
         }
 
         private void setTextViewName(TextView textViewName, String name) {

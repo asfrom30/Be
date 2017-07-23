@@ -10,14 +10,16 @@ public class MatchingComplete extends FirebaseModel {
     private String giverAccessKey;
     private String takerAccessKey;
     private String chatAccessKey;
+    private String locationAccessKey;
 
     public MatchingComplete() {
     }
 
-    public MatchingComplete(String giverAccessKey, String takerAccessKey, String chatAccessKey) {
+    public MatchingComplete(String giverAccessKey, String takerAccessKey, String chatAccessKey, String locationAccessKey) {
         this.takerAccessKey = takerAccessKey;
         this.giverAccessKey = giverAccessKey;
         this.chatAccessKey = chatAccessKey;
+        this.locationAccessKey = locationAccessKey;
     }
 
     public String getTakerAccessKey() {
@@ -43,6 +45,14 @@ public class MatchingComplete extends FirebaseModel {
 
     public void setGiverAccessKey(String giverAccessKey) {
         this.giverAccessKey = giverAccessKey;
+    }
+
+    public String getLocationAccessKey() {
+        return locationAccessKey;
+    }
+
+    public void setLocationAccessKey(String locationAccessKey) {
+        this.locationAccessKey = locationAccessKey;
     }
 
     @Override

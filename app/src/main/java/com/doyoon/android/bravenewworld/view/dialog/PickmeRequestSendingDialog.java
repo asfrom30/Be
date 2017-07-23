@@ -85,7 +85,7 @@ public class PickmeRequestSendingDialog extends DialogFragment {
 
 
 
-        if(userType == Const.UserType.Taker){
+        if(userType == Const.ActiveUserType.Taker){
             builder.setPositiveButton("PickMeRequest", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int id) {

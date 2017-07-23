@@ -14,12 +14,27 @@ public class Const {
         public static final String USER_ACCESS_KEY = "user_access_key";
     }
 
-    /* MapFragment Setting */
+    /* LocationFragment Setting */
     public static class GoogleMap {
         public static final int REQUEST_CHECK_SETTING = 0x01;
         public static final int UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
         public static final int FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
         public static final int PRIORITY = LocationRequest.PRIORITY_HIGH_ACCURACY;
+    }
+
+    /* View Resource ID */
+    public static class LOCATION_FRAG {
+        public static float MARKER_ALPHA = 1.0f;
+        public static int DEFAULT_MAP_PIN_RES_ID = R.drawable.map_pin_umbrella;
+        public static int MY_MAP_PIN_RES_ID = R.drawable.map_icon_mylocation;
+        public static int OTHER_MAP_PIN_RES_ID = R.drawable.map_icon_location_rain;
+    }
+
+
+    public static class MAP_SETTING {
+        public static float MARKER_ALPHA = 1.0f;
+        public static int GIVER_MAP_PIN_RES_ID = R.drawable.map_pin_umbrella;
+        public static int TAKER_MAP_PIN_RES_ID = R.drawable.map_pin_rain;
     }
 
 
@@ -36,7 +51,11 @@ public class Const {
 
         public static String USER_PROFILE = "userprofile";
         public static String USER_PROFILE_IMAGE_URI = "imageUri";
+
+        public static String LOCATION_SERCIVE = "locationservice";
+        public static String LOCATION_FINDER = "locationfinder";
     }
+
     public static class StorageRefKey {
         public static String USER_PROFILE = "userprofile";
     }
@@ -50,11 +69,6 @@ public class Const {
 
     public static final int PAGING_NUMBER_AT_ONCE = 10;
 
-    public static class MAP_SETTING {
-        public static float MARKER_ALPHA = 1.0f;
-        public static int GIVER_MAP_PIN_RES_ID = R.drawable.map_pin_umbrella;
-        public static int TAKER_MAP_PIN_RES_ID = R.drawable.map_pin_rain;
-    }
 
     public static class ACTIVITY_REQ_CODE {
         public static final int CAMERA = 101;
@@ -66,11 +80,19 @@ public class Const {
         public static String TAKER = "taker";
     }
 
-    public static class UserType {
-        public static final int Taker = -1;
+    public static class ActiveUserType {
         public static final int NOT_YET_CHOOSED = 0;
+        public static final int Taker = -1;
         public static final int Giver = 1;
     }
+
+    public static class UserStatus {
+        public static final int USER_NOT_YET_MATCHED = 0;
+        public static final int ON_MATCHING = 1;
+        public static final int ON_FINDING = 2;
+        public static final int USER_ON_TOGHETHER = 3;
+    }
+
 
     public static class Gender {
         public static int MALE = 1;
@@ -82,6 +104,11 @@ public class Const {
         public static int MAP = 1;
         public static int CHAT = 2;
         public static int PROFILE = 3;
+    }
+
+    public static class DefaultLatlng {
+        public static double latitude = 37.575801;
+        public static double longitude = 126.976719;
     }
 
 }

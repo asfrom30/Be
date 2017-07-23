@@ -7,16 +7,18 @@ import android.util.Log;
 
 import com.doyoon.android.bravenewworld.domain.RemoteDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
-import com.doyoon.android.bravenewworld.domain.firebase.FirebaseGeoDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.domain.firebase.geovalue.ActiveUser;
 import com.doyoon.android.bravenewworld.domain.firebase.value.Chat;
+import com.doyoon.android.bravenewworld.domain.firebase.value.ChatProfile;
+import com.doyoon.android.bravenewworld.domain.firebase.value.LocationFinder;
 import com.doyoon.android.bravenewworld.domain.firebase.value.MatchingComplete;
 import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ActiveUserListUIController;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ActiveUserMapController;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ChatUIController;
+import com.doyoon.android.bravenewworld.presenter.interfaces.LocationUIController;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ViewPagerMover;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.view.dialog.PickmeRequestNoticeDialog;
@@ -69,9 +71,7 @@ public class AppPresenter {
     private ActiveUserListUIController activeUserListUIController;
 
     /* Shared Preference */
-    private boolean isOnFinding;
-    private boolean isOnMatching;
-    private int userType;
+
     private int startIndexForFetchUser = 0;
 
     private AppPresenter() {
@@ -79,10 +79,6 @@ public class AppPresenter {
     }
 
     public void initialize(AppCompatActivity activity){
-        this.isOnFinding = false;
-        this.isOnMatching = false;
-        this.userType = Const.UserType.NOT_YET_CHOOSED;
-
         this.activity = activity;
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(activity);
     }
@@ -91,30 +87,30 @@ public class AppPresenter {
 
     }
 
-    public void runOnFinding(final int userType){
+    public void runOnMatching(){
 
-        if (isOnFinding()) {
-            Log.e(TAG, "User Already on the matching. can't start runOnFinding");
-            return;
+        if (UserStatusPresenter.getInstance().isOnFinding()) {
+            Log.e(TAG, "User Already on the matching. It's weired..");
         }
 
-        if (this.userType != Const.UserType.NOT_YET_CHOOSED) {
-            Log.e(TAG, "Current User Type is [" + this.userType + "], User type is changed, check listener removing properly");
+        if (UserStatusPresenter.activeUserType != Const.ActiveUserType.NOT_YET_CHOOSED) {
+            Log.e(TAG, "Current User Type is [" + UserStatusPresenter.activeUserType + "], User type is changed, check listener removing properly");
         }
-        this.userType = userType;
 
-        //thisView.startInProgress();
+        RemoteDao.ActiveUser.remove(Const.ActiveUserType.Giver);
+        RemoteDao.ActiveUser.remove(Const.ActiveUserType.Taker);
+
         getLastLocation(new LocationCallback() {
             @Override
             public void execute(LatLng latLng) {
                 /* Register Active User */
+                UserStatusPresenter.userStatus = Const.UserStatus.ON_MATCHING;
                 registerActiveUser(latLng);
-                isOnFinding = true;
 
                 /* Add Geo Query Data using Last LatLng */
                 activeUserMap.clear();
                 activeUserList.clear();
-                toEnableActiveUserListListener(userType, latLng, Const.DEFAULT_SEARCH_DISTANCE_KM);
+                toEnableActiveUserListListener(UserStatusPresenter.activeUserType, latLng, Const.DEFAULT_SEARCH_DISTANCE_KM);
 
                 Log.e(TAG, "Get Query Complete");
             }
@@ -122,18 +118,17 @@ public class AppPresenter {
 
         this.addMatchingCompleteListener();
 
-        if(userType == Const.UserType.Giver) {
+        if(UserStatusPresenter.activeUserType == Const.ActiveUserType.Giver) {
             this.addPickMeRequestListener();
         }
 
         Log.e(TAG, "Add Listener Complete");
     }
 
-    public void stopOnFinding(){
+    public void stopOnMatching(){
         //fixme remove geo listener
         removeMatchingCompleteListener();
         removePickMeRequestListener();
-        isOnFinding = false;
     }
 
     /**
@@ -141,40 +136,7 @@ public class AppPresenter {
      * @param latLng
      */
     private void registerActiveUser(LatLng latLng){
-        if (this.userType == Const.UserType.NOT_YET_CHOOSED) {
-            Log.e(TAG, "Try to register at geo fire, but user type is not yet choosed.");
-            return;
-        }
-
-
-        String modelDir = "";
-        switch(userType){
-            case Const.UserType.Giver:
-                modelDir = getModelDir(Const.RefKey.ACTIVE_USER_TYPE_GIVER);
-                break;
-            case Const.UserType.Taker:
-                modelDir = getModelDir(Const.RefKey.ACTIVE_USER_TYPE_TAKER);
-                break;
-        }
-
-        FirebaseGeoDao.insert(modelDir, UserStatusPresenter.myUserAccessKey, new GeoLocation(latLng.latitude, latLng.longitude));
-    }
-
-    private void removeActiveUser() {
-        if (this.userType == Const.UserType.NOT_YET_CHOOSED) {
-            Log.e(TAG, "Try to remove at geo fire, but user type is not yet choosed.");
-            return;
-        }
-
-        String modelDir = "";
-
-        if(this.userType == Const.UserType.Giver) {
-            modelDir = getModelDir(Const.RefKey.ACTIVE_USER_TYPE_GIVER);
-        } else if(this.userType == Const.UserType.Taker){
-            modelDir = getModelDir(Const.RefKey.ACTIVE_USER_TYPE_TAKER);
-        }
-
-        FirebaseGeoDao.delete(modelDir, UserStatusPresenter.myUserAccessKey);
+        RemoteDao.ActiveUser.insert(latLng);
     }
 
     @SuppressWarnings("MissingPermission")
@@ -200,58 +162,88 @@ public class AppPresenter {
                 });
     }
 
+    public int getUserType() {
+        return UserStatusPresenter.activeUserType;
+    }
+
     public interface LocationCallback {
         void execute(LatLng latLng);
     }
 
-    private UserProfile chatOtherUserProfile;
-
-    public UserProfile getChatOtherUserProfile(){
-        return this.chatOtherUserProfile;
-    };
-
-
     private void receiveMatchingComplete(MatchingComplete matchingComplete){
 
-        isOnMatching = true;
-
         /* Remove Matching Complete Value */
-        String modelPath = FirebaseHelper.getModelPath(Const.RefKey.MATCHING_COMPLETE, UserStatusPresenter.myUserAccessKey);
-        FirebaseDatabase.getInstance().getReference(modelPath).removeValue();
+        // RemoteDao.MatchingComplete.remove();
 
         /* Remove PickMe Request */
-        if (userType == Const.UserType.Giver) {
+        if (UserStatusPresenter.activeUserType == Const.ActiveUserType.Giver) {
             String modelDir = FirebaseHelper.getModelDir(Const.RefKey.PICK_ME_REQUEST, UserStatusPresenter.myUserAccessKey);
             FirebaseDatabase.getInstance().getReference(modelDir).removeValue();
         }
 
         /* remove relate to OnFinding Listener */
-        removeActiveUser();
+        RemoteDao.ActiveUser.remove(UserStatusPresenter.userStatus);
         removeMatchingCompleteListener();
         removePickMeRequestListener();
 
+        /* Get Other User Access Key */
+        String otherUserAccessKey = getOtherUserAccessKey(matchingComplete);
+        UserStatusPresenter.getInstance().otherUserAccessKey = otherUserAccessKey;
+
         /* Get Another User Profile from remote */
+        FirebaseDao.read(UserProfile.class, new FirebaseDao.ReadCallback<UserProfile>() {
+            @Override
+            public void execute(UserProfile userProfile) {
+                UserStatusPresenter.otherUserProfile = userProfile;
+                chatUIController.updateTitle();
+                chatUIController.updateProfileView();
+            }
+        }, otherUserAccessKey);
+
+        /* Stop Matching(Activie User) */
+        this.stopOnMatching();
+
+
+        /* Run Finding */
+        String chatAccessKey = matchingComplete.getChatAccessKey();
+        String locationAccessKey = matchingComplete.getLocationAccessKey();
+        this.runOnFinding(locationAccessKey, chatAccessKey);
+
+        /* Change View */
+        this.viewPagerMover.moveViewPage(1);
+    }
+
+    public void runOnFinding(String locationAccessKey, String chatAccessKey){
+
+        UserStatusPresenter.currentChatAccessKey = chatAccessKey;
+        UserStatusPresenter.locationFinderAccessKey = locationAccessKey;
+
+        addChatListener(chatAccessKey);
+        addOtherLocationListener();
+
+        UserStatusPresenter.userStatus = Const.UserStatus.ON_FINDING;
+
+        Log.i(TAG, "Now User is Run on Finding, Listen Chat and Other User Location");
+        Log.i(TAG, ", Other User is " + UserStatusPresenter.getInstance().otherUserAccessKey +
+                ", ChatAccessKey is " + chatAccessKey +
+                ", LocationAccessKey is " + locationAccessKey);
+    }
+
+    public void stopOnFinding(){
+        removeChatListener();
+        removeOtherLocationListener();
+    }
+
+    private String getOtherUserAccessKey(MatchingComplete matchingComplete){
+
         String otherUserAccessKey;
-        if (userType == Const.UserType.Giver) {
+        if (UserStatusPresenter.activeUserType == Const.ActiveUserType.Giver) {
             otherUserAccessKey = matchingComplete.getTakerAccessKey();
         } else {
             otherUserAccessKey = matchingComplete.getGiverAccessKey();
         }
 
-        FirebaseDao.read(UserProfile.class, new FirebaseDao.ReadCallback<UserProfile>() {
-            @Override
-            public void execute(UserProfile userProfile) {
-                chatOtherUserProfile = userProfile;
-                chatUIController.updateProfileView();
-            }
-        }, otherUserAccessKey);
-
-        /* Add chat Listener */
-        String chatAccessKey = matchingComplete.getChatAccessKey();
-        addChatListener(chatAccessKey);
-
-        /* go chat page */
-        this.viewPagerMover.moveViewPage(2);
+        return otherUserAccessKey;
     }
 
     private void receivePickMeRequest(PickMeRequest pickMeRequest){
@@ -265,6 +257,28 @@ public class AppPresenter {
 
         // todo readed pickMeRequest must be deleted...
         // dataSnapshot.getRef().removeValue();
+    }
+
+    /* Match Complete in Dialog when user accept pick me request notice */
+    public void acceptPickmeRequestNotice(PickMeRequest pickMeRequest){
+        String modelDir = FirebaseHelper.getModelDir(Const.RefKey.CHAT_ROOM);
+        String chatAccessKey = FirebaseDatabase.getInstance().getReference(modelDir).push().getKey();
+
+        /* ChatProfile Manual Input for Remember Auto Generate Key */
+        String otherUserAccesskey = pickMeRequest.getFromUserAccessKey();
+        ChatProfile chatProfile = new ChatProfile(chatAccessKey);
+        chatProfile.setGiverKey(UserStatusPresenter.myUserAccessKey);
+        chatProfile.setTakerKey(otherUserAccesskey);
+        FirebaseDao.insert(chatProfile, chatAccessKey);
+        // FirebaseDatabase.getInstance().getReference(modelDir + chatAccessKey \).setValue(chatProfile);
+
+        /* Location Service를 개설하고 상대방에게 채팅방 키를 전달해줍니다. */
+        String locationAccessKey = RemoteDao.LocationFinder.insertWithGetRandomKey(UserStatusPresenter.lastLatLng);
+
+        /* 채팅방을 개설하고 상대방에게 채팅방 키를 전달해줍니다 */
+        MatchingComplete matchingComplete = new MatchingComplete(UserStatusPresenter.myUserAccessKey, otherUserAccesskey, chatAccessKey, locationAccessKey);
+        FirebaseDao.insert(matchingComplete, otherUserAccesskey);
+        FirebaseDao.insert(matchingComplete, UserStatusPresenter.myUserAccessKey);
     }
 
     /* Firebase : Matching Complete Listener on Firebase */
@@ -462,11 +476,52 @@ public class AppPresenter {
     }
 
     private String getQueryDependOnUserType(int userType){
-        if (userType == Const.UserType.Giver) {
+        if (userType == Const.ActiveUserType.Giver) {
             return Const.QueryKey.TAKER;
         } else {
             return Const.QueryKey.GIVER;
         }
+    }
+
+    /* Firebase : run Location Listener */
+    private LocationUIController locationUIController;
+    private ValueEventListener locationListener;
+
+    private void addOtherLocationListener(){
+        String locationAccessKey = UserStatusPresenter.getInstance().locationFinderAccessKey;
+        String otherUserAccessKey = UserStatusPresenter.getInstance().otherUserAccessKey;
+
+        if(locationAccessKey == null) return;
+        if(otherUserAccessKey == null) return;
+
+        if(locationListener != null) removeOtherLocationListener();
+
+        this.locationListener = RemoteDao.LocationFinder.addListener(locationAccessKey, otherUserAccessKey
+                , new RemoteDao.LocationFinder.Callback(){
+                    @Override
+                    public void execute(LocationFinder locationFinder) {
+                        if(locationFinder == null) return;
+                        // todo latitude and longitude validate check
+                        if(locationFinder.getLatitude() == 0 || locationFinder.getLongitude() == 0) return;
+                        locationUIController.updateOtherMarker(locationFinder.getLatitude(), locationFinder.getLongitude());
+                    }
+                });
+
+        Log.i(TAG, "Add Location Listener Successfull");
+    }
+
+
+    private void removeOtherLocationListener() {
+        String locationAccessKey = UserStatusPresenter.getInstance().locationFinderAccessKey;
+        String otherUserAccessKey = UserStatusPresenter.getInstance().otherUserAccessKey;
+
+        if(locationAccessKey == null) return;
+        if(otherUserAccessKey == null) return;
+
+        RemoteDao.LocationFinder.removeListener(locationAccessKey, otherUserAccessKey, this.locationListener);
+        locationListener = null;
+
+        Log.i(TAG, "remove Location Listener Successfull");
     }
 
     /* Firebase : run Chat Listener */
@@ -578,14 +633,6 @@ public class AppPresenter {
     }
 
     /* Getter and Setter */
-    public boolean isOnFinding() {
-        return isOnFinding;
-    }
-
-    public int getUserType() {
-        return userType;
-    }
-
     public Map<String, ActiveUser> getActiveUserMap() {
         return this.activeUserMap == null ? null : this.activeUserMap;
     }
@@ -611,6 +658,10 @@ public class AppPresenter {
 
     public void setChatUIController(ChatUIController chatUIController) {
         this.chatUIController = chatUIController;
+    }
+
+    public void setLocationUIController(LocationUIController locationUIController) {
+        this.locationUIController = locationUIController;
     }
 
     public String getCurrentChatAccessKey() {

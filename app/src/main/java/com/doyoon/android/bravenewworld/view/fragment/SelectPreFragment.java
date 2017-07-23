@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
+import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.LogUtil;
 import com.doyoon.android.bravenewworld.util.RuntimePermissionUtil;
@@ -141,7 +142,8 @@ public class SelectPreFragment extends Fragment {
             public void onClick(View v) {
                 showOrNotGuideSnackBar();
                 if (selectedBtn == BTN_UMB_SELECTED) {
-                    AppPresenter.getInstance().runOnFinding(Const.UserType.Giver);
+                    UserStatusPresenter.activeUserType = Const.ActiveUserType.Giver;
+                    AppPresenter.getInstance().runOnMatching();
                     goUserSelectMapFragment();
                 } else {
                     selectedBtn = BTN_UMB_SELECTED;
@@ -156,7 +158,8 @@ public class SelectPreFragment extends Fragment {
             public void onClick(View v) {
                 showOrNotGuideSnackBar();
                 if (selectedBtn == BTN_RAIN_SELECTED) {
-                    AppPresenter.getInstance().runOnFinding(Const.UserType.Taker);
+                    UserStatusPresenter.activeUserType = Const.ActiveUserType.Taker;
+                    AppPresenter.getInstance().runOnMatching();
                     goUserSelectMapFragment();
                 } else {
                     selectedBtn = BTN_RAIN_SELECTED;

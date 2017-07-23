@@ -1,17 +1,15 @@
 package com.doyoon.android.bravenewworld.view.fragment;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.doyoon.android.bravenewworld.R;
@@ -29,7 +27,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
-import static android.app.Activity.RESULT_OK;
 import static com.doyoon.android.bravenewworld.presenter.UserStatusPresenter.myUserProfile;
 
 /**
@@ -40,9 +37,9 @@ public class ProfileFragment extends Fragment implements UserProfileView {
 
     public static final String TAG = ProfileFragment.class.getSimpleName();
 
-    private EditText textViewName, textViewWork, textViewAge;
-    private Spinner spinnerGender;
+    private TextView textViewTitle;
     private ImageView imageView;
+    private ImageButton btnEditProfile;
 
     public static ProfileFragment newInstance() {
 
@@ -67,51 +64,44 @@ public class ProfileFragment extends Fragment implements UserProfileView {
         dependencyInjection(view);
         addWidgetsListener();
 
-        // UserProfilePresenter.getInstance().setUserProfileView(this);
-        // update();
+        UserProfilePresenter.getInstance().setUserProfileView(this);
+        update();
 
         return view;
     }
 
     private void dependencyInjection(View view){
         imageView = (ImageView) view.findViewById(R.id.profile_title_imageView);
-        textViewName = (EditText) view.findViewById(R.id.profile_name_editText);
-//        textViewWork = (EditText) view.findViewById(R.id.profile_work_editText);
-//        textViewAge = (EditText) view.findViewById(R.id.profile_age_editText);
-//        spinnerGender = (Spinner) view.findViewById(R.id.profile_spinner);
+        textViewTitle = (TextView) view.findViewById(R.id.profile_title_textView);
+        btnEditProfile = (ImageButton) view.findViewById(R.id.btnEditProfile);
     }
 
     private void addWidgetsListener(){
-        imageView.setOnClickListener(new View.OnClickListener() {
+        btnEditProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(Intent.createChooser(intent, "Select Photo"), Const.ACTIVITY_REQ_CODE.SELECT_PROFILE_IMAGE); // 선택한 이미지를 돌려받기위해서 startActivityForResult를 사용한다.
+                showEditProfileFragment();
             }
         });
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK) {
-            switch (requestCode) {
-                case Const.ACTIVITY_REQ_CODE.SELECT_PROFILE_IMAGE:
-                    Uri imageUri = data.getData();
-                    imageView.setImageURI(imageUri);
-                    UserProfilePresenter.getInstance().uploadProfileImage(imageUri.toString());
-                    break;
-
-            }
-        }
+    private void showEditProfileFragment() {
+        Log.i(TAG, "Show Edit Profile Fragment");
     }
+
 
     @Override
     public void update() {
         if(myUserProfile == null) return;
         if(myUserProfile.getImageUri() != null) setProfileImage(myUserProfile.getImageUri());
-        if(myUserProfile.getName() != null) textViewName.setText(myUserProfile.getName());
-        if(myUserProfile.getWork() != null) textViewWork.setText(myUserProfile.getWork());
-        if(myUserProfile.getAge() != 0) textViewAge.setText(myUserProfile.getAge());
+
+        String title = "";
+
+        if(myUserProfile.getName() != null) title += myUserProfile.getName();
+        if(myUserProfile.getWork() != null) title += ", " + myUserProfile.getWork();
+        if(myUserProfile.getAge() != 0) title += ", " + myUserProfile.getAge();
+
+        textViewTitle.setText(title);
     }
 
     @Override
@@ -125,13 +115,10 @@ public class ProfileFragment extends Fragment implements UserProfileView {
     }
 
     private void setProfileImage(String strImageUri){
+        if (strImageUri == null) return;
+        if(imageView == null) return;
         Glide.with(this).load(strImageUri).bitmapTransform(new CropCircleTransformation(getContext())).into(imageView);
     }
-
-
-
-
-
 
 
     @Deprecated

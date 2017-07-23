@@ -19,19 +19,38 @@
         android:layout_marginTop="12dp"
         android:gravity="center"
         android:orientation="horizontal"
+        android:paddingLeft="25dp"
+        android:paddingRight="25dp"
         android:weightSum="100"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <ImageView
+            android:id="@+id/imageView8"
+            android:layout_width="wrap_content"
+            android:layout_height="0.5dp"
+            android:layout_weight="20"
+            app:srcCompat="@android:color/white" />
+
         <TextView
-            android:id="@+id/textView3"
+            android:id="@+id/chat_title"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="40"
+            android:layout_weight="60"
             android:gravity="center"
-            android:text="TextView" />
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:text="상대가 없습니다"
+            android:textColor="@android:color/white" />
+
+        <ImageView
+            android:id="@+id/imageView9"
+            android:layout_width="0dp"
+            android:layout_height="0.5dp"
+            android:layout_weight="20"
+            app:srcCompat="@android:color/white" />
 
     </LinearLayout>
 
@@ -46,6 +65,8 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="12dp"
         android:background="@drawable/background_rounded_corner"
+        android:clickable="false"
+        android:divider="#00000000"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
