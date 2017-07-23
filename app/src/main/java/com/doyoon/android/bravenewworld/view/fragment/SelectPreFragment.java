@@ -17,10 +17,10 @@ import com.bumptech.glide.Glide;
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
-import com.doyoon.android.bravenewworld.util.Const;
-import com.doyoon.android.bravenewworld.util.LogUtil;
-import com.doyoon.android.bravenewworld.util.RuntimePermissionUtil;
-import com.doyoon.android.bravenewworld.util.view.SnackBarHelper;
+import com.doyoon.android.bravenewworld.z.util.Const;
+import com.doyoon.android.bravenewworld.z.util.LogUtil;
+import com.doyoon.android.bravenewworld.z.util.RuntimePermissionUtil;
+import com.doyoon.android.bravenewworld.z.util.view.SnackBarHelper;
 
 /**
  * Created by DOYOON on 7/13/2017.

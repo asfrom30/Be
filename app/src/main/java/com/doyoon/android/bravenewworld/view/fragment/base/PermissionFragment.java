@@ -7,7 +7,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.z.util.Const;
 
 /**
  * Created by DOYOON on 7/16/2017.

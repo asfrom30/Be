@@ -1,6 +1,7 @@
 package com.doyoon.android.bravenewworld.domain.firebase.value;
 
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseModel;
+import com.doyoon.android.bravenewworld.z.util.ConvString;
 
 /**
  * Created by DOYOON on 7/13/2017.
@@ -70,7 +71,7 @@ public class PickMeRequest extends FirebaseModel {
     }
 
     public void fetchDataFromUserProfile(UserProfile userProfile) {
-        this.fromUserAccessKey = userProfile.getEmail();
+        this.fromUserAccessKey = ConvString.commaSignToString(userProfile.getEmail());
         this.age = userProfile.getAge();
         this.gender = userProfile.getGender();
         this.name = userProfile.getName();

@@ -7,15 +7,17 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.doyoon.android.bravenewworld.R;
+import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
-import com.doyoon.android.bravenewworld.presenter.LocationPresenter;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.presenter.interfaces.LocationUIController;
-import com.doyoon.android.bravenewworld.util.Const;
-import com.doyoon.android.bravenewworld.util.LogUtil;
+import com.doyoon.android.bravenewworld.presenter.interfaces.OtherUserProfileUpdater;
+import com.doyoon.android.bravenewworld.z.util.Const;
+import com.doyoon.android.bravenewworld.z.util.LogUtil;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -25,15 +27,16 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import jp.wasabeef.glide.transformations.CropCircleTransformation;
+
 /**
  * Created by DOYOON on 7/12/2017.
  */
 
-public class LocationFragment extends Fragment implements OnMapReadyCallback, LocationUIController {
+public class LocationFragment extends Fragment implements OnMapReadyCallback, LocationUIController, OtherUserProfileUpdater {
 
     private static final String TAG = LocationFragment.class.getSimpleName();
-    private Button btnStart;
-    private Button btnStop;
+    private ImageView locationFragmentMyImage, locationFragmentOtherImage;
 
     public static LocationFragment newInstance() {
 
@@ -66,37 +69,20 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Lo
 
         View view = inflater.inflate(R.layout.fragment_user_map, container, false);
         dependencyInjection(view, savedInstanceState);
-        addWidgetsListener();
 
+        AppPresenter.getInstance().setLocationUIController(this);
+        AppPresenter.getInstance().addOtherUserProfileUpdater(this);
 
         return view;
     }
 
-    private void dependencyInjection(View view, Bundle savedInstanceState){
+    private void dependencyInjection(View view, Bundle savedInstanceState) {
         mMapView = (MapView) view.findViewById(R.id.mainMapView);
         mMapView.onCreate(savedInstanceState);
         mMapView.getMapAsync(this);
 
-        btnStart = (Button) view.findViewById(R.id.btnStart);
-        btnStop = (Button) view.findViewById(R.id.btnStop);
-    }
-
-    private void addWidgetsListener(){
-
-        btnStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LocationPresenter.getInstance().run(getActivity());
-            }
-        });
-
-        btnStop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LocationPresenter.getInstance().stop();
-            }
-        });
-
+        locationFragmentMyImage = (ImageView) view.findViewById(R.id.location_fragment_my_image);
+        locationFragmentOtherImage = (ImageView) view.findViewById(R.id.location_fragment_other_image);
     }
 
     @Override
@@ -106,20 +92,19 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Lo
         mGoogleMap = googleMap;
         setDefaultMapSetting();
 
-        if (UserStatusPresenter.getInstance().userStatus == Const.UserStatus.ON_FINDING) {
-            AppPresenter.getInstance().setLocationUIController(this);
-        } else {
+        if (UserStatusPresenter.getInstance().userStatus != Const.UserStatus.ON_FINDING) {
             updateOnlyMyLocation();
         }
+
     }
 
-    private void updateOnlyMyLocation(){
+    private void updateOnlyMyLocation() {
         /* Code start */
         if (mGoogleMap != null) {
             Log.i(TAG, "mGoogleMap not null");
             if (UserStatusPresenter.userStatus == Const.UserStatus.ON_FINDING) {
                 // add marker to map
-                // run update and move marker
+                // traceAndExecute update and move marker
             } else {
                 Log.i(TAG, "Try to get Location in Map Fragment");
                 AppPresenter.getInstance().getLastLocation(new AppPresenter.LocationCallback() {
@@ -137,12 +122,27 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Lo
         }
     }
 
-    private void updateMarker(){
+    @Override
+    public void updateMyMarker(double lat, double lng) {
+        if (UserStatusPresenter.getInstance().userStatus != Const.UserStatus.ON_FINDING) return;
 
-        if(mGoogleMap == null) return;
+        myLatLng = new LatLng(lat, lng);
+        updateMarker();
+    }
+
+    @Override
+    public void updateOtherMarker(double lat, double lng) {
+        if (UserStatusPresenter.getInstance().userStatus != Const.UserStatus.ON_FINDING) return;
+
+        otherLatLng = new LatLng(lat, lng);
+        updateMarker();
+    }
+
+    private void updateMarker() {
+        if (mGoogleMap == null) return;
         mGoogleMap.clear();
 
-        if(myLatLng != null) {
+        if (myLatLng != null) {
             addMarker(myLatLng, Const.LOCATION_FRAG.MY_MAP_PIN_RES_ID);
         }
 
@@ -222,15 +222,11 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Lo
         mGoogleMap.moveCamera(cameraUpdate);
     }
 
-    @Override
-    public void updateMyMarker(double lat, double lng) {
-        myLatLng = new LatLng(lat, lng);
-        updateMarker();
-    }
 
     @Override
-    public void updateOtherMarker(double lat, double lng) {
-        otherLatLng = new LatLng(lat, lng);
-        updateMarker();
+    public void otherUserProfileUpdate(UserProfile userProfile) {
+        if(userProfile.getImageUri() == null || "".equals(userProfile.getImageUri())) return;
+
+        Glide.with(this).load(userProfile.getImageUri()).bitmapTransform(new CropCircleTransformation(getContext())).into(locationFragmentOtherImage);
     }
 }

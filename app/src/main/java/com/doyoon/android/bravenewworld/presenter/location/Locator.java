@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.presenter;
+package com.doyoon.android.bravenewworld.presenter.location;
 
 import android.app.Activity;
 import android.content.IntentSender;
@@ -8,8 +8,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.doyoon.android.bravenewworld.domain.RemoteDao;
-import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.z.util.Const;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -34,15 +33,15 @@ import java.util.Date;
  * Created by DOYOON on 7/19/2017.
  */
 
-public class LocationPresenter {
+public class Locator {
 
-    private static final String TAG = LocationPresenter.class.getSimpleName();
-    private static LocationPresenter instance;
+    private static final String TAG = Locator.class.getSimpleName();
+    private static Locator instance;
 
-    public static LocationPresenter getInstance(){
+    public static Locator getInstance(){
 
         if (instance == null) {
-            instance = new LocationPresenter();
+            instance = new Locator();
         }
 
         return instance;
@@ -51,11 +50,15 @@ public class LocationPresenter {
     private LocationCallback locationCallback;
     private OnCompleteListener onStopLocationCompleteListener;
 
-    private LocationPresenter() {
+    private Locator() {
 
     }
 
-    public void run(Activity activity){
+    public void traceOnce(Activity activity, CustomLocationCallback customCallback){
+
+    }
+
+    public void traceAndExecute(Activity activity, CustomLocationCallback customCallback){
 
         // update values using data stored in the bundle
         // updateValuesFromBundle(savedInstanceState);
@@ -65,7 +68,7 @@ public class LocationPresenter {
         locationServiceInit(activity);
 
         if (locationCallback == null) {
-            locationCallback = createLocationCallback();
+            locationCallback = createLocationCallback(customCallback);
         }
         startLocationUpdates(locationCallback);
     }
@@ -81,7 +84,7 @@ public class LocationPresenter {
     }
 
     /* Create a callback for receiving location events */
-    private LocationCallback createLocationCallback() {
+    private LocationCallback createLocationCallback(final CustomLocationCallback customCallback) {
         return new LocationCallback(){
             @Override
             public void onLocationResult(LocationResult locationResult) {
@@ -90,9 +93,7 @@ public class LocationPresenter {
                 LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
                 String lastUpdateTime = DateFormat.getTimeInstance().format(new Date());
 
-                RemoteDao.LocationFinder.updateMyLocation(currentLatLng, UserStatusPresenter.locationFinderAccessKey, UserStatusPresenter.myUserAccessKey);
-
-                Log.e(TAG, currentLocation.getLatitude() + ", " + currentLocation.getLongitude() + ", " + lastUpdateTime);
+                customCallback.execute(currentLatLng, lastUpdateTime);
             }
         };
     }
@@ -206,5 +207,7 @@ public class LocationPresenter {
                 .addOnCompleteListener(activity, onCompleteListener);
     }
 
-
+    public interface CustomLocationCallback {
+        void execute(LatLng currentLatLng, String lastUpdateTime);
+    }
 }

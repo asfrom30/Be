@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.util;
+package com.doyoon.android.bravenewworld.z.util;
 
 import java.text.DateFormat;
 import java.util.Date;

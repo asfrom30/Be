@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
-import com.doyoon.android.bravenewworld.util.LogUtil;
+import com.doyoon.android.bravenewworld.z.util.LogUtil;
 
 /**
  * Created by DOYOON on 7/13/2017.

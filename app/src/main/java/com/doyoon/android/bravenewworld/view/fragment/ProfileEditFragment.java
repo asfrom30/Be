@@ -13,7 +13,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.doyoon.android.bravenewworld.presenter.UserProfilePresenter;
-import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.z.util.Const;
 
 import static android.app.Activity.RESULT_OK;
 

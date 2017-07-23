@@ -10,11 +10,10 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.doyoon.android.bravenewworld.R;
-import com.doyoon.android.bravenewworld.domain.DummyDao;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
 import com.doyoon.android.bravenewworld.view.fragment.base.RecyclerFragment;
-import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.z.util.Const;
 
 import java.util.List;
 
@@ -106,15 +105,12 @@ public class ActiveUserFragmentView {
                 @Override
                 public void updateRecyclerItemView(View view, UserProfile userProfile) {
                     //todo make thumbnail
-                    if (userProfile.getImageUri() == null) {
-                        int resID = DummyDao.getDummyDrawable(userProfile.getGender());
-                        Glide.with(getContext()).load(resID).bitmapTransform(new CropCircleTransformation(getContext())).into(imageView);
-                    } else {
+                    if (userProfile.getImageUri() != null) {
                         Glide.with(getContext()).load(userProfile.getImageUri()).bitmapTransform(new CropCircleTransformation(getContext())).into(imageView);
                     }
-                    textViewKey.setText(userProfile.getKey());
-                    textViewName.setText(userProfile.getName());
-                    textViewAge.setText(userProfile.getAge() + "");
+                    if(userProfile.getKey() != null) textViewKey.setText(userProfile.getKey());
+                    if(userProfile.getName() != null) textViewName.setText(userProfile.getName());
+                    if(userProfile.getAge() != 0) textViewAge.setText(userProfile.getAge() + "");
 
                     if (userProfile.getGender() == Const.Gender.FEMALE) {
                         textViewGender.setText("여자");

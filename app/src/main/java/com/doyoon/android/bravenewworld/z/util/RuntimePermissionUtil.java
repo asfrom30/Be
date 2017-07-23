@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.util;
+package com.doyoon.android.bravenewworld.z.util;
 
 import android.app.Activity;
 import android.content.Context;

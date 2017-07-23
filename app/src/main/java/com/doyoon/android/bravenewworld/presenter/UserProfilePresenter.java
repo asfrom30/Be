@@ -7,8 +7,8 @@ import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseUploader;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.presenter.interfaces.UserProfileView;
-import com.doyoon.android.bravenewworld.util.Const;
-import com.doyoon.android.bravenewworld.util.DateUtil;
+import com.doyoon.android.bravenewworld.z.util.Const;
+import com.doyoon.android.bravenewworld.z.util.DateUtil;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;

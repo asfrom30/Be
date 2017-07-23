@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.pre;
+package com.doyoon.android.bravenewworld.z;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;

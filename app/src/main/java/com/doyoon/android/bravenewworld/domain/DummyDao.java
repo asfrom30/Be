@@ -2,15 +2,14 @@ package com.doyoon.android.bravenewworld.domain;
 
 import android.util.Log;
 
-import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseGeoDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
-import com.doyoon.android.bravenewworld.util.Const;
-import com.doyoon.android.bravenewworld.util.ConvString;
+import com.doyoon.android.bravenewworld.z.util.Const;
+import com.doyoon.android.bravenewworld.z.util.ConvString;
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
@@ -22,7 +21,7 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Random;
 
-import static com.doyoon.android.bravenewworld.util.ConvString.commaSignToString;
+import static com.doyoon.android.bravenewworld.z.util.ConvString.commaSignToString;
 
 /**
  * Created by DOYOON on 7/12/2017.
@@ -39,13 +38,39 @@ public class DummyDao {
         return new BigInteger(130, random).toString(32);
     }
 
+    public static String getMyDummyUserAccessKey() {
+        int currentApiVersion = android.os.Build.VERSION.SDK_INT;
+        String email = "";
+        if (currentApiVersion == 25) {
+            email = "miraee05@naver.com";
+        } else if (currentApiVersion == 23) {
+            email = "jumum@google.com";
+        }
+        return ConvString.commaSignToString(email);
+    }
+
     /* MY DUMMY PROFILE */
-    public static UserProfile createDummyMyProfile() {
-        String email = "miraee05@naver.com";
-        String key = commaSignToString(email);
-        UserProfile userProfile = new UserProfile("김도윤", 33, Const.Gender.MALE, email);
+    public static UserProfile insertDummyMyProfile() {
+        UserProfile userProfile = getMyProfile();
+        String key = commaSignToString(userProfile.getEmail());
         userProfile.setKey(key);
         FirebaseDao.insert(userProfile, key);
+        return userProfile;
+    }
+
+    private static UserProfile getMyProfile(){
+        int currentApiVersion = android.os.Build.VERSION.SDK_INT;
+
+        UserProfile userProfile = null;
+
+        if (currentApiVersion == 25) {
+            userProfile =  new UserProfile("김도윤", 33, Const.Gender.MALE, "miraee05@naver.com");
+            userProfile.setImageUri("https://firebasestorage.googleapis.com/v0/b/bravenewworld-45c25.appspot.com/o/userprofile%2Fkim.jpg?alt=media&token=c688f7c5-e4a2-4c09-afe4-c8b04d7657d0");
+        } else if (currentApiVersion == 23) {
+            userProfile =  new UserProfile("황정음", 29, Const.Gender.FEMALE, "jumum@google.com");
+            userProfile.setImageUri("https://firebasestorage.googleapis.com/v0/b/bravenewworld-45c25.appspot.com/o/userprofile%2Fhwang.jpg?alt=media&token=06e493cc-be8b-4cf2-b3fc-14407b656911");
+        }
+
         return userProfile;
     }
 
@@ -112,18 +137,19 @@ public class DummyDao {
 
     public static void createDummies(String userType){
         /* Create MY Dummy */
-        UserProfile myUserProfile = DummyDao.createDummyMyProfile();
+        UserProfile myUserProfile = DummyDao.insertDummyMyProfile();
         String myAccessKey = ConvString.commaSignToString(myUserProfile.getEmail());
         FirebaseDao.insert(myUserProfile, myAccessKey);
 
         for(int i =0; i < 10; i++) {
             /* Create Dummy Profile */
             UserProfile userProfile = DummyDao.createDummyUserProfile();
+            userProfile.setImageUri(getDummyImageUrl(userProfile.getGender()));
             String userAccessKey = ConvString.commaSignToString(userProfile.getEmail());
             Log.i(TAG, "Create Dummy User : " + userProfile.toString());
             FirebaseDao.insert(userProfile, userAccessKey);
 
-            /* Insert givers using Geo Fire */
+            /* Insert givers using Geo Fire for active user */
             LatLng latLng = DummyDao.createDummyLatLng();
             String modelDir = FirebaseHelper.getModelDir(userType);
             FirebaseGeoDao.insert(modelDir, userAccessKey, new GeoLocation(latLng.latitude, latLng.longitude));
@@ -156,53 +182,53 @@ public class DummyDao {
         });
     }
 
-    public static int getDummyDrawable(int gender){
+    public static String getDummyImageUrl(int gender){
         int index = getRandomInt(1, 5);
-        int resId;
+        String imageUrl;
         if (gender == Const.Gender.MALE) {
             switch (index) {
                 case 1:
-                    resId = R.drawable.male_1;
+                    imageUrl = "https://firebasestorage.googleapis.com/v0/b/bravenewworld-45c25.appspot.com/o/userprofile%2Fmale_1.jpg?alt=media&token=046139c2-57ca-4a06-98ab-f21a4c3f3023";
                     break;
                 case 2:
-                    resId = R.drawable.male_2;
+                    imageUrl = "https://firebasestorage.googleapis.com/v0/b/bravenewworld-45c25.appspot.com/o/userprofile%2Fmale_1.jpg?alt=media&token=046139c2-57ca-4a06-98ab-f21a4c3f3023";
                     break;
                 case 3:
-                    resId = R.drawable.male_3;
+                    imageUrl = "https://firebasestorage.googleapis.com/v0/b/bravenewworld-45c25.appspot.com/o/userprofile%2Fmale_1.jpg?alt=media&token=046139c2-57ca-4a06-98ab-f21a4c3f3023";
                     break;
                 case 4:
-                    resId = R.drawable.male_4;
+                    imageUrl = "https://firebasestorage.googleapis.com/v0/b/bravenewworld-45c25.appspot.com/o/userprofile%2Fmale_4.jpg?alt=media&token=bdf8fb32-1814-4223-852c-7618e1341976";
                     break;
                 case 5:
-                    resId = R.drawable.male_5;
+                    imageUrl = "https://firebasestorage.googleapis.com/v0/b/bravenewworld-45c25.appspot.com/o/userprofile%2Fmale_5.jpg?alt=media&token=218350e5-2838-4055-a876-bf8c432458a4";
                     break;
                 default:
-                    resId = R.drawable.male_5;
+                    imageUrl = "https://firebasestorage.googleapis.com/v0/b/bravenewworld-45c25.appspot.com/o/userprofile%2Fmale_5.jpg?alt=media&token=218350e5-2838-4055-a876-bf8c432458a4";
                     break;
             }
         } else {
             switch (index) {
                 case 1:
-                    resId = R.drawable.female_1;
+                    imageUrl = "https://firebasestorage.googleapis.com/v0/b/bravenewworld-45c25.appspot.com/o/userprofile%2Ffemale_1.jpg?alt=media&token=79f70ce1-18dd-41b8-bc27-0051533a3325";
                     break;
                 case 2:
-                    resId = R.drawable.female_2;
+                    imageUrl = "https://firebasestorage.googleapis.com/v0/b/bravenewworld-45c25.appspot.com/o/userprofile%2Ffemale_2.jpg?alt=media&token=4a14fb88-e24c-4d3e-98bc-4a13a71d670c";
                     break;
                 case 3:
-                    resId = R.drawable.female_3;
+                    imageUrl = "https://firebasestorage.googleapis.com/v0/b/bravenewworld-45c25.appspot.com/o/userprofile%2Ffemale_3.jpg?alt=media&token=ed2ecbb2-2538-471e-a60e-4d96abcb2a87";
                     break;
                 case 4:
-                    resId = R.drawable.female_4;
+                    imageUrl = "https://firebasestorage.googleapis.com/v0/b/bravenewworld-45c25.appspot.com/o/userprofile%2Ffemale_4.jpg?alt=media&token=c1fe04c5-5468-4116-bcb9-c34d7323271f";
                     break;
                 case 5:
-                    resId = R.drawable.female_5;
+                    imageUrl = "https://firebasestorage.googleapis.com/v0/b/bravenewworld-45c25.appspot.com/o/userprofile%2Ffemale_5.jpg?alt=media&token=64e305a1-3d9c-4c92-950d-2a51d8703654";
                     break;
                 default:
-                    resId = R.drawable.female_5;
+                    imageUrl = "https://firebasestorage.googleapis.com/v0/b/bravenewworld-45c25.appspot.com/o/userprofile%2Ffemale_5.jpg?alt=media&token=64e305a1-3d9c-4c92-950d-2a51d8703654";
                     break;
             }
         }
-        return resId;
+        return imageUrl;
     }
 
 }

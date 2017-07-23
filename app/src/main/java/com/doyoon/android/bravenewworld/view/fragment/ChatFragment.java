@@ -24,9 +24,9 @@ import com.doyoon.android.bravenewworld.domain.firebase.value.Chat;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ChatUIController;
-import com.doyoon.android.bravenewworld.util.Const;
-import com.doyoon.android.bravenewworld.util.ConvString;
-import com.doyoon.android.bravenewworld.util.LogUtil;
+import com.doyoon.android.bravenewworld.z.util.Const;
+import com.doyoon.android.bravenewworld.z.util.ConvString;
+import com.doyoon.android.bravenewworld.z.util.LogUtil;
 
 import java.util.ArrayList;
 import java.util.List;

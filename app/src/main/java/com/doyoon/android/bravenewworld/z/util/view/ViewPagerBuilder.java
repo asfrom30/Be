@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.util.view;
+package com.doyoon.android.bravenewworld.z.util.view;
 
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;

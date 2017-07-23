@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.util;
+package com.doyoon.android.bravenewworld.z.util;
 
 import com.doyoon.android.bravenewworld.R;
 import com.google.android.gms.location.LocationRequest;

@@ -12,6 +12,9 @@ public class LocationFinder extends FirebaseModel {
     private double latitude;
     private double longitude;
 
+    public LocationFinder() {
+    }
+
     public LocationFinder(String accessKey, double latitude, double longitude) {
         this.accessKey = accessKey;
         this.latitude = latitude;

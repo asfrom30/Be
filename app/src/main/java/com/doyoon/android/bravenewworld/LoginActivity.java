@@ -28,9 +28,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.doyoon.android.bravenewworld.util.ConvString;
-import com.doyoon.android.bravenewworld.util.LogUtil;
-import com.doyoon.android.bravenewworld.util.regex.EmailValidator;
+import com.doyoon.android.bravenewworld.z.util.ConvString;
+import com.doyoon.android.bravenewworld.z.util.LogUtil;
+import com.doyoon.android.bravenewworld.z.util.regex.EmailValidator;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;

@@ -6,21 +6,23 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
+import com.doyoon.android.bravenewworld.domain.DummyDao;
 import com.doyoon.android.bravenewworld.domain.RemoteDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
 import com.doyoon.android.bravenewworld.presenter.UserProfilePresenter;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ViewPagerMover;
-import com.doyoon.android.bravenewworld.util.Const;
-import com.doyoon.android.bravenewworld.util.ConvString;
-import com.doyoon.android.bravenewworld.util.LogUtil;
-import com.doyoon.android.bravenewworld.util.view.ViewPagerBuilder;
 import com.doyoon.android.bravenewworld.view.fragment.ChatFragment;
 import com.doyoon.android.bravenewworld.view.fragment.LocationFragment;
 import com.doyoon.android.bravenewworld.view.fragment.ProfileFragment;
 import com.doyoon.android.bravenewworld.view.fragment.SelectFragment;
+import com.doyoon.android.bravenewworld.z.util.Const;
+import com.doyoon.android.bravenewworld.z.util.LogUtil;
+import com.doyoon.android.bravenewworld.z.util.view.ViewPagerBuilder;
 import com.tsengvn.typekit.TypekitContextWrapper;
+
+import static com.doyoon.android.bravenewworld.domain.DummyDao.getMyDummyUserAccessKey;
 
 /**
  * 나는 뭐하는 놈입니다~
@@ -38,19 +40,19 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        /* Construct DB Structure */
+        /* Move to Splash */
+        // Construct DB Structure
         FirebaseHelper.buildDbStructure(getBaseContext());
+
+        /* Create Dummy */
+        DummyDao.insertDummyMyProfile();
 
         /* Get User Access Key */
         String myUserAcessKey = getMyDummyUserAccessKey();
         // String myUserAcessKey = getIntent().getStringExtra(Const.ExtraKey.USER_ACCESS_KEY);
         if (myUserAcessKey == null) {
-            /* ??? 어떻게??? */
-        }
 
-        /* Create Dummy */
-        // UserProfile userProfile = DummyDao.createDummyMyProfile();
-        // FirebaseDao.insert(userProfile, myUserAcessKey);
+        }
 
         /* Build AppPresenter */
         buildPresenter(myUserAcessKey);
@@ -82,28 +84,6 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
         LogUtil.logLifeCycle(TAG, "On Pause");
         RemoteDao.ActiveUser.remove(Const.ActiveUserType.Giver);
         RemoteDao.ActiveUser.remove(Const.ActiveUserType.Taker);
-    }
-
-    /**
-     * 나는 뭐하는 놈입니다~
-     */
-    private String getDummyUserEmail(){
-        int currentApiVersion = android.os.Build.VERSION.SDK_INT;
-        String email;
-        if (currentApiVersion == 25) {
-            email = "miraee05@naver.com";
-        } else if (currentApiVersion == 23) {
-            email = "YDJQ74F025@google.com";
-        } else {
-            email = "miraee05@naver.com";
-        }
-        return email;
-    }
-
-    private String getMyDummyUserAccessKey(){
-        String email = getDummyUserEmail();
-        String userKey = ConvString.commaSignToString(email);
-        return userKey;
     }
 
     private void buildPresenter(String myUserAccessKey){

@@ -7,7 +7,7 @@ import com.doyoon.android.bravenewworld.domain.firebase.FirebaseGeoDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
-import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.z.util.Const;
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
@@ -16,7 +16,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import static com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper.getModelDir;
-import static com.doyoon.android.bravenewworld.util.Const.RefKey.LOCATION_SERCIVE;
+import static com.doyoon.android.bravenewworld.z.util.Const.RefKey.LOCATION_SERCIVE;
 
 /**
  * Created by DOYOON on 7/14/2017.
@@ -54,8 +54,10 @@ public class RemoteDao {
         }
 
         public static ValueEventListener addListener(String locationAccessKey, String userAccessKey, final Callback callback){
-            String modelPath = FirebaseHelper.getModelPath(Const.RefKey.LOCATION_SERCIVE, locationAccessKey);
-            modelPath = modelPath + userAccessKey;
+            String modelPath = FirebaseHelper.getModelDir(Const.RefKey.LOCATION_SERCIVE);
+            modelPath = modelPath + locationAccessKey + "/" + userAccessKey;
+
+            Log.e(TAG, "Add Listener model path " + modelPath);
 
             ValueEventListener valueEventListener = new ValueEventListener() {
                 @Override
