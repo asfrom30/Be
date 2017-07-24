@@ -3,6 +3,7 @@ package com.doyoon.android.bravenewworld.view.fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,10 +65,16 @@ public class ProfileFragment extends Fragment implements UserProfileView {
         dependencyInjection(view);
         addWidgetsListener();
 
-        UserProfilePresenter.getInstance().setUserProfileView(this);
-        update();
+        UserProfilePresenter.getInstance().addUserProfileView(this);
+        updateProfile();
 
         return view;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        UserProfilePresenter.getInstance().removeUserProfileView(this);
     }
 
     private void dependencyInjection(View view){
@@ -87,11 +94,16 @@ public class ProfileFragment extends Fragment implements UserProfileView {
 
     private void showEditProfileFragment() {
         Log.i(TAG, "Show Edit Profile Fragment");
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(R.anim.enter_from_bottom, R.anim.exit_to_bottom, R.anim.enter_from_bottom, R.anim.exit_to_bottom);
+        transaction.add(R.id.profile_frame_layout, ProfileEditFragment.newInstance(), null);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
 
     @Override
-    public void update() {
+    public void updateProfile() {
         if(myUserProfile == null) return;
         if(myUserProfile.getImageUri() != null) setProfileImage(myUserProfile.getImageUri());
 

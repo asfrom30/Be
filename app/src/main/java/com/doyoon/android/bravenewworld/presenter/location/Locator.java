@@ -60,7 +60,7 @@ public class Locator {
 
     public void traceAndExecute(Activity activity, CustomLocationCallback customCallback){
 
-        // update values using data stored in the bundle
+        // updateProfile values using data stored in the bundle
         // updateValuesFromBundle(savedInstanceState);
 
 
@@ -73,13 +73,10 @@ public class Locator {
         startLocationUpdates(locationCallback);
     }
 
-    public void stop(){
+    public void stopTraceAndExecute(){
         if (onStopLocationCompleteListener == null) {
             onStopLocationCompleteListener = createStopLocationCompleteListener();
         }
-
-        /* Firebase handling */
-
         stopLocationUpdates(locationCallback, onStopLocationCompleteListener);
     }
 

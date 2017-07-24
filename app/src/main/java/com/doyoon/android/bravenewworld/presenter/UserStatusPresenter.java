@@ -35,6 +35,8 @@ public class UserStatusPresenter {
     public static String otherUserAccessKey;
     public static UserProfile myUserProfile;
     public static UserProfile otherUserProfile;
+    public static LatLng myLatLng;
+    public static LatLng otherLatLng;
 
     public static LatLng lastLatLng;
     public static String chatAccessKey;

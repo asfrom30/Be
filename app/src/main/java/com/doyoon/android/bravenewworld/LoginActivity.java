@@ -293,7 +293,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @Override
     protected void onStop() {
         super.onStop();
-        LogUtil.logLifeCycle(TAG, "on stop");
+        LogUtil.logLifeCycle(TAG, "on stopTraceAndExecute");
         FirebaseAuth.getInstance().removeAuthStateListener(mFirebaseAuth);
 
     }

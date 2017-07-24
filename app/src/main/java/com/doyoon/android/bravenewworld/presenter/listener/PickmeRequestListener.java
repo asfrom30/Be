@@ -47,7 +47,7 @@ public class PickmeRequestListener {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 // todo  남은 메세지수 몇개... 방향키로 메세지 이동할 수 있게 할 것...
-                // todo Message를 add만 하고 update ui하게끔 onChilAdded와 같은 Thread를 쓰면 안된다.
+                // todo Message를 add만 하고 updateProfile ui하게끔 onChilAdded와 같은 Thread를 쓰면 안된다.
                 // todo 이것은 그냥 데이터만 추가하고.... 다른 쓰레드에서 update를 갱신할 수 있도록
                 // todo 여기에 다 추가하면... firebase firebase 업데이트 속도가 느려질 수 있겠지만 큰 상관은 없을듯...
                 PickMeRequest pickMeRequest = dataSnapshot.getValue(PickMeRequest.class);

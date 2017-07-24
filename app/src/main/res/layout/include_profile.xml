@@ -4,8 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_profile_include"
     android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="90"
+        android:gravity="center_vertical"
+        android:paddingLeft="16dp"
+        android:text="@string/fragment_profile_alarm_setting"
+        android:textColor="@color/custom_slate_grey"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        tools:layout_editor_absoluteY="8dp"
+        tools:layout_editor_absoluteX="0dp" />
 
     <LinearLayout
         android:id="@+id/linearLayout4"
@@ -78,7 +91,7 @@
         android:id="@+id/linearLayout5"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
+        android:background="@color/custom_pinkish_grey"
         android:orientation="vertical"
         android:paddingTop="8dp"
         app:layout_constraintHorizontal_bias="0.0"
@@ -89,11 +102,13 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="63dp"
+            android:background="@android:color/white"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
             android:weightSum="100">
 
             <TextView
-                android:id="@+id/textView12"
+                android:id="@+id/textView3"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="90"
@@ -106,15 +121,19 @@
 
             <ImageView
                 android:id="@+id/imageView4"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
                 android:layout_weight="10"
-                app:srcCompat="@drawable/quantum_ic_play_arrow_grey600_36" />
+                app:srcCompat="@drawable/more_btn_more" />
+
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="63dp"
+            android:layout_marginTop="1dp"
+            android:background="@android:color/white"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
             android:weightSum="100">
 
@@ -131,16 +150,20 @@
                 android:textStyle="bold" />
 
             <ImageView
-                android:id="@+id/imageView4"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:id="@+id/imageView13"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
                 android:layout_weight="10"
-                app:srcCompat="@drawable/quantum_ic_play_arrow_grey600_36" />
+                app:srcCompat="@drawable/more_btn_more" />
+
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="63dp"
+            android:layout_marginTop="1dp"
+            android:background="@android:color/white"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
             android:weightSum="100"
             tools:layout_editor_absoluteX="8dp"
@@ -159,17 +182,21 @@
                 android:textStyle="bold" />
 
             <ImageView
-                android:id="@+id/imageView4"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:id="@+id/imageView14"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
                 android:layout_weight="10"
-                app:srcCompat="@drawable/quantum_ic_play_arrow_grey600_36" />
+                app:srcCompat="@drawable/more_btn_more" />
+
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="63dp"
+            android:layout_marginTop="1dp"
             android:layout_weight="90"
+            android:background="@android:color/white"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
             android:weightSum="100"
             tools:layout_editor_absoluteX="8dp"
@@ -188,11 +215,12 @@
                 android:textStyle="bold" />
 
             <ImageView
-                android:id="@+id/imageView4"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:id="@+id/imageView15"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
                 android:layout_weight="10"
-                app:srcCompat="@drawable/quantum_ic_play_arrow_grey600_36" />
+                app:srcCompat="@drawable/more_btn_more" />
+
         </LinearLayout>
 
     </LinearLayout>

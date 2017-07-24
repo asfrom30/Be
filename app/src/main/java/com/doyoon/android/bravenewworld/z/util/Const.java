@@ -25,7 +25,7 @@ public class Const {
     /* View Resource ID */
     public static class LOCATION_FRAG {
         public static float MARKER_ALPHA = 1.0f;
-        public static int DEFAULT_MAP_PIN_RES_ID = R.drawable.map_pin_umbrella;
+        public static int DEFAULT_MAP_PIN_RES_ID = R.drawable.map_icon_mylocation;
         public static int MY_MAP_PIN_RES_ID = R.drawable.map_icon_mylocation;
         public static int OTHER_MAP_PIN_RES_ID = R.drawable.map_icon_location_rain;
     }
@@ -66,6 +66,15 @@ public class Const {
 
         public static String LOCATION_SERCIVE = "locationservice";
         public static String LOCATION_FINDER = "locationfinder";
+
+        public static String PROFILE_NAME = "name";
+        public static String PROFILE_WORK = "work";
+        public static String PROFILE_AGE = "age";
+        public static String PROFILE_COMMENT = "comment";
+        public static String PROFILE_GENDER = "gender";
+        public static String PROFILE_RAIN_COUNT = "rainCount";
+        public static String PROFILE_UMB_COUNT = "umbCount";
+
     }
 
     public static class StorageRefKey {
@@ -77,6 +86,7 @@ public class Const {
 
     public static final int LOCATION_REQ_CODE = 100;
 
+    public static final float DEFAULT_FINDING_DISTANCE_M = 50;
     public static final double DEFAULT_SEARCH_DISTANCE_KM = 2.0;  // 100m
 
     public static final int PAGING_NUMBER_AT_ONCE = 10;

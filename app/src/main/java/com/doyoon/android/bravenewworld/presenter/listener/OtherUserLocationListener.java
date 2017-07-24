@@ -51,7 +51,7 @@ public class OtherUserLocationListener {
                         if(locationFinder.getLatitude() == 0 || locationFinder.getLongitude() == 0) return;
                         callback.execute(locationFinder);
 
-                        Log.i(TAG, "update other user  location in ui controller");
+                        Log.i(TAG, "updateProfile other user  location in ui controller");
                     }
                 });
 

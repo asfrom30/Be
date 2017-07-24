@@ -8,6 +8,7 @@ import com.doyoon.android.bravenewworld.domain.firebase.FirebaseModel;
 
 public class UserProfile extends FirebaseModel{
 
+    private String comment;
     private String key;
     private String name;
     private int age;
@@ -91,6 +92,14 @@ public class UserProfile extends FirebaseModel{
 
     public void setRainCount(int rainCount) {
         this.rainCount = rainCount;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.doyoon.android.bravenewworld.presenter;
 import android.net.Uri;
 import android.util.Log;
 
+import com.doyoon.android.bravenewworld.domain.RemoteDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseUploader;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
@@ -34,7 +35,8 @@ public class UserProfilePresenter {
         }
         return instance;
     }
-    private UserProfileView userProfileView;
+
+    private List<UserProfileView> userProfileViewList;
 
     private UserProfilePresenter() {
         userProfileViewList = new ArrayList<>();
@@ -47,54 +49,73 @@ public class UserProfilePresenter {
             @Override
             public void execute(UserProfile userProfile) {
                 myUserProfile = userProfile;
-                if(userProfileView != null) userProfileView.update();
-
+                notifyMyProfileUpdate();
                 Log.i(TAG, "load my userProfile successful from remote" + myUserProfile.toString());
             }
         }, myUserAccessKey);
     }
 
-    public void setUserProfileView(UserProfileView userProfileView){
-        this.userProfileView = userProfileView;
+
+    public void saveProfileToRemote(String name, String work, int age, String comment) {
+        UserProfile currentProfile = UserStatusPresenter.getInstance().myUserProfile;
+        if(currentProfile == null) return;
+
+        if(!name.equals(currentProfile.getName())) RemoteDao.UserProfile.insertName(name);
+        if(!work.equals(currentProfile.getWork())) RemoteDao.UserProfile.insertWork(work);
+        if(age != currentProfile.getAge()) RemoteDao.UserProfile.insertAge(age);
+        if(!comment.equals(currentProfile.getComment())) RemoteDao.UserProfile.insertComment(comment);
+
+        loadMyUserProfileFromRemote();
     }
 
-    public void uploadProfileImage(String strFileUri){
+    public void saveProfileImageToRemote(String imageUrl) {
         // todo random key...
         String fileName = DateUtil.getCurrentDate() + "_" + myUserAccessKey;// 시간값 + UUID 추가해서 만듦...
-        FirebaseUploader.execute(strFileUri, Const.StorageRefKey.USER_PROFILE, fileName, new FirebaseUploader.Callback() {
+        FirebaseUploader.execute(imageUrl, Const.StorageRefKey.USER_PROFILE, fileName, new FirebaseUploader.Callback() {
             @Override
             public void postExecute(Uri uploadedFileUri) {
                 String modelDir = getModelDir(Const.RefKey.USER_PROFILE, myUserAccessKey)
                         + Const.RefKey.USER_PROFILE + "/" + Const.RefKey.USER_PROFILE_IMAGE_URI;
                 FirebaseDatabase.getInstance().getReference(modelDir).setValue(uploadedFileUri.toString());
 
-                UserStatusPresenter.getInstance().myUserProfile.setImageUri(uploadedFileUri.toString());
-
-                if(userProfileView != null) userProfileView.updateProfileImage();
-
+                loadMyUserProfileFromRemote();
                 Log.i(TAG, "Add profile image to remote successful" + uploadedFileUri);
             }
         });
     }
 
 
-    /* Todo update All view... */
-    // Impelement Observer Pattern Lately for study
-    // how to remove UserProfile UserProfileView.... on
-    private List<UserProfileView> userProfileViewList;
 
-    public void addCustomView(UserProfileView view) {
+    @Deprecated
+    public void saveProfileToRemote(final String name, final String work, final int age, final String comment, String imageUrl) {
+        UserProfile currentProfile = UserStatusPresenter.getInstance().myUserProfile;
+        if(currentProfile == null) return;
 
+        String fileName = DateUtil.getCurrentDate() + "_" + myUserAccessKey;// 시간값 + UUID 추가해서 만듦...
+        FirebaseUploader.execute(imageUrl, Const.StorageRefKey.USER_PROFILE, fileName, new FirebaseUploader.Callback() {
+            @Override
+            public void postExecute(Uri uploadedFileUri) {
+                String modelDir = getModelDir(Const.RefKey.USER_PROFILE, myUserAccessKey)
+                        + Const.RefKey.USER_PROFILE + "/" + Const.RefKey.USER_PROFILE_IMAGE_URI;
+                FirebaseDatabase.getInstance().getReference(modelDir).setValue(uploadedFileUri.toString());
+                saveProfileToRemote(name, work, age, comment);
+                Log.i(TAG, "Add profile image to remote successful" + uploadedFileUri);
+            }
+        });
     }
 
-    public void removeCustomView(UserProfileView view) {
-
+    public void notifyMyProfileUpdate(){
+        for (UserProfileView view : userProfileViewList) {
+            view.updateProfile();
+        }
     }
 
-    private void updateViewForMulti(){
-        /* Update All UI which relates to User Profile */
-//        for (UserProfileView view : userProfileViewList) {
-//            view.update(myUserProfile);
-//        }
+    public void addUserProfileView(UserProfileView view) {
+        this.userProfileViewList.add(view);
     }
+
+    public void removeUserProfileView(UserProfileView view) {
+        this.userProfileViewList.remove(view);
+    }
+
 }

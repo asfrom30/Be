@@ -6,7 +6,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
-import com.doyoon.android.bravenewworld.domain.DummyDao;
 import com.doyoon.android.bravenewworld.domain.RemoteDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
@@ -45,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
         FirebaseHelper.buildDbStructure(getBaseContext());
 
         /* Create Dummy */
-        DummyDao.insertDummyMyProfile();
+        // DummyDao.insertDummyMyProfile();
 
         /* Get User Access Key */
         String myUserAcessKey = getMyDummyUserAccessKey();

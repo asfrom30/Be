@@ -5,7 +5,6 @@ import android.util.Log;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseGeoDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
-import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.z.util.Const;
 import com.firebase.geofire.GeoLocation;
@@ -16,6 +15,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import static com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper.getModelDir;
+import static com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper.getModelPath;
 import static com.doyoon.android.bravenewworld.z.util.Const.RefKey.LOCATION_SERCIVE;
 
 /**
@@ -171,7 +171,7 @@ public class RemoteDao {
             FirebaseDatabase.getInstance().getReference(modelDir).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    UserProfile userProfile = dataSnapshot.getValue(UserProfile.class);
+                    com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile userProfile = dataSnapshot.getValue(com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile.class);
                     UserStatusPresenter.myUserProfile = userProfile;
                 }
 
@@ -183,4 +183,41 @@ public class RemoteDao {
         }
     }
 
+    public static class UserProfile {
+        public static void insertName(String name){
+            String modelPath = getModelPath(Const.RefKey.USER_PROFILE,  UserStatusPresenter.myUserAccessKey);
+            FirebaseDatabase.getInstance().getReference(modelPath + Const.RefKey.PROFILE_NAME).setValue(name);
+        }
+
+        public static void insertWork(String work){
+            String modelPath = getModelPath(Const.RefKey.USER_PROFILE,  UserStatusPresenter.myUserAccessKey);
+            FirebaseDatabase.getInstance().getReference(modelPath + Const.RefKey.PROFILE_WORK).setValue(work);
+        }
+
+        public static void insertAge(int age){
+            String modelPath = getModelPath(Const.RefKey.USER_PROFILE,  UserStatusPresenter.myUserAccessKey);
+            FirebaseDatabase.getInstance().getReference(modelPath + Const.RefKey.PROFILE_AGE).setValue(age);
+        }
+
+        public static void insertComment(String comment){
+            String modelPath = getModelPath(Const.RefKey.USER_PROFILE,  UserStatusPresenter.myUserAccessKey);
+            FirebaseDatabase.getInstance().getReference(modelPath + Const.RefKey.PROFILE_COMMENT).setValue(comment);
+        }
+
+        public static void insertGender(int gender) {
+            String modelPath = getModelPath(Const.RefKey.USER_PROFILE,  UserStatusPresenter.myUserAccessKey);
+            FirebaseDatabase.getInstance().getReference(modelPath + Const.RefKey.PROFILE_GENDER).setValue(gender);
+        }
+
+        public static void increaseRainCount() {
+            String modelPath = getModelPath(Const.RefKey.USER_PROFILE,  UserStatusPresenter.myUserAccessKey);
+
+        }
+
+        public static void increaseUmbCount() {
+            String modelPath = getModelPath(Const.RefKey.USER_PROFILE,  UserStatusPresenter.myUserAccessKey);
+        }
+
+
+    }
 }

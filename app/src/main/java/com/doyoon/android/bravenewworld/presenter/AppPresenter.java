@@ -28,6 +28,7 @@ import com.doyoon.android.bravenewworld.presenter.listener.PickmeRequestListener
 import com.doyoon.android.bravenewworld.presenter.location.Locator;
 import com.doyoon.android.bravenewworld.view.dialog.PickmeReceiveDialog;
 import com.doyoon.android.bravenewworld.z.util.Const;
+import com.doyoon.android.bravenewworld.z.util.LatLngUtil;
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
@@ -40,6 +41,8 @@ import java.util.Map;
 
 import static android.R.attr.key;
 import static com.doyoon.android.bravenewworld.presenter.UserStatusPresenter.chatAccessKey;
+import static com.doyoon.android.bravenewworld.presenter.UserStatusPresenter.myLatLng;
+import static com.doyoon.android.bravenewworld.presenter.UserStatusPresenter.otherLatLng;
 
 /**
  * Created by DOYOON on 7/16/2017.
@@ -61,10 +64,6 @@ public class AppPresenter {
     /* member variable */
     private AppCompatActivity activity;
 
-
-    /* Shared Preference */
-    private int startIndexForFetchUser = 0;
-
     private AppPresenter() {}
 
     public void initialize(AppCompatActivity activity){
@@ -75,102 +74,56 @@ public class AppPresenter {
 
     }
 
+    /**
+     *
+     * @param selectedType
+     *
+     * Add active user and get other users
+     */
     public void runOnMatching(int selectedType){
-
-        if (!UserStatusPresenter.getInstance().isNotYetChoosed()) {
-            Log.e(TAG, "User status is not 'not_yet_Choosed' 'already something choosed. It's weired..");
-        }
-
-        if (UserStatusPresenter.activeUserType != Const.ActiveUserType.NOT_YET_CHOOSED) {
-            Log.e(TAG, "Current User Type is [" + UserStatusPresenter.activeUserType + "], User type is changed, check listener removing properly");
-        }
+        if (!UserStatusPresenter.getInstance().isNotYetChoosed()) Log.e(TAG, "User status is not 'not_yet_Choosed' 'already something choosed. It's weired..");
+        if (UserStatusPresenter.activeUserType != Const.ActiveUserType.NOT_YET_CHOOSED) Log.e(TAG, "Current User Type is [" + UserStatusPresenter.activeUserType + "], User type is changed, check listener removing properly");
 
         /* clear all active user data in local */
         activeUserMap.clear();
         activeUserList.clear();
+
         /* Add Geo Query Data using Last LatLng */
         removeExistedActiveUserFromRemote();
 
+        /* Get last location and add geo query */
         // last location callback
         // geo query callback
         // addActiveUserAndGetOtherActiveUsersFromMyLastLocation(selectedType, /* */, this.geoQueryCallbackForActiveUser);
         addActiveUserAndGetOtherActiveUsersFromMyLastLocation(selectedType);
 
-        MatchingCompleteListener.getInstance().addMatchingCompleteListener(new MatchingCompleteListener.Callback() {
-            @Override
-            public void execute(MatchingComplete matchingComplete) {
-                receiveMatchingComplete(matchingComplete);
-            }
-        });
+        /* Add Matching Complete Listener */
+        MatchingCompleteListener.getInstance().addMatchingCompleteListener(this.matchingCompleteListenerCallback);
 
+        /* If Active user type is giver, add pickme receive listener */
         if(UserStatusPresenter.activeUserType == Const.ActiveUserType.Giver) {
-            PickmeRequestListener.getInstance().addPickMeRequestListener(new PickmeRequestListener.Callback() {
-                @Override
-                public void execute(PickMeRequest pickMeRequest) {
-                    receivePickMeRequest(pickMeRequest);
-                }
-            });
+            PickmeRequestListener.getInstance().addPickMeRequestListener(this.pickmeReceiveListener);
         }
 
-        Log.e(TAG, "Add Listener Complete");
+        Log.i(TAG, "Now User is run on matching");
     }
-
 
     public void stopOnMatching(){
         //fixme remove geo listener
         MatchingCompleteListener.getInstance().removeMatchingCompleteListener();
         PickmeRequestListener.getInstance().removePickMeRequestListener();
+
+        Log.i(TAG, "Now User is stop on matching");
     }
 
-    public void runOnFinding(String locationAccessKey, String chatAccessKey){
 
-        UserStatusPresenter.chatAccessKey = chatAccessKey;
-        UserStatusPresenter.locationFinderAccessKey = locationAccessKey;
-
-        ChatListener.getInstance().addChatListener(new ChatListener.Callback() {
-            @Override
-            public void onChatAdded(Chat chat) {
-                chatView.addChat(chat);
-                chatView.notifySetChanged();
-                chatView.setFocusLastItem();
-            }
-        });
-
-        OtherUserLocationListener.getInstance().addOtherLocationListener(new OtherUserLocationListener.Callback() {
-            @Override
-            public void execute(LocationFinder locationFinder) {
-                if(findingMapView == null) return;
-                findingMapView.updateOtherMarker(locationFinder.getLatitude(), locationFinder.getLongitude());
-            }
-        });
-
-        UserStatusPresenter.userStatus = Const.UserStatus.ON_FINDING;
-
-        /* Update my location automatically to remote */
-        Locator.getInstance().traceAndExecute(this.activity, new Locator.CustomLocationCallback() {
-            @Override
-            public void execute(LatLng currentLatLng, String lastUpdateTime) {
-                RemoteDao.LocationFinder.updateMyLocation(currentLatLng, UserStatusPresenter.locationFinderAccessKey, UserStatusPresenter.myUserAccessKey);
-                if(findingMapView != null) findingMapView.updateMyMarker(currentLatLng.latitude, currentLatLng.longitude);
-                Log.e(TAG, currentLatLng.latitude + ", " + currentLatLng.longitude + ", " + lastUpdateTime);
-            }
-        });
-
-        Log.i(TAG, "Now User is Run on Finding, Listen Chat and Other User Location");
-        Log.i(TAG, ", Other User is " + UserStatusPresenter.getInstance().otherUserAccessKey +
-                ", ChatAccessKey is " + chatAccessKey +
-                ", LocationAccessKey is " + locationAccessKey);
-    }
-
-    public void stopOnFinding(){
-        ChatListener.getInstance().removeChatListener();
-        OtherUserLocationListener.getInstance().removeOtherLocationListener();
-    }
-
+    /**
+     * If receive the matchingcomplete.
+     * stop on matching and run on finding.
+     *
+     * @param matchingComplete
+     */
     private void receiveMatchingComplete(MatchingComplete matchingComplete){
-
-        /* Remove Matching Complete Value */
-        // RemoteDao.MatchingComplete.remove();
 
         /* Remove PickMe Request */
         if (UserStatusPresenter.activeUserType == Const.ActiveUserType.Giver) {
@@ -213,12 +166,84 @@ public class AppPresenter {
         this.viewPagerMover.moveViewPage(1);
     }
 
+    public void runOnFinding(String locationAccessKey, String chatAccessKey){
+
+            UserStatusPresenter.chatAccessKey = chatAccessKey;
+            UserStatusPresenter.locationFinderAccessKey = locationAccessKey;
+
+            /* Update my location automatically to remote */
+            Locator.getInstance().traceAndExecute(this.activity, new Locator.CustomLocationCallback() {
+                @Override
+                public void execute(LatLng currentLatLng, String lastUpdateTime) {
+                    RemoteDao.LocationFinder.updateMyLocation(currentLatLng, UserStatusPresenter.locationFinderAccessKey, UserStatusPresenter.myUserAccessKey);
+                    if(findingMapView != null) findingMapView.updateMyMarker(currentLatLng.latitude, currentLatLng.longitude);
+
+                    UserStatusPresenter.myLatLng = new LatLng(currentLatLng.latitude, currentLatLng.longitude);
+                    if (isNearEachOther()) {
+                        RemoteDao.MatchingComplete.remove();
+                        stopOnFinding();
+                    }
+                    // Log.i(TAG, currentLatLng.latitude + ", " + currentLatLng.longitude + ", " + lastUpdateTime);
+                }
+            });
+
+            /* Get Other User location from remote */
+            OtherUserLocationListener.getInstance().addOtherLocationListener(new OtherUserLocationListener.Callback() {
+                @Override
+                public void execute(LocationFinder locationFinder) {
+                    if(findingMapView == null) return;
+                    UserStatusPresenter.otherLatLng = new LatLng(locationFinder.getLatitude(), locationFinder.getLongitude());
+
+                    findingMapView.updateOtherMarker(locationFinder.getLatitude(), locationFinder.getLongitude());
+                    if (isNearEachOther()){
+                        RemoteDao.MatchingComplete.remove();
+                        stopOnFinding();
+                    }
+                }
+            });
+
+            /* Chat Listener */
+            ChatListener.getInstance().addChatListener(new ChatListener.Callback() {
+                @Override
+                public void onChatAdded(Chat chat) {
+                    chatView.addChat(chat);
+                    chatView.notifySetChanged();
+                    chatView.setFocusLastItem();
+                }
+            });
+
+            UserStatusPresenter.userStatus = Const.UserStatus.ON_FINDING;
+
+
+
+            Log.i(TAG, "Now User is Run on Finding, Listen Chat and Other User Location");
+            Log.i(TAG, ", Other User is " + UserStatusPresenter.getInstance().otherUserAccessKey +
+                    ", ChatAccessKey is " + chatAccessKey +
+                    ", LocationAccessKey is " + locationAccessKey);
+    }
+
+    public void stopOnFinding(){
+        Locator.getInstance().stopTraceAndExecute();
+        OtherUserLocationListener.getInstance().removeOtherLocationListener();
+
+        ChatListener.getInstance().removeChatListener();
+
+        Log.i(TAG, "stop on finding");
+    }
+
     public int getUserType() {
         return UserStatusPresenter.activeUserType;
     }
 
-    public interface LocationCallback {
-        void execute(LatLng latLng);
+    private boolean isNearEachOther(){
+        if(UserStatusPresenter.myLatLng == null || UserStatusPresenter.otherLatLng == null) return false;
+
+        float distance = LatLngUtil.distanceBetweenTwoLatLngUnitMeter(myLatLng, otherLatLng);
+
+        Log.i(TAG, "Distance is " + distance +"m");
+
+        if (distance < Const.DEFAULT_FINDING_DISTANCE_M) return true;
+        else return false;
     }
 
     private String getOtherUserAccessKey(MatchingComplete matchingComplete){
@@ -383,7 +408,7 @@ public class AppPresenter {
             activeUserMap.put(key, activeUser);
             activeUserList.add(key);
 
-                /* No need this method... validate distance */
+            /* No need this method... validate distance */
             // float distance_m = LatLngUtil.distanceBetweenTwoLatLngUnitMeter(lastLatLng, activeUser.getLatLng());
             // Log.i(TAG, "ADD Active User Complete " + activeUser.getKey() + ", distance(m) is " + distance_m);
         }
@@ -392,8 +417,8 @@ public class AppPresenter {
         public void onKeyExited() {
             /* Don't remove key and object in activeUserMap and activeUserList */
             // todo remove or not??
-            activeUserMap.get(key).setActive(false);
             activeUserMapView.resetMarker(activeUserMap);
+            activeUserMap.get(key).setActive(false);
             Log.i(TAG, "Remove Geo Query : Active user [" + key + "] is now deactive");
         }
 
@@ -405,6 +430,19 @@ public class AppPresenter {
         }
     };
 
+    private MatchingCompleteListener.Callback matchingCompleteListenerCallback = new MatchingCompleteListener.Callback() {
+        @Override
+        public void execute(MatchingComplete matchingComplete) {
+            receiveMatchingComplete(matchingComplete);
+        }
+    };
+
+    private PickmeRequestListener.Callback pickmeReceiveListener = new PickmeRequestListener.Callback() {
+        @Override
+        public void execute(PickMeRequest pickMeRequest) {
+            receivePickMeRequest(pickMeRequest);
+        }
+    };
 
     /* Getter and Setter */
     public Map<String, ActiveUser> getActiveUserMap() {

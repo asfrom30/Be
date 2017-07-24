@@ -5,9 +5,7 @@ package com.doyoon.android.bravenewworld.presenter.interfaces;
  */
 
 public interface UserProfileView {
-    void update();
-
+    void updateProfile();
     void updateProfileImage();
-
     void updateGiverAndTakerCount();
 }

@@ -13,6 +13,12 @@ And also, using Interface and Abstract class I try to keep every class has recyc
 I really hope this code helps even a little.
 
 ### Fetures
+#### prevent memory leak
+
+#### Keep all data recently.
+When user changed profile Image, It does not mean only update current view. Espeacially in view pager case.
+becase View Pager always create three views for Left and Right swiping. In order to solve this problem. I made Interface for UserProfileView.
+and Add All views at Presenter and notify.
 
 
 ### Behind
@@ -27,6 +33,19 @@ Consider another api..
 * Firebase `Get Model Path` and `Read` at Once in FirebaseDao class using FirebaseModel class
 * String left and right padding
 
+### Reference
+#### API
+* [Google Maps Android Api v2 Sample](https://github.com/googlemaps/android-samples)
+
+#### Activity LifeCycle
+* [About on Destroy](https://stackoverflow.com/questions/18361719/android-activity-ondestroy-is-not-always-called-and-if-called-only-part-of-the)
+
+#### View
+* [Set Color Image View](https://stackoverflow.com/questions/38653357/how-to-set-color-for-imageview-in-android)
+* [remove ListView divider](https://stackoverflow.com/questions/5414902/how-to-remove-the-border-in-a-listview)
+* [Claculate between two point latlng](https://stackoverflow.com/questions/14394366/find-distance-between-two-points-on-map-using-google-map-api-v2)
+* [Fragment Transaction Slide in Slide out](https://stackoverflow.com/questions/21026409/fragment-transaction-animation-slide-in-and-slide-out)
+* [Fragment animation back stack](https://stackoverflow.com/questions/10886669/how-to-reverse-fragment-animations-on-backstack)
 ###
 -. 가장 어려웠던 점은... 시간이 걸리는 작업의 경우가 여러개 있는 경우
  User status를 반영하는 타이밍을 정하기 어려웠던 점입니다.
