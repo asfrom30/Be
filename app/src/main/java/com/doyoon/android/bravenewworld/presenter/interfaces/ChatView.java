@@ -6,7 +6,7 @@ import com.doyoon.android.bravenewworld.domain.firebase.value.Chat;
  * Created by DOYOON on 7/17/2017.
  */
 
-public interface ChatUIController {
+public interface ChatView {
     void addChat(Chat chat);
     void notifySetChanged();
     void setFocusLastItem();

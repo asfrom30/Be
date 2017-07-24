@@ -27,9 +27,9 @@ import jp.wasabeef.glide.transformations.CropCircleTransformation;
  * Created by DOYOON on 7/12/2017.
  */
 
-public class PickmeRequestSendingDialog extends DialogFragment {
+public class SendPickmeRequestDialog extends DialogFragment {
 
-    private static final String TAG = PickmeRequestSendingDialog.class.getSimpleName();
+    private static final String TAG = SendPickmeRequestDialog.class.getSimpleName();
 
     // Use this instance of the interface to deliver action events
     private int userType;
@@ -37,7 +37,7 @@ public class PickmeRequestSendingDialog extends DialogFragment {
     private UserProfile targetUserProfile;
 
 
-    public PickmeRequestSendingDialog(int userType, UserProfile targetUserProfile, Callback callback) {
+    public SendPickmeRequestDialog(int userType, UserProfile targetUserProfile, Callback callback) {
         this.userType = userType;
         this.callback = callback;
         this.targetUserProfile = targetUserProfile;

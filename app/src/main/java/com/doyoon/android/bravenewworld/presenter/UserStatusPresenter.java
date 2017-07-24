@@ -37,7 +37,7 @@ public class UserStatusPresenter {
     public static UserProfile otherUserProfile;
 
     public static LatLng lastLatLng;
-    public static String currentChatAccessKey;
+    public static String chatAccessKey;
     public static String locationFinderAccessKey;
 
 
@@ -45,7 +45,17 @@ public class UserStatusPresenter {
 
     }
 
+    public boolean isNotYetChoosed() {
+        if(userStatus == Const.UserStatus.USER_NOT_YET_MATCHED) return true;
+        else return false;
+    }
+
     public boolean isOnFinding() {
+        if(userStatus == Const.UserStatus.ON_FINDING) return true;
+        else return false;
+    }
+
+    public boolean isOnMatching() {
         if(userStatus == Const.UserStatus.ON_MATCHING) return true;
         else return false;
     }

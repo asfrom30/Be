@@ -142,9 +142,9 @@ public class SelectPreFragment extends Fragment {
             public void onClick(View v) {
                 showOrNotGuideSnackBar();
                 if (selectedBtn == BTN_UMB_SELECTED) {
-                    UserStatusPresenter.activeUserType = Const.ActiveUserType.Giver;
-                    AppPresenter.getInstance().runOnMatching();
-                    goUserSelectMapFragment();
+                    AppPresenter.getInstance().runOnMatching(Const.ActiveUserType.Giver);
+                    UserStatusPresenter.activeUserType = Const.ActiveUserType.Giver; //todo move in presenter
+                    goUserSelectMapFragment(); //todo move in presenter
                 } else {
                     selectedBtn = BTN_UMB_SELECTED;
                     updateButtonView();
@@ -158,9 +158,9 @@ public class SelectPreFragment extends Fragment {
             public void onClick(View v) {
                 showOrNotGuideSnackBar();
                 if (selectedBtn == BTN_RAIN_SELECTED) {
-                    UserStatusPresenter.activeUserType = Const.ActiveUserType.Taker;
-                    AppPresenter.getInstance().runOnMatching();
-                    goUserSelectMapFragment();
+                    AppPresenter.getInstance().runOnMatching(Const.ActiveUserType.Taker);
+                    UserStatusPresenter.activeUserType = Const.ActiveUserType.Taker; //todo move in presenter
+                    goUserSelectMapFragment(); //todo move in presenter
                 } else {
                     selectedBtn = BTN_RAIN_SELECTED;
                     updateButtonView();

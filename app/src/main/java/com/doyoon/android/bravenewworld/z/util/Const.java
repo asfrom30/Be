@@ -31,10 +31,22 @@ public class Const {
     }
 
 
-    public static class MAP_SETTING {
+    public static class MapSetting {
+
+    }
+
+    public static class ActiveUserMapSetting {
         public static float MARKER_ALPHA = 1.0f;
-        public static int GIVER_MAP_PIN_RES_ID = R.drawable.map_pin_umbrella;
-        public static int TAKER_MAP_PIN_RES_ID = R.drawable.map_pin_rain;
+
+        public static int getMapPinResId(int activeUserType){
+            if (activeUserType == Const.ActiveUserType.Taker) {
+                return R.drawable.map_pin_umbrella;
+            } else if (activeUserType == Const.ActiveUserType.Giver) {
+                return R.drawable.map_pin_rain;
+            } else {
+                throw new IllegalStateException("AppPresenter User Type is not declared, can't get Map Pin Resource ID`");
+            }
+        }
     }
 
 

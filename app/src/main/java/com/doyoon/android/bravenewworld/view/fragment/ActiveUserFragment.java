@@ -12,10 +12,12 @@ import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.geovalue.ActiveUser;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
+import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
+import com.doyoon.android.bravenewworld.presenter.fetch.MyLastLocationFetcher;
 import com.doyoon.android.bravenewworld.view.fragment.base.PermissionFragment;
-import com.doyoon.android.bravenewworld.view.dialog.PickmeRequestSendingDialog;
-import com.doyoon.android.bravenewworld.presenter.interfaces.ActiveUserListUIController;
-import com.doyoon.android.bravenewworld.presenter.interfaces.ActiveUserMapController;
+import com.doyoon.android.bravenewworld.view.dialog.SendPickmeRequestDialog;
+import com.doyoon.android.bravenewworld.presenter.interfaces.ActiveUserListView;
+import com.doyoon.android.bravenewworld.presenter.interfaces.ActiveUserMapView;
 import com.doyoon.android.bravenewworld.z.util.Const;
 import com.doyoon.android.bravenewworld.z.util.LogUtil;
 import com.google.android.gms.maps.CameraUpdate;
@@ -34,7 +36,7 @@ import java.util.Map;
  * 설명
  */
 
-public class ActiveUserFragment extends PermissionFragment implements OnMapReadyCallback, ActiveUserMapController, ActiveUserListUIController {
+public class ActiveUserFragment extends PermissionFragment implements OnMapReadyCallback, ActiveUserMapView, ActiveUserListView {
 
     private static String TAG = ActiveUserFragment.class.getSimpleName();
     private static int linkRes = R.layout.fragment_user_select_map;
@@ -73,8 +75,8 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
         LogUtil.logLifeCycle(TAG, "onCreateView()");
 
         /* Link to AppPresenter */
-        AppPresenter.getInstance().setActiveUserListUIController(this);
-        AppPresenter.getInstance().setActiveUserMapController(this);
+        AppPresenter.getInstance().setActiveUserListView(this);
+        AppPresenter.getInstance().setActiveUserMapView(this);
 
         /* Layout Inflating */
         baseView = inflater.inflate(R.layout.fragment_user_select_map, container, false);
@@ -113,9 +115,9 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
 
     public void onActiveUserItemClicked(UserProfile clickedUserProfile) {
         int userType = AppPresenter.getInstance().getUserType();
-        DialogFragment dialogFragment = new PickmeRequestSendingDialog( userType
+        DialogFragment dialogFragment = new SendPickmeRequestDialog( userType
                 , clickedUserProfile
-                , new PickmeRequestSendingDialog.Callback() {
+                , new SendPickmeRequestDialog.Callback() {
                     /* Show Detail Profile */
 
                     /* Sending */
@@ -146,7 +148,7 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
             return;
         }
 
-        AppPresenter.getInstance().getLastLocation(new AppPresenter.LocationCallback() {
+        MyLastLocationFetcher.getInstance().fetch(getActivity(), new MyLastLocationFetcher.Callback() {
             @Override
             public void execute(LatLng latLng) {
                 CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, CURRENT_CAMERA_ZOOM);
@@ -160,18 +162,6 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
         // googleMap.getUiSettings().setZoomControlsEnabled(false);
         googleMap.getUiSettings().setRotateGesturesEnabled(false);
 
-    }
-
-    private int getMapPinResId(){
-        int userType = AppPresenter.getInstance().getUserType();
-
-        if (userType == Const.ActiveUserType.Taker) {
-            return Const.MAP_SETTING.GIVER_MAP_PIN_RES_ID;
-        } else if (userType == Const.ActiveUserType.Giver) {
-            return Const.MAP_SETTING.TAKER_MAP_PIN_RES_ID;
-        } else {
-            throw new IllegalStateException("AppPresenter User Type is not declared, can't get Map Pin Resource ID`");
-        }
     }
 
     /* Activity Life Cycler */
@@ -236,14 +226,16 @@ public class ActiveUserFragment extends PermissionFragment implements OnMapReady
         }
 
         this.mGoogleMap.clear();
+
         for (Map.Entry<String, ActiveUser> entry : activeUserMap.entrySet()) {
             ActiveUser activeUser = entry.getValue();
 
+            int markerResId = Const.ActiveUserMapSetting.getMapPinResId(UserStatusPresenter.activeUserType);
             if(activeUser.isActive()){
                 this.mGoogleMap.addMarker(new MarkerOptions()
                         .position(activeUser.getLatLng())
-                        .alpha(Const.MAP_SETTING.MARKER_ALPHA)
-                        .icon(BitmapDescriptorFactory.fromResource(getMapPinResId())));
+                        .alpha(Const.ActiveUserMapSetting.MARKER_ALPHA)
+                        .icon(BitmapDescriptorFactory.fromResource(markerResId)));
             }
         }
     }

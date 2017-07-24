@@ -8,6 +8,6 @@ import java.util.Map;
  * Created by DOYOON on 7/16/2017.
  */
 
-public interface ActiveUserMapController {
+public interface ActiveUserMapView {
     void resetMarker(Map<String, ActiveUser> activeUserMap);
 }

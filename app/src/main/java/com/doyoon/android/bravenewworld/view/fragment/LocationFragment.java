@@ -14,7 +14,8 @@ import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
-import com.doyoon.android.bravenewworld.presenter.interfaces.LocationUIController;
+import com.doyoon.android.bravenewworld.presenter.fetch.MyLastLocationFetcher;
+import com.doyoon.android.bravenewworld.presenter.interfaces.FindingMapView;
 import com.doyoon.android.bravenewworld.presenter.interfaces.OtherUserProfileUpdater;
 import com.doyoon.android.bravenewworld.z.util.Const;
 import com.doyoon.android.bravenewworld.z.util.LogUtil;
@@ -33,7 +34,7 @@ import jp.wasabeef.glide.transformations.CropCircleTransformation;
  * Created by DOYOON on 7/12/2017.
  */
 
-public class LocationFragment extends Fragment implements OnMapReadyCallback, LocationUIController, OtherUserProfileUpdater {
+public class LocationFragment extends Fragment implements OnMapReadyCallback, FindingMapView, OtherUserProfileUpdater {
 
     private static final String TAG = LocationFragment.class.getSimpleName();
     private ImageView locationFragmentMyImage, locationFragmentOtherImage;
@@ -70,7 +71,7 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Lo
         View view = inflater.inflate(R.layout.fragment_user_map, container, false);
         dependencyInjection(view, savedInstanceState);
 
-        AppPresenter.getInstance().setLocationUIController(this);
+        AppPresenter.getInstance().setFindingMapView(this);
         AppPresenter.getInstance().addOtherUserProfileUpdater(this);
 
         return view;
@@ -106,8 +107,7 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Lo
                 // add marker to map
                 // traceAndExecute update and move marker
             } else {
-                Log.i(TAG, "Try to get Location in Map Fragment");
-                AppPresenter.getInstance().getLastLocation(new AppPresenter.LocationCallback() {
+                MyLastLocationFetcher.getInstance().fetch(getActivity(), new MyLastLocationFetcher.Callback() {
                     @Override
                     public void execute(LatLng latLng) {
                         // Get Lastlocation and Update

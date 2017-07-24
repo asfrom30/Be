@@ -25,12 +25,12 @@ import jp.wasabeef.glide.transformations.CropCircleTransformation;
  * Created by DOYOON on 7/12/2017.
  */
 
-public class PickmeRequestNoticeDialog extends DialogFragment {
+public class PickmeReceiveDialog extends DialogFragment {
     // Use this instance of the interface to deliver action events
     private Callback callback;
     private PickMeRequest pickMeRequest;
 
-    public PickmeRequestNoticeDialog(PickMeRequest pickMeRequest, Callback callback) {
+    public PickmeReceiveDialog(PickMeRequest pickMeRequest, Callback callback) {
         this.pickMeRequest = pickMeRequest;
         this.callback = callback;
     }

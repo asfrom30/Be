@@ -23,7 +23,7 @@ import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.value.Chat;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
-import com.doyoon.android.bravenewworld.presenter.interfaces.ChatUIController;
+import com.doyoon.android.bravenewworld.presenter.interfaces.ChatView;
 import com.doyoon.android.bravenewworld.z.util.Const;
 import com.doyoon.android.bravenewworld.z.util.ConvString;
 import com.doyoon.android.bravenewworld.z.util.LogUtil;
@@ -42,7 +42,7 @@ import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
 /* 이거 리팩토링해서 채팅방으로 재사용하기... 인터페이스로 분리해서 oop에 넣어 놓을 것.. */
 
-public class ChatFragment extends Fragment implements ChatUIController {
+public class ChatFragment extends Fragment implements ChatView {
 
     private static String TAG = ChatFragment.class.getSimpleName();
 
@@ -76,7 +76,7 @@ public class ChatFragment extends Fragment implements ChatUIController {
         LogUtil.logLifeCycle(TAG, "On Create View");
 
         /* Set AppPresenter */
-        AppPresenter.getInstance().setChatUIController(this);
+        AppPresenter.getInstance().setChatView(this);
         this.chatAccessKey = AppPresenter.getInstance().getCurrentChatAccessKey();
 
         /* UserProfileView setting */
