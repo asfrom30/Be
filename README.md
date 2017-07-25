@@ -33,7 +33,12 @@ Consider another api..
 * Firebase `Get Model Path` and `Read` at Once in FirebaseDao class using FirebaseModel class
 * String left and right padding
 
+### Solved Problem
+* RealtimeBlurView -> Rounded Blur view -> Top roundedBlurView -> Path
+
 ### Reference
+#### Gradle
+* [Realtime Blur](https://android-arsenal.com/details/1/4409)
 #### API
 * [Google Maps Android Api v2 Sample](https://github.com/googlemaps/android-samples)
 

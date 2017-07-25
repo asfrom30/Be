@@ -36,7 +36,6 @@ public class ProfileEditFragment extends Fragment implements UserProfileView {
     private EditText textViewName, textViewWork, textViewAge;
     private Spinner spinnerGender;
     private ImageView editProfileImage;
-    private ImageView editProfileImageTop;
     private TextView editProfileEditTextComment;
     private EditText editProfileEditTextName;
     private EditText editProfileEditTextAge;
@@ -44,6 +43,7 @@ public class ProfileEditFragment extends Fragment implements UserProfileView {
     private ImageButton editProfileBtnComplete;
     private ImageButton editProfileBtnCamera;
     private ImageButton editProfileBtnBack;
+    private ViewGroup viewGroup;
 
     public static ProfileEditFragment newInstance() {
 
@@ -93,7 +93,6 @@ public class ProfileEditFragment extends Fragment implements UserProfileView {
 
     private void initView(View view) {
         editProfileImage = (ImageView) view.findViewById(R.id.edit_profile_image);
-        editProfileImageTop = (ImageView) view.findViewById(R.id.edit_profile_image_top);
         editProfileEditTextComment = (TextView) view.findViewById(R.id.edit_profile_editText_comment);
         editProfileEditTextName = (EditText) view.findViewById(R.id.edit_profile_editText_name);
         editProfileEditTextAge = (EditText) view.findViewById(R.id.edit_profile_editText_age);
@@ -101,6 +100,8 @@ public class ProfileEditFragment extends Fragment implements UserProfileView {
         editProfileBtnComplete = (ImageButton) view.findViewById(R.id.edit_profile_btn_complete);
         editProfileBtnCamera = (ImageButton) view.findViewById(R.id.edit_profile_btn_camera);
         editProfileBtnBack = (ImageButton) view.findViewById(R.id.edit_profile_btn_back);
+
+        viewGroup = (ViewGroup) view.findViewById(R.id.edit_profile_view_group);
     }
 
     private void addWidgetsListener() {

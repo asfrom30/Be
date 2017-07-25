@@ -2,18 +2,36 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:orientation="vertical">
 
-    <ImageView
+
+    <LinearLayout
+
         android:id="@+id/edit_profile_image_top"
+
         android:layout_width="0dp"
         android:layout_height="90dp"
+        android:layout_marginTop="0dp"
+        android:orientation="vertical"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/background_profile_include_grey" />
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="8dp">
+
+        <com.doyoon.android.bravenewworld.z.util.view.blur.RoundedTopRectBlurView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:realtimeBlurRadius="30dp"
+            app:realtimeOverlayColor="#00000000" />
+
+
+    </LinearLayout>
+
 
     <LinearLayout
         android:id="@+id/linearLayout3"
