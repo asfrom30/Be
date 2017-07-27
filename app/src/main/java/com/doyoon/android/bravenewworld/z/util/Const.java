@@ -23,7 +23,7 @@ public class Const {
     }
 
     /* View Resource ID */
-    public static class LOCATION_FRAG {
+    public static class LocationFrag {
         public static float MARKER_ALPHA = 1.0f;
         public static int DEFAULT_MAP_PIN_RES_ID = R.drawable.map_icon_mylocation;
         public static int MY_MAP_PIN_RES_ID = R.drawable.map_icon_mylocation;
@@ -31,18 +31,16 @@ public class Const {
     }
 
 
-    public static class MapSetting {
-
-    }
-
-    public static class ActiveUserMapSetting {
+    public static class ActiveUserMapFrag {
         public static float MARKER_ALPHA = 1.0f;
+
+        public static int DEFAULT_MAP_PIN_RES_ID = R.drawable.map_icon_mylocation;
 
         public static int getMapPinResId(int activeUserType){
             if (activeUserType == Const.ActiveUserType.Taker) {
-                return R.drawable.map_pin_umbrella;
+                return R.drawable.map_icon_location_umb;
             } else if (activeUserType == Const.ActiveUserType.Giver) {
-                return R.drawable.map_pin_rain;
+                return R.drawable.map_icon_location_rain;
             } else {
                 throw new IllegalStateException("AppPresenter User Type is not declared, can't get Map Pin Resource ID`");
             }
@@ -86,8 +84,8 @@ public class Const {
 
     public static final int LOCATION_REQ_CODE = 100;
 
-    public static final float DEFAULT_FINDING_DISTANCE_M = 50;
-    public static final double DEFAULT_SEARCH_DISTANCE_KM = 2.0;  // 100m
+    public static final float DEFAULT_FINDING_DISTANCE_M = 20;
+    public static final double DEFAULT_SEARCH_DISTANCE_KM = 100.0;  // 100m
 
     public static final int PAGING_NUMBER_AT_ONCE = 10;
 

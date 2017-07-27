@@ -24,7 +24,7 @@ public abstract class RecyclerFragment<T> extends Fragment{
     private LinearLayoutManager linearLayoutManager;
     int pastVisiblesItems, visibleItemCount, totalItemCount;
 
-    private RecyclerView.Adapter adapter;
+    protected RecyclerView.Adapter adapter;
     private List<T> dataList;
 
 
@@ -74,6 +74,7 @@ public abstract class RecyclerFragment<T> extends Fragment{
         recyclerView.setAdapter(adapter);
         linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);
+
         return view;
     }
 

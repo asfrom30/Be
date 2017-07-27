@@ -16,6 +16,10 @@ public class LogUtil {
         Log.i(StringUtil.padRight(LIFE_CYCLE_TAG + "     [ " + tag, 45) + " ] : ", lifecycleStatus);
     }
 
+    public static void logErrLifeCycle(String tag, String lifecycleStatus){
+        Log.e(StringUtil.padRight(LIFE_CYCLE_TAG + "     [ " + tag, 45) + " ] : ", lifecycleStatus);
+    }
+
     public static void auth(String tag, String autStatus) {
         Log.i(StringUtil.padRight(AUTH + "     [ " + tag, 45) + " ] : ", autStatus);
     }

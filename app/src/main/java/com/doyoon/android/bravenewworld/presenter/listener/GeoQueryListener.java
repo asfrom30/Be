@@ -81,7 +81,7 @@ public class GeoQueryListener {
         this.currentGeoQuery = null;
         this.currentGeoQueryEventListener = null;
 
-        Log.i(TAG, "Before Geo Query Is Detached Successful");
+        Log.i(TAG, "Before Geo Query Is Removed Successful");
     }
 
     private GeoQuery toBuildGeoQuery(GeoLocation coordiGeoLocationQuery, String userTypeQuery, double distanceQuery){
@@ -105,7 +105,7 @@ public class GeoQueryListener {
 
             @Override
             public void onKeyExited(String key) {
-                callback.onKeyExited();
+                callback.onKeyExited(key);
             }
 
             @Override
@@ -136,7 +136,7 @@ public class GeoQueryListener {
 
     public interface Callback {
         void onKeyEntered(String key, GeoLocation location);
-        void onKeyExited();
+        void onKeyExited(String key);
         void onGeoQueryReady();
     }
 }

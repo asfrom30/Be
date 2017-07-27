@@ -91,12 +91,7 @@ public class RemoteDao {
     }
 
     public static class ActiveUser {
-        public static void insert(LatLng latLng) {
-
-            if (UserStatusPresenter.activeUserType == Const.ActiveUserType.NOT_YET_CHOOSED) {
-                Log.e(TAG, "Try to insert Active User at geo fire, but user type is not yet choosed.");
-                return;
-            }
+        public static void insert(int activeUserType, LatLng latLng) {
 
             if (UserStatusPresenter.myUserAccessKey == null) {
                 Log.e(TAG, "Try to insert Active User at geo fire, but myUserAccessKey is null");
@@ -105,7 +100,7 @@ public class RemoteDao {
 
             String modelDir = "";
 
-            switch(UserStatusPresenter.activeUserType){
+            switch(activeUserType){
                 case Const.ActiveUserType.Giver:
                     modelDir = getModelDir(Const.RefKey.ACTIVE_USER_TYPE_GIVER);
                     break;

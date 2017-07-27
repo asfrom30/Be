@@ -6,5 +6,7 @@ package com.doyoon.android.bravenewworld.presenter.interfaces;
 
 public interface ActiveUserListView {
 
-    void update();
+    void notifyListDataSetChanged();
+    void notifyListDataRemoved(int position);
+    void notifyListDataAdded(int position);
 }

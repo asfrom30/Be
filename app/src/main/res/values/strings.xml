@@ -30,4 +30,8 @@
     <string name="fragment_edit_profile_comment">남긴 한마디</string>
     <string name="fragment_edit_profile_no_comment">남긴 한마디가 없습니다.</string>
 
+    <string name="dialog_profile_no_name">No name</string>
+    <string name="dialog_profile_no_detail">-</string>
+    <string name="dialog_profile_distance">0m</string>
+
 </resources>

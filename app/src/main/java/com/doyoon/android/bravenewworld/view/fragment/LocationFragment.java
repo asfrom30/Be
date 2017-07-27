@@ -79,8 +79,6 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Fi
         UserProfilePresenter.getInstance().addUserProfileView(this);
         updateProfile();
 
-        Log.e(TAG, "on create DETACHED" + isDetached());
-
         return view;
     }
 
@@ -89,6 +87,8 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Fi
         super.onDetach();
         UserProfilePresenter.getInstance().removeUserProfileView(this);
     }
+
+
 
     private void dependencyInjection(View view, Bundle savedInstanceState) {
         mMapView = (MapView) view.findViewById(R.id.mainMapView);
@@ -125,7 +125,7 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Fi
                     public void execute(LatLng latLng) {
                         // Get Lastlocation and Update
                         mGoogleMap.clear();
-                        addMarker(latLng, Const.LOCATION_FRAG.DEFAULT_MAP_PIN_RES_ID);
+                        addMarker(latLng, Const.LocationFrag.DEFAULT_MAP_PIN_RES_ID);
                         moveCamera(mGoogleMap, latLng, currentCameraZoom);
                     }
                 });
@@ -156,18 +156,18 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Fi
         mGoogleMap.clear();
 
         if (myLatLng != null) {
-            addMarker(myLatLng, Const.LOCATION_FRAG.MY_MAP_PIN_RES_ID);
+            addMarker(myLatLng, Const.LocationFrag.MY_MAP_PIN_RES_ID);
         }
 
         if (otherLatLng != null) {
-            addMarker(otherLatLng, Const.LOCATION_FRAG.OTHER_MAP_PIN_RES_ID);
+            addMarker(otherLatLng, Const.LocationFrag.OTHER_MAP_PIN_RES_ID);
         }
     }
 
     private void addMarker(LatLng latLng, int ResId) {
         mGoogleMap.addMarker(new MarkerOptions()
                 .position(latLng)
-                .alpha(Const.LOCATION_FRAG.MARKER_ALPHA)
+                .alpha(Const.LocationFrag.MARKER_ALPHA)
                 .icon(BitmapDescriptorFactory.fromResource(ResId)));
     }
 
@@ -179,7 +179,7 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Fi
 //        setFocusMyLatlng();
 //
 //        if (AppPresenter.getInstance().getActiveUserMap() != null) {
-//            resetMarker(AppPresenter.getInstance().getActiveUserMap());
+//            addOtherActiveUserMarkers(AppPresenter.getInstance().getActiveUserMap());
 //        }
     }
 

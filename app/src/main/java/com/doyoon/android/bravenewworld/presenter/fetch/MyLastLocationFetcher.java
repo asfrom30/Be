@@ -48,7 +48,7 @@ public class MyLastLocationFetcher {
                             Log.i(TAG, "Last Location Update Complete, My Last Location is " + latLng.toString());
 
                         } else {
-                            Log.e(TAG, "getLastLocation:exception", task.getException());
+                            Log.e(TAG, "getLastLocation:exception ", task.getException());
                         }
                     }
                 });

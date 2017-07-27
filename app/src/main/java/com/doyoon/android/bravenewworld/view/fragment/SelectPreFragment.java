@@ -16,7 +16,6 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
-import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.z.util.Const;
 import com.doyoon.android.bravenewworld.z.util.LogUtil;
 import com.doyoon.android.bravenewworld.z.util.RuntimePermissionUtil;
@@ -44,15 +43,9 @@ public class SelectPreFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         LogUtil.logLifeCycle(TAG, "on Create");
-
         super.onCreate(savedInstanceState);
-
-        if (savedInstanceState != null) {
-            selectedBtn = savedInstanceState.getInt(BTN_INSTANCE_STATE_TAG);
-        }
     }
 
-    private static final String BTN_INSTANCE_STATE_TAG = "selectedBtn";
     private static final int BTN_UMB_SELECTED = -1;
     private static final int NOT_YET_SELECTED = 0;
     private static final int BTN_RAIN_SELECTED = 1;
@@ -67,12 +60,7 @@ public class SelectPreFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
         LogUtil.logLifeCycle(TAG, "onCreateView()");
-
-        if (savedInstanceState != null) {
-            selectedBtn = savedInstanceState.getInt(BTN_INSTANCE_STATE_TAG);
-        }
 
         View view = inflater.inflate(R.layout.fragment_user_select_pre, container, false);
         this.dependencyInjection(view);
@@ -143,8 +131,6 @@ public class SelectPreFragment extends Fragment {
                 showOrNotGuideSnackBar();
                 if (selectedBtn == BTN_UMB_SELECTED) {
                     AppPresenter.getInstance().runOnMatching(Const.ActiveUserType.Giver);
-                    UserStatusPresenter.activeUserType = Const.ActiveUserType.Giver; //todo move in presenter
-                    goUserSelectMapFragment(); //todo move in presenter
                 } else {
                     selectedBtn = BTN_UMB_SELECTED;
                     updateButtonView();
@@ -159,8 +145,6 @@ public class SelectPreFragment extends Fragment {
                 showOrNotGuideSnackBar();
                 if (selectedBtn == BTN_RAIN_SELECTED) {
                     AppPresenter.getInstance().runOnMatching(Const.ActiveUserType.Taker);
-                    UserStatusPresenter.activeUserType = Const.ActiveUserType.Taker; //todo move in presenter
-                    goUserSelectMapFragment(); //todo move in presenter
                 } else {
                     selectedBtn = BTN_RAIN_SELECTED;
                     updateButtonView();
@@ -176,17 +160,10 @@ public class SelectPreFragment extends Fragment {
             SnackBarHelper.show(getActivity(), "한번 더 누르시면 서비스를 시작합니다.", null, null);
         }
     }
-
-    private void goUserSelectMapFragment() {
-        getFragmentManager().beginTransaction().add(R.id.user_select_frame_layout, ActiveUserFragment.newInstance(), null).commit();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putInt(BTN_INSTANCE_STATE_TAG, selectedBtn);
-    }
+//
+//    private void goUserSelectMapFragment() {
+//        getFragmentManager().beginTransaction().add(R.id.user_select_frame_layout, ActiveUserMapFragment.newInstance(), null).commit();
+//    }
 
     private void updateButtonView() {
 

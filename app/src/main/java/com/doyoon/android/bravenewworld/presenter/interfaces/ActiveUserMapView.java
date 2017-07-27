@@ -1,6 +1,7 @@
 package com.doyoon.android.bravenewworld.presenter.interfaces;
 
 import com.doyoon.android.bravenewworld.domain.firebase.geovalue.ActiveUser;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Map;
 
@@ -9,5 +10,7 @@ import java.util.Map;
  */
 
 public interface ActiveUserMapView {
-    void resetMarker(Map<String, ActiveUser> activeUserMap);
+    void clearAllMarkers();
+    void addMyLocationMarker(LatLng latLng);
+    void addOtherActiveUserMarkers(Map<String, ActiveUser> activeUserMap);
 }

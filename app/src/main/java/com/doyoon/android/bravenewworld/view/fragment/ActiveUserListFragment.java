@@ -4,6 +4,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.res.Resources;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -23,22 +25,22 @@ import jp.wasabeef.glide.transformations.CropCircleTransformation;
  * Created by DOYOON on 7/12/2017.
  */
 
-public class ActiveUserFragmentView {
+public class ActiveUserListFragment {
 
-    private static String TAG = ActiveUserFragmentView.class.getSimpleName();
+    private static String TAG = ActiveUserListFragment.class.getSimpleName();
     int linkRes = R.layout.fragment_user_select_map;
 
     private Context context;
-    private ActiveUserFragment presenter;
+    private ActiveUserMapFragment presenter;
     private View baseView;
 
     private ProgressDialog progressDialog;
 
-    private RecyclerFragment displayUserListFragment;
+    private DisplayUserListFragment displayUserListFragment;
 
-    public ActiveUserFragmentView(ActiveUserFragment activeUserFragment, Context context, View baseView) {
+    public ActiveUserListFragment(ActiveUserMapFragment activeUserMapFragment, Context context, View baseView) {
 
-        this.presenter = activeUserFragment;
+        this.presenter = activeUserMapFragment;
         this.context = context;
         this.baseView = baseView;
 
@@ -54,9 +56,14 @@ public class ActiveUserFragmentView {
 
     }
 
-    public void notifyDataListChanged(){
-        displayUserListFragment.notifySetChanged();
+    public RecyclerView.Adapter getAdapter(){
+        if(displayUserListFragment == null) {
+            Log.i(TAG, "displayUserListFragment is null, can not return Recycler Adpater");
+        }
+
+        return displayUserListFragment.getAdpater();
     }
+
 
     private void setWidgetsPropFromResources() {
         Resources resources = context.getResources();
@@ -81,18 +88,23 @@ public class ActiveUserFragmentView {
         AppPresenter.getInstance().fetchNextPageUserProfiles();
     }
 
+
     public static class DisplayUserListFragment extends RecyclerFragment<UserProfile> {
 
-        private ActiveUserFragmentView parent;
+        private ActiveUserListFragment parent;
         private List<UserProfile> displayUserList;
 
         public DisplayUserListFragment() {
 
         }
 
-        public DisplayUserListFragment(ActiveUserFragmentView parent, List<UserProfile> displayUserList) {
+        public DisplayUserListFragment(ActiveUserListFragment parent, List<UserProfile> displayUserList) {
             this.parent = parent;
             this.displayUserList = displayUserList;
+        }
+
+        public RecyclerView.Adapter getAdpater(){
+            return super.adapter;
         }
 
         @Override

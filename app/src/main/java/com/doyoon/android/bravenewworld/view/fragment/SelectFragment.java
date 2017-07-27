@@ -9,14 +9,16 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.doyoon.android.bravenewworld.R;
+import com.doyoon.android.bravenewworld.presenter.AppPresenter;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
+import com.doyoon.android.bravenewworld.presenter.interfaces.ActiveUserFragmentPublisher;
 import com.doyoon.android.bravenewworld.z.util.LogUtil;
 
 /**
  * Created by DOYOON on 7/13/2017.
  */
 
-public class SelectFragment extends Fragment {
+public class SelectFragment extends Fragment implements ActiveUserFragmentPublisher {
 
     private static String TAG = SelectFragment.class.getSimpleName();
 
@@ -40,20 +42,28 @@ public class SelectFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         LogUtil.logLifeCycle(TAG, "onCreateView()");
 
+        AppPresenter.getInstance().setActiveUserFragmentPublisher(this);
+
         View view = inflater.inflate(R.layout.fragment_user_select, container, false);
 
         if (UserStatusPresenter.getInstance().isOnFinding()) {
-            getFragmentManager().beginTransaction().add(R.id.user_select_frame_layout, ActiveUserFragment.newInstance(), null).commit();
+            startFragment(ActiveUserMapFragment.newInstance());
         } else {
-            startPreFragment();
+            startFragment(SelectPreFragment.newInstance());
         }
 
         return view;
     }
 
-    private void startPreFragment(){
+    private void startFragment(Fragment fragment){
+        // getFragmentManager().beginTransaction().add(R.id.user_select_frame_layout, ActiveUserMapFragment.newInstance(), null).commit();
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        transaction.add(R.id.user_select_frame_layout, SelectPreFragment.newInstance());
+        transaction.add(R.id.user_select_frame_layout, fragment);
         transaction.commit();
+    }
+
+    @Override
+    public void publish() {
+        startFragment(ActiveUserMapFragment.newInstance());
     }
 }

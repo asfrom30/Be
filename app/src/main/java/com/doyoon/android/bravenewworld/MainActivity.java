@@ -6,7 +6,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
-import com.doyoon.android.bravenewworld.domain.RemoteDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
 import com.doyoon.android.bravenewworld.presenter.UserProfilePresenter;
@@ -16,7 +15,6 @@ import com.doyoon.android.bravenewworld.view.fragment.ChatFragment;
 import com.doyoon.android.bravenewworld.view.fragment.LocationFragment;
 import com.doyoon.android.bravenewworld.view.fragment.ProfileFragment;
 import com.doyoon.android.bravenewworld.view.fragment.SelectFragment;
-import com.doyoon.android.bravenewworld.z.util.Const;
 import com.doyoon.android.bravenewworld.z.util.LogUtil;
 import com.doyoon.android.bravenewworld.z.util.view.ViewPagerBuilder;
 import com.tsengvn.typekit.TypekitContextWrapper;
@@ -61,28 +59,17 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
 
         /* make view pager*/
         viewPager = (ViewPager) findViewById(R.id.main_view_pager);
-        TabLayout tabLayout = (TabLayout)  findViewById(R.id.main_tab_layout);
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.main_tab_layout);
 
-        ViewPagerBuilder.getInstance(viewPager)
+        ViewPagerBuilder.getInstance(viewPager, getBaseContext())
                 .addFragment(SelectFragment.newInstance())
                 .addFragment(LocationFragment.newInstance())
                 .addFragment(ChatFragment.newInstance())
                 .addFragment(ProfileFragment.newInstance())
                 .linkTabLayout(tabLayout)
+                .setFirstSelectedTabColor()
                 .build(getSupportFragmentManager());
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        LogUtil.logLifeCycle(TAG, "On Pause");
-        RemoteDao.ActiveUser.remove(Const.ActiveUserType.Giver);
-        RemoteDao.ActiveUser.remove(Const.ActiveUserType.Taker);
     }
 
     private void buildPresenter(String myUserAccessKey){
@@ -96,8 +83,27 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
         AppPresenter.getInstance().setViewPagerMover(this);
     }
 
+    /* Activity Cycle*/
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // todo need remove and restart based on userstatus
+        LogUtil.logErrLifeCycle(TAG, "On Pause");
+//        RemoteDao.ActiveUser.remove(Const.ActiveUserType.Giver);
+//        RemoteDao.ActiveUser.remove(Const.ActiveUserType.Taker);
+//        AppPresenter.getInstance().restart();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // todo need remove and restart based on userstatus
+        LogUtil.logErrLifeCycle(TAG, "On Resume");
+    }
 
 
+    /* Apply font all app */
     @Override protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(TypekitContextWrapper.wrap(newBase));
     }
