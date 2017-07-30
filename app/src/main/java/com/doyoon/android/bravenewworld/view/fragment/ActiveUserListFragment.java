@@ -12,10 +12,10 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.doyoon.android.bravenewworld.R;
-import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
+import com.doyoon.android.bravenewworld.domain.local.ActiveUserProfile;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
+import com.doyoon.android.bravenewworld.util.ConvString;
 import com.doyoon.android.bravenewworld.view.fragment.base.RecyclerFragment;
-import com.doyoon.android.bravenewworld.z.util.Const;
 
 import java.util.List;
 
@@ -32,7 +32,6 @@ public class ActiveUserListFragment {
 
     private Context context;
     private ActiveUserMapFragment presenter;
-    private View baseView;
 
     private ProgressDialog progressDialog;
 
@@ -42,7 +41,6 @@ public class ActiveUserListFragment {
 
         this.presenter = activeUserMapFragment;
         this.context = context;
-        this.baseView = baseView;
 
         this.setWidgetsPropFromResources();
         this.dependencyInjection();
@@ -61,7 +59,7 @@ public class ActiveUserListFragment {
             Log.i(TAG, "displayUserListFragment is null, can not return Recycler Adpater");
         }
 
-        return displayUserListFragment.getAdpater();
+        return displayUserListFragment.getAdapter();
     }
 
 
@@ -80,8 +78,8 @@ public class ActiveUserListFragment {
     private void addWidgetsListener() {
     }
 
-    public void onItemClicked(UserProfile userProfile){
-        this.presenter.onActiveUserItemClicked(userProfile);
+    public void onItemClicked(ActiveUserProfile activeUserProfile){
+        this.presenter.onActiveUserItemClicked(activeUserProfile);
     }
 
     public void onScrollEnded(){
@@ -89,21 +87,21 @@ public class ActiveUserListFragment {
     }
 
 
-    public static class DisplayUserListFragment extends RecyclerFragment<UserProfile> {
+    public static class DisplayUserListFragment extends RecyclerFragment<ActiveUserProfile> {
 
         private ActiveUserListFragment parent;
-        private List<UserProfile> displayUserList;
+        private List<ActiveUserProfile> displayUserList;
 
         public DisplayUserListFragment() {
 
         }
 
-        public DisplayUserListFragment(ActiveUserListFragment parent, List<UserProfile> displayUserList) {
+        public DisplayUserListFragment(ActiveUserListFragment parent, List<ActiveUserProfile> displayUserList) {
             this.parent = parent;
             this.displayUserList = displayUserList;
         }
 
-        public RecyclerView.Adapter getAdpater(){
+        public RecyclerView.Adapter getAdapter(){
             return super.adapter;
         }
 
@@ -112,30 +110,27 @@ public class ActiveUserListFragment {
             return new CustomViewHolder(view) {
 
                 ImageView imageView;
-                TextView textViewIndex, textViewDistance, textViewUserWork, textViewKey, textViewName, textViewAge, textViewGender;
+                TextView textViewIndex, textViewDistance, textViewUserWork, textViewName, textViewAge, textViewGender;
 
                 @Override
-                public void updateRecyclerItemView(View view, UserProfile userProfile) {
+                public void updateRecyclerItemView(View view, ActiveUserProfile activeUserProfile) {
                     //todo make thumbnail
-                    if (userProfile.getImageUri() != null) {
-                        Glide.with(getContext()).load(userProfile.getImageUri()).bitmapTransform(new CropCircleTransformation(getContext())).into(imageView);
+                    if (activeUserProfile.getImageUri() != null) {
+                        Glide.with(getContext()).load(activeUserProfile.getImageUri()).bitmapTransform(new CropCircleTransformation(getContext())).into(imageView);
                     }
-                    if(userProfile.getKey() != null) textViewKey.setText(userProfile.getKey());
-                    if(userProfile.getName() != null) textViewName.setText(userProfile.getName());
-                    if(userProfile.getAge() != 0) textViewAge.setText(userProfile.getAge() + "");
+                    if(activeUserProfile.getName() != null) textViewName.setText(activeUserProfile.getName());
+                    if(activeUserProfile.getAge() != 0) textViewAge.setText(activeUserProfile.getAge() + "");
+                    if(activeUserProfile.getGender() != 0) textViewGender.setText(ConvString.getGender(activeUserProfile.getGender()));
 
-                    if (userProfile.getGender() == Const.Gender.FEMALE) {
-                        textViewGender.setText("여자");
-                    } else {
-                        textViewGender.setText("남자");
-                    }
+                    String distance = ConvString.getDistance(activeUserProfile.getDistanceFromUser(), getString(R.string.fragment_active_distance_unit));
+                    if(activeUserProfile.getDistanceFromUser() != 0) textViewDistance.setText(distance);
+
 
                 }
 
                 @Override
-                public void dependencyInjection(View itemView, UserProfile userProfile) {
+                public void dependencyInjection(View itemView, ActiveUserProfile activeUserProfile) {
                     imageView = (ImageView) itemView.findViewById(R.id.userprofile_image);
-                    textViewKey = (TextView) itemView.findViewById(R.id.userprofile_key);
                     textViewName = (TextView) itemView.findViewById(R.id.userprofile_name);
                     textViewAge = (TextView) itemView.findViewById(R.id.userprofile_age);
                     textViewGender = (TextView) itemView.findViewById(R.id.userprofile_gender);
@@ -147,8 +142,8 @@ public class ActiveUserListFragment {
 
                 @Override
                 public void onClick(View v) {
-                    UserProfile userProfile = getT();
-                    parent.onItemClicked(userProfile);
+                    ActiveUserProfile activeUserProfile = getT();
+                    parent.onItemClicked(activeUserProfile);
                 }
             };
         }
@@ -164,7 +159,7 @@ public class ActiveUserListFragment {
         }
 
         @Override
-        public List<UserProfile> throwDataList() {
+        public List<ActiveUserProfile> throwDataList() {
             return this.displayUserList;
         }
 
@@ -178,75 +173,4 @@ public class ActiveUserListFragment {
             this.parent.onScrollEnded();
         }
     }
-
-    /* Data Loading Progress Dialog*/
-    public void startInProgress() {
-        progressDialog.setMessage("Downloading Music");
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setProgress(0);
-        progressDialog.show();
-        final int totalProgressTime = 100;
-        final Thread t = new Thread() {
-            @Override
-            public void run() {
-                int jumpTime = 0;
-
-                while (jumpTime < totalProgressTime) {
-                    try {
-                        sleep(200);
-                        jumpTime += 5;
-                        progressDialog.setProgress(jumpTime);
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-            }
-        };
-        t.start();
-    }
-
-    public void endInProgress() {
-        progressDialog.dismiss();
-    }
-
-    /*
-    mLatitudeText.setText(String.format(Locale.ENGLISH, "%s: %f",
-            mLatitudeLabel,
-            mLastLocation.getLatitude()));
-    mLongitudeText.setText(String.format(Locale.ENGLISH, "%s: %f",
-            mLongitudeLabel,
-            mLastLocation.getLongitude()));
-    */
-
-    //
-    //    /**
-    //     * Shows a {@link Snackbar} using {@code text}.
-    //     *
-    //     * @param text The Snackbar text.
-    //     */
-    //    private void showSnackbar(final String text) {
-    //        UserProfileView container = findViewById(R.id.main_activity_container);
-    //        if (container != null) {
-    //            Snackbar.make(container, text, Snackbar.LENGTH_LONG).show();
-    //        }
-    //    }
-    //
-    //    /**
-    //     * Shows a {@link Snackbar}.
-    //     *
-    //     * @param mainTextStringId The id for the string resource for the Snackbar text.
-    //     * @param actionStringId   The text of the action item.
-    //     * @param listener         The listener associated with the Snackbar action.
-    //     */
-    //    private void showSnackbar(final int mainTextStringId, final int actionStringId,
-    //                              UserProfileView.OnClickListener listener) {
-    //        Snackbar.make(findViewById(android.R.id.content),
-    //                getString(mainTextStringId),
-    //                Snackbar.LENGTH_INDEFINITE)
-    //                .setAction(getString(actionStringId), listener).show();
-    //    }
-    //
-
 }

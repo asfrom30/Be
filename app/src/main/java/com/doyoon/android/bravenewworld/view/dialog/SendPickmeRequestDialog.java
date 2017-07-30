@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -14,12 +13,10 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.doyoon.android.bravenewworld.R;
-import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
-import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
-import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
-import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
-import com.doyoon.android.bravenewworld.z.util.Const;
-import com.doyoon.android.bravenewworld.z.util.ConvString;
+import com.doyoon.android.bravenewworld.domain.local.ActiveUserProfile;
+import com.doyoon.android.bravenewworld.presenter.AppPresenter;
+import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.util.ConvString;
 
 import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
@@ -34,13 +31,13 @@ public class SendPickmeRequestDialog extends DialogFragment {
     // Use this instance of the interface to deliver action events
     private int userType;
     private Callback callback;
-    private UserProfile targetUserProfile;
+    private ActiveUserProfile targetActiveUserProfile;
 
 
-    public SendPickmeRequestDialog(int userType, UserProfile targetUserProfile, Callback callback) {
+    public SendPickmeRequestDialog(int userType, ActiveUserProfile targetActiveUserProfile, Callback callback) {
         this.userType = userType;
         this.callback = callback;
-        this.targetUserProfile = targetUserProfile;
+        this.targetActiveUserProfile = targetActiveUserProfile;
     }
 
     @NonNull
@@ -54,13 +51,13 @@ public class SendPickmeRequestDialog extends DialogFragment {
 
         /* Custom UserProfileView */
         TextView textView = (TextView) view.findViewById(R.id.request_sending_textview);
-        textView.setText(targetUserProfile.getName() + ", "
-                + targetUserProfile.getAge() + ", "
-                + ConvString.getGender(targetUserProfile.getGender()));
+        textView.setText(targetActiveUserProfile.getName() + ", "
+                + targetActiveUserProfile.getAge() + ", "
+                + ConvString.getGender(targetActiveUserProfile.getGender()));
 
-        if (targetUserProfile.getImageUri() != null) {
+        if (targetActiveUserProfile.getImageUri() != null) {
             ImageView imageView = (ImageView) view.findViewById(R.id.request_sending_imageView);
-            Glide.with(this).load(targetUserProfile.getImageUri()).bitmapTransform(new CropCircleTransformation(getContext())).into(imageView);
+            Glide.with(this).load(targetActiveUserProfile.getImageUri()).bitmapTransform(new CropCircleTransformation(getContext())).into(imageView);
         }
 
 
@@ -106,16 +103,7 @@ public class SendPickmeRequestDialog extends DialogFragment {
     }
 
     private void onPositiveClicked(){
-        String invitingTargetUserAccessKey = ConvString.commaSignToString(targetUserProfile.getEmail());
-        PickMeRequest pickMeRequest = new PickMeRequest();
-        if (UserStatusPresenter.myUserAccessKey == null) {
-            Log.e(TAG, "User Profile is null, can not send pick me request");
-            return;
-        }
-        pickMeRequest.fetchDataFromUserProfile(UserStatusPresenter.myUserProfile);
-
-        /* Add Pick Me Request to Target */
-        FirebaseDao.insert(pickMeRequest, invitingTargetUserAccessKey);
+        AppPresenter.getInstance().sendPickMeRequest(targetActiveUserProfile);
     }
 
     private void onNegativeClicked() {

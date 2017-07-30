@@ -1,11 +1,11 @@
 package com.doyoon.android.bravenewworld.presenter;
 
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
-import com.doyoon.android.bravenewworld.z.util.Const;
+import com.doyoon.android.bravenewworld.util.Const;
 import com.google.android.gms.maps.model.LatLng;
 
-import static com.doyoon.android.bravenewworld.z.util.Const.UserStatus.USER_NOT_YET_MATCHED;
-import static com.doyoon.android.bravenewworld.z.util.Const.ActiveUserType.NOT_YET_CHOOSED;
+import static com.doyoon.android.bravenewworld.util.Const.UserStatus.USER_NOT_YET_MATCHED;
+import static com.doyoon.android.bravenewworld.util.Const.ActiveUserType.NOT_YET_CHOOSED;
 
 /**
  * Created by DOYOON on 7/20/2017.
@@ -38,7 +38,6 @@ public class UserStatusPresenter {
     public static LatLng myLatLng;
     public static LatLng otherLatLng;
 
-    public static LatLng lastLatLng;
     public static String chatAccessKey;
     public static String locationFinderAccessKey;
 

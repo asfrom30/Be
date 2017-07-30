@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.z.util;
+package com.doyoon.android.bravenewworld.util;
 
 /**
  * Created by DOYOON on 7/15/2017.

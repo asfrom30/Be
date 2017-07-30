@@ -8,7 +8,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.doyoon.android.bravenewworld.z.util.Const;
+import com.doyoon.android.bravenewworld.util.Const;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -174,7 +174,7 @@ public class Locator {
                                 Log.i(TAG, "Location Settings are not satisfied. Attempting to upgrade location settings");
 
                                 try {
-                                    /* show the dialog by calling startResolutionForresult(), and check the result in onActivityResult() */
+                                    /* showWithPreImageLoad the dialog by calling startResolutionForresult(), and check the result in onActivityResult() */
                                     ResolvableApiException rae = (ResolvableApiException) e;
                                     rae.startResolutionForResult(activity, Const.GoogleMap.REQUEST_CHECK_SETTING);
                                 } catch (IntentSender.SendIntentException sie) {

@@ -1,10 +1,8 @@
 package com.doyoon.android.bravenewworld.view.fragment;
 
-import android.Manifest;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -16,10 +14,9 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
-import com.doyoon.android.bravenewworld.z.util.Const;
-import com.doyoon.android.bravenewworld.z.util.LogUtil;
-import com.doyoon.android.bravenewworld.z.util.RuntimePermissionUtil;
-import com.doyoon.android.bravenewworld.z.util.view.SnackBarHelper;
+import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.util.LogUtil;
+import com.doyoon.android.bravenewworld.util.view.SnackBarHelper;
 
 /**
  * Created by DOYOON on 7/13/2017.
@@ -69,47 +66,12 @@ public class SelectPreFragment extends Fragment {
         guideSnackBarFlag = false;
         updateButtonView();
 
-        /* Runtime Permission Check */
-        setButtonsEnabled(false);
-        requestRunOrNot();
-
-
+        // todo apply runtime permission
+        // setButtonsEnabled(false);
         return view;
     }
 
-    private void requestRunOrNot() {
-        String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
 
-        RuntimePermissionUtil.requestAndRunOrNot(getActivity(), permissions, new RuntimePermissionUtil.Callback() {
-            @Override
-            public void run() {
-                setButtonsEnabled(true);
-            }
-
-            @Override
-            public void cancel() {
-                /* nothing to do */
-            }
-        });
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        RuntimePermissionUtil.postPermissionResult(requestCode, permissions, grantResults, new RuntimePermissionUtil.Callback() {
-
-            @Override
-            public void run() {
-                setButtonsEnabled(true);
-            }
-
-            @Override
-            public void cancel() {
-                SnackBarHelper.show(getActivity(), "서비스를 정상적으로 이용하시려면 위치서비스가 필요합니다", null, null);
-            }
-
-        });
-    }
 
     private void setButtonsEnabled(boolean flag) {
         imGiverBtn.setEnabled(flag);

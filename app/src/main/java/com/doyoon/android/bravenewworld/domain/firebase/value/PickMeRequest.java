@@ -1,7 +1,7 @@
 package com.doyoon.android.bravenewworld.domain.firebase.value;
 
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseModel;
-import com.doyoon.android.bravenewworld.z.util.ConvString;
+import com.doyoon.android.bravenewworld.util.ConvString;
 
 /**
  * Created by DOYOON on 7/13/2017.
@@ -15,6 +15,7 @@ public class PickMeRequest extends FirebaseModel {
     private String name;
     private int age;
     private int gender;
+    private String distance;
 
 
     public PickMeRequest() {
@@ -68,6 +69,14 @@ public class PickMeRequest extends FirebaseModel {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getDistance() {
+        return distance;
+    }
+
+    public void setDistance(String distance) {
+        this.distance = distance;
     }
 
     public void fetchDataFromUserProfile(UserProfile userProfile) {

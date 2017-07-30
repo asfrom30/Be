@@ -50,7 +50,7 @@
                 android:textSize="13dp" />
 
             <TextView
-                android:id="@+id/textView8"
+                android:id="@+id/edit_fragment_umb_count"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -76,7 +76,7 @@
                 android:textSize="13dp" />
 
             <TextView
-                android:id="@+id/textView11"
+                android:id="@+id/edit_fragment_rain_count"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"

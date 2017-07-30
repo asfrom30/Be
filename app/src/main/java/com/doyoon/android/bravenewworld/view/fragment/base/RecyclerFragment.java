@@ -70,7 +70,10 @@ public abstract class RecyclerFragment<T> extends Fragment{
         dataList = throwDataList();
 
         /* Set Recycler UserProfileView */
-        adapter = new CustomRecyclerAdapter();
+        if (adapter == null) {
+            adapter = new CustomRecyclerAdapter();
+        }
+
         recyclerView.setAdapter(adapter);
         linearLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(linearLayoutManager);

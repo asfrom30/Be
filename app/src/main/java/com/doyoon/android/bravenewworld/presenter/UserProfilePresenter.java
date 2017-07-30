@@ -8,8 +8,8 @@ import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseUploader;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.presenter.interfaces.UserProfileView;
-import com.doyoon.android.bravenewworld.z.util.Const;
-import com.doyoon.android.bravenewworld.z.util.DateUtil;
+import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.util.DateUtil;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class UserProfilePresenter {
     }
 
 
-    public void saveProfileToRemote(String name, String work, int age, String comment) {
+    public void saveProfileToRemote(String name, String work, int age, String comment, int gender) {
         UserProfile currentProfile = UserStatusPresenter.getInstance().myUserProfile;
         if(currentProfile == null) return;
 
@@ -64,6 +64,7 @@ public class UserProfilePresenter {
         if(!work.equals(currentProfile.getWork())) RemoteDao.UserProfile.insertWork(work);
         if(age != currentProfile.getAge()) RemoteDao.UserProfile.insertAge(age);
         if(!comment.equals(currentProfile.getComment())) RemoteDao.UserProfile.insertComment(comment);
+        if(currentProfile.getGender() != gender) RemoteDao.UserProfile.insertGender(gender);
 
         loadMyUserProfileFromRemote();
     }
@@ -79,26 +80,6 @@ public class UserProfilePresenter {
                 FirebaseDatabase.getInstance().getReference(modelDir).setValue(uploadedFileUri.toString());
 
                 loadMyUserProfileFromRemote();
-                Log.i(TAG, "Add profile image to remote successful" + uploadedFileUri);
-            }
-        });
-    }
-
-
-
-    @Deprecated
-    public void saveProfileToRemote(final String name, final String work, final int age, final String comment, String imageUrl) {
-        UserProfile currentProfile = UserStatusPresenter.getInstance().myUserProfile;
-        if(currentProfile == null) return;
-
-        String fileName = DateUtil.getCurrentDate() + "_" + myUserAccessKey;// 시간값 + UUID 추가해서 만듦...
-        FirebaseUploader.execute(imageUrl, Const.StorageRefKey.USER_PROFILE, fileName, new FirebaseUploader.Callback() {
-            @Override
-            public void postExecute(Uri uploadedFileUri) {
-                String modelDir = getModelDir(Const.RefKey.USER_PROFILE, myUserAccessKey)
-                        + Const.RefKey.USER_PROFILE + "/" + Const.RefKey.USER_PROFILE_IMAGE_URI;
-                FirebaseDatabase.getInstance().getReference(modelDir).setValue(uploadedFileUri.toString());
-                saveProfileToRemote(name, work, age, comment);
                 Log.i(TAG, "Add profile image to remote successful" + uploadedFileUri);
             }
         });

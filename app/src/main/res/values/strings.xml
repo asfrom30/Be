@@ -15,8 +15,12 @@
         completions."
     </string>
 
+    <string name="gender_label_male">남자</string>
+    <string name="gender_label_female">여자</string>
     <string name="latitude_label">Latitude</string>
     <string name="longitude_label">Longitude</string>
+
+    <string name="fragment_active_distance_unit">m</string>
 
     <string name="fragment_select_pre_title">지금 어떤 상태인가요?</string>
     <string name="fragment_select_pre_umb">우산을 쓰고 있어요</string>
@@ -33,5 +37,12 @@
     <string name="dialog_profile_no_name">No name</string>
     <string name="dialog_profile_no_detail">-</string>
     <string name="dialog_profile_distance">0m</string>
+    <string name="dialog_profile_send">SEND</string>
+    <string name="dialog_profile_accept">ACCEPT</string>
+
+    <string name="snackbar_send_pickme">요청을보냈습니다</string>
+
+    <string name="progress_dialog_pull_profile">상대방 프로필을 가져오는중입니다</string>
+
 
 </resources>

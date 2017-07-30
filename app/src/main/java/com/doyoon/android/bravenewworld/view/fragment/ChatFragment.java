@@ -24,9 +24,9 @@ import com.doyoon.android.bravenewworld.domain.firebase.value.Chat;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ChatView;
-import com.doyoon.android.bravenewworld.z.util.Const;
-import com.doyoon.android.bravenewworld.z.util.ConvString;
-import com.doyoon.android.bravenewworld.z.util.LogUtil;
+import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.util.ConvString;
+import com.doyoon.android.bravenewworld.util.LogUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,18 +40,24 @@ import jp.wasabeef.glide.transformations.CropCircleTransformation;
 /* 좌우로 정렬하기 */
 /* 말풍선*/
 
-/* 이거 리팩토링해서 채팅방으로 재사용하기... 인터페이스로 분리해서 oop에 넣어 놓을 것.. */
+/* todo 이거 리팩토링해서 채팅방으로 재사용하기... 인터페이스로 분리해서 oop에 넣어 놓을 것.. */
 
 public class ChatFragment extends Fragment implements ChatView {
 
     private static String TAG = ChatFragment.class.getSimpleName();
+    private List<Chat> chatList;
+
+    public ChatFragment() {
+        LogUtil.logLifeCycle(TAG, "Constructor");
+        chatList = new ArrayList<>();
+    }
 
     public static ChatFragment newInstance() {
-
         Bundle args = new Bundle();
 
         ChatFragment fragment = new ChatFragment();
         fragment.setArguments(args);
+
         return fragment;
     }
 
@@ -92,6 +98,12 @@ public class ChatFragment extends Fragment implements ChatView {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        Log.e(TAG, "size is " + chatList.size() + "");
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         LogUtil.logLifeCycle(TAG, "On Resume View");
@@ -99,15 +111,9 @@ public class ChatFragment extends Fragment implements ChatView {
     }
 
     private void dependencyInjection(View view) {
-        if (listView == null) {
-            listView = (ListView) view.findViewById(R.id.chat_list_view);
-        }
-
-
-        if (chatAdapter == null) {
-            chatAdapter = new ChatAdapter(getContext());
-            listView.setAdapter(chatAdapter);
-        }
+        listView = (ListView) view.findViewById(R.id.chat_list_view);
+        chatAdapter = new ChatAdapter(getContext());
+        listView.setAdapter(chatAdapter);
 
         titleTextView = (TextView) view.findViewById(R.id.chat_title);
         inputEditText = (EditText) view.findViewById(R.id.chat_input_text_editText);
@@ -123,6 +129,10 @@ public class ChatFragment extends Fragment implements ChatView {
             flag = false;
         }
 
+        setBtnEnabled(flag);
+    }
+
+    private void setBtnEnabled(boolean flag){
         emojiBtn.setEnabled(flag);
         sendBtn.setEnabled(flag);
         inputEditText.setEnabled(flag);
@@ -164,7 +174,7 @@ public class ChatFragment extends Fragment implements ChatView {
 
     @Override
     public void addChat(Chat chat) {
-        chatAdapter.addChat(chat);
+        chatList.add(chat);
     }
 
     @Override
@@ -184,6 +194,11 @@ public class ChatFragment extends Fragment implements ChatView {
 
     @Override
     public void updateTitle() {
+
+        if(!UserStatusPresenter.getInstance().isOnFinding()){
+            return;
+        }
+
         String myName = "-";
         String otherName = "-";
 
@@ -209,6 +224,8 @@ public class ChatFragment extends Fragment implements ChatView {
             }
         }
 
+        myName = ConvString.getShortName(myName);
+        otherName = ConvString.getShortName(otherName);
 
         if (UserStatusPresenter.getInstance().activeUserType == Const.ActiveUserType.Giver) {
             titleTextView.setText(myName + "님이 " + otherName +"에게 우산이 되어 주었습니다.");
@@ -220,10 +237,8 @@ public class ChatFragment extends Fragment implements ChatView {
     private class ChatAdapter extends BaseAdapter {
 
         private LayoutInflater inflater;
-        private List<Chat> chatList;
 
         public ChatAdapter(Context context) {
-            chatList = new ArrayList<>();
             inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
@@ -255,10 +270,6 @@ public class ChatFragment extends Fragment implements ChatView {
             LinearLayout linearLayout = (LinearLayout) view.findViewById(R.id.chat_item_linearlayout);
 
             boolean isMyChat = (chatList.get(position).getOwnerKey().equals(UserStatusPresenter.myUserAccessKey)) ? true : false;
-            Log.i(TAG, "owner key is " + chatList.get(position).getOwnerKey());
-            Log.i(TAG, "user key is " + UserStatusPresenter.myUserAccessKey);
-            Log.i(TAG, "=====" + isMyChat);
-
             boolean userChangedFlag = false;
 
             if (position == 0) {
@@ -308,10 +319,6 @@ public class ChatFragment extends Fragment implements ChatView {
             setTextViewMsg(textViewMsg, chatList.get(position).getMessage());
 
             return view;
-        }
-
-        public void addChat(Chat chat) {
-            chatList.add(chat);
         }
 
         private String getOwnerName(boolean isMyChat) {

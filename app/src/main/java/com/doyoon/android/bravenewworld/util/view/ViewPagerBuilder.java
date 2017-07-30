@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.z.util.view;
+package com.doyoon.android.bravenewworld.util.view;
 
 import android.content.Context;
 import android.graphics.PorterDuff;

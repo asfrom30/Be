@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/te"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -29,7 +28,7 @@
 
         <ImageView
             android:id="@+id/imageView8"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="0.5dp"
             android:layout_weight="20"
             app:srcCompat="@android:color/white" />
@@ -43,7 +42,8 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:text="상대가 없습니다"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:textSize="10sp" />
 
         <ImageView
             android:id="@+id/imageView9"
@@ -76,12 +76,14 @@
         android:id="@+id/linearLayout"
         android:layout_width="0dp"
         android:layout_height="50dp"
+        android:layout_marginBottom="0dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:background="#FFFFFF"
         android:orientation="horizontal"
         android:weightSum="100"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent">
 
@@ -95,18 +97,27 @@
             android:inputType="textPersonName" />
 
         <ImageButton
-            android:id="@+id/chat_input_emoji_imageButton"
-            android:layout_width="50dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            app:srcCompat="@android:drawable/ic_menu_upload" />
-
-        <ImageButton
             android:id="@+id/chat_send_imageButton"
             android:layout_width="50dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            app:srcCompat="@android:drawable/ic_menu_send" />
+            android:background="@null"
+            android:scaleType="centerInside"
+            android:scaleX="0.8"
+            android:scaleY="0.8"
+            app:srcCompat="@drawable/selector_send" />
+
+        <ImageButton
+            android:id="@+id/chat_input_emoji_imageButton"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:scaleType="centerInside"
+            android:scaleX="0.7"
+            android:scaleY="0.7"
+            app:srcCompat="@drawable/selector_emoticon" />
+
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

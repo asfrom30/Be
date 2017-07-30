@@ -9,16 +9,16 @@ import android.view.ViewGroup;
 
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.geovalue.ActiveUser;
-import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
+import com.doyoon.android.bravenewworld.domain.local.ActiveUserProfile;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.presenter.fetch.MyLastLocationFetcher;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ActiveUserListView;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ActiveUserMapView;
-import com.doyoon.android.bravenewworld.view.dialog.ProfileDialog;
-import com.doyoon.android.bravenewworld.view.fragment.base.PermissionFragment;
-import com.doyoon.android.bravenewworld.z.util.Const;
-import com.doyoon.android.bravenewworld.z.util.LogUtil;
+import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.util.LogUtil;
+import com.doyoon.android.bravenewworld.view.dialog.SendProfileDialog;
+import com.doyoon.android.bravenewworld.view.fragment.base.UserBaseFragment;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -35,7 +35,7 @@ import java.util.Map;
  * 설명
  */
 
-public class ActiveUserMapFragment extends PermissionFragment implements OnMapReadyCallback, ActiveUserMapView, ActiveUserListView {
+public class ActiveUserMapFragment extends UserBaseFragment implements OnMapReadyCallback, ActiveUserMapView, ActiveUserListView {
 
     private static String TAG = ActiveUserMapFragment.class.getSimpleName();
     private static int linkRes = R.layout.fragment_user_select_map;
@@ -79,7 +79,9 @@ public class ActiveUserMapFragment extends PermissionFragment implements OnMapRe
 
         /* Layout Inflating */
         baseView = inflater.inflate(R.layout.fragment_user_select_map, container, false);
-        this.mActiveUserListView = new ActiveUserListFragment(this, getContext(), baseView);
+        if (this.mActiveUserListView == null) {
+            this.mActiveUserListView = new ActiveUserListFragment(this, getContext(), baseView);
+        }
 
         /* Get Default Setting  */
         searchDistanceKm = Const.DEFAULT_SEARCH_DISTANCE_KM;
@@ -92,22 +94,11 @@ public class ActiveUserMapFragment extends PermissionFragment implements OnMapRe
         // Gets to GoogleMap from the MapView and does initialization stuff
         mMapView.getMapAsync(this);
 
-        if (AppPresenter.getInstance().getActiveUserProfileList().size() != 0) {
-            notifyListDataSetChanged();
-        }
 
-        // todo move to pre Select Fragment
-        checkRuntimePermission(new Callback() {
-            @Override
-            public void runWithPermission() {
-
-            }
-
-            @Override
-            public void runWithoutPermission() {
-
-            }
-        });
+        //todo... not working
+//        if (AppPresenter.getInstance().getActiveUserProfileList().size() != 0) {
+//            notifyListDataSetChanged();
+//        }
 
         return baseView;
     }
@@ -122,12 +113,12 @@ public class ActiveUserMapFragment extends PermissionFragment implements OnMapRe
 //                    /* Sending */
 //        });
 //
-//        dialogFragment.show(getFragmentManager(), null);
+//        dialogFragment.showWithPreImageLoad(getFragmentManager(), null);
 //    }
 
-    public void onActiveUserItemClicked(UserProfile clickedUserProfile) {
-        ProfileDialog profileDialog = new ProfileDialog(clickedUserProfile, null);
-        profileDialog.show(getFragmentManager(), null);
+    public void onActiveUserItemClicked(ActiveUserProfile clickedAcitveUserProfile) {
+        SendProfileDialog sendProfileDialog = new SendProfileDialog(clickedAcitveUserProfile, UserStatusPresenter.activeUserType);
+        sendProfileDialog.show(getFragmentManager(), null);
     }
 
 
@@ -236,7 +227,7 @@ public class ActiveUserMapFragment extends PermissionFragment implements OnMapRe
     }
 
     /* Getter and Setter */
-    public List<UserProfile> getDataList() {
+    public List<ActiveUserProfile> getDataList() {
         return AppPresenter.getInstance().getActiveUserProfileList();
         //return this.displayUserList;
     }
@@ -244,6 +235,10 @@ public class ActiveUserMapFragment extends PermissionFragment implements OnMapRe
     /* Interface for presenter */
     @Override
     public void notifyListDataSetChanged() {
+        if(mActiveUserListView.getAdapter() == null){
+            Log.e(TAG, "mActiveUserListView adapter is null, can not notify data set changed");
+        }
+
         mActiveUserListView.getAdapter().notifyDataSetChanged();
     }
 

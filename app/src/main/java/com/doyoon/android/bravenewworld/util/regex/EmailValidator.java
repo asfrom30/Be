@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.z.util.regex;
+package com.doyoon.android.bravenewworld.util.regex;
 
 import java.util.regex.Pattern;
 

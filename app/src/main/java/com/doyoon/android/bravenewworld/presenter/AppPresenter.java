@@ -3,6 +3,7 @@ package com.doyoon.android.bravenewworld.presenter;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.RemoteDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseDao;
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
@@ -13,6 +14,7 @@ import com.doyoon.android.bravenewworld.domain.firebase.value.LocationFinder;
 import com.doyoon.android.bravenewworld.domain.firebase.value.MatchingComplete;
 import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
+import com.doyoon.android.bravenewworld.domain.local.ActiveUserProfile;
 import com.doyoon.android.bravenewworld.presenter.fetch.MyLastLocationFetcher;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ActiveUserFragmentPublisher;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ActiveUserListView;
@@ -27,9 +29,10 @@ import com.doyoon.android.bravenewworld.presenter.listener.MatchingCompleteListe
 import com.doyoon.android.bravenewworld.presenter.listener.OtherUserLocationListener;
 import com.doyoon.android.bravenewworld.presenter.listener.PickmeRequestListener;
 import com.doyoon.android.bravenewworld.presenter.location.Locator;
-import com.doyoon.android.bravenewworld.view.dialog.PickmeReceiveDialog;
-import com.doyoon.android.bravenewworld.z.util.Const;
-import com.doyoon.android.bravenewworld.z.util.LatLngUtil;
+import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.util.ConvString;
+import com.doyoon.android.bravenewworld.util.LatLngUtil;
+import com.doyoon.android.bravenewworld.view.dialog.ReceiveProfileDialog;
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
@@ -70,20 +73,31 @@ public class AppPresenter {
         this.activity = activity;
     }
 
+    private int currentUserStatus;
+
     public void stop(){
-//        if (UserStatusPresenter.userStatus == Const.UserStatus.ON_MATCHING) {
-//            stopOnMatching();
-//        } else if (UserStatusPresenter.userStatus == Const.UserStatus.ON_MATCHING) {
-//            stopOnFinding();
-//        }
+
+        currentUserStatus = UserStatusPresenter.userStatus;
+
+        if (UserStatusPresenter.userStatus == Const.UserStatus.ON_MATCHING) {
+            Log.i(TAG, "AppPresenter stops from onMatching");
+            stopOnMatching();
+        } else if (UserStatusPresenter.userStatus == Const.UserStatus.ON_FINDING) {
+            Log.i(TAG, "AppPresenter stops from onFinding");
+            stopOnFinding();
+        }
     }
 
     public void restart(){
-//        if (UserStatusPresenter.userStatus == Const.UserStatus.ON_MATCHING) {
-//            runOnMatching();
-//        } else if (UserStatusPresenter.userStatus == Const.UserStatus.ON_MATCHING) {
-//            runOnFinding();
-//        }
+        if(currentUserStatus == Const.UserStatus.USER_NOT_YET_MATCHED) return;
+
+        if (currentUserStatus == Const.UserStatus.ON_MATCHING) {
+            // runOnMatching();
+        } else if (currentUserStatus == Const.UserStatus.ON_FINDING) {
+            // runOnFinding();
+        }
+
+        currentUserStatus = Const.UserStatus.USER_NOT_YET_MATCHED;
     }
 
     /**
@@ -107,7 +121,7 @@ public class AppPresenter {
             @Override
             public void change() {
                 UserStatusPresenter.userStatus = Const.UserStatus.ON_MATCHING;
-                UserStatusPresenter.activeUserType = selectedType; //todo move in presenter
+                UserStatusPresenter.activeUserType = selectedType;
                 Log.i(TAG, "Now User Status is.. UserStatus [" + UserStatusPresenter.userStatus + "] ActiveUserType is [" + UserStatusPresenter.activeUserType +"]");
             }
         };
@@ -133,7 +147,8 @@ public class AppPresenter {
     }
 
     public void stopOnMatching(){
-        // todo check remove geoquery succesfully
+        removeExistedActiveUserFromRemote();
+
         removeGeoQueryListener();
         MatchingCompleteListener.getInstance().removeMatchingCompleteListener();
         PickmeRequestListener.getInstance().removePickMeRequestListener();
@@ -284,15 +299,16 @@ public class AppPresenter {
     }
 
     private void receivePickMeRequest(PickMeRequest pickMeRequest){
-        new PickmeReceiveDialog(pickMeRequest, new PickmeReceiveDialog.Callback(){
 
-        }).show(this.activity.getSupportFragmentManager(), null);
-        // Create Pick Me Response
+        ReceiveProfileDialog receiveProfileDialog = new ReceiveProfileDialog(pickMeRequest);
+        receiveProfileDialog.show(activity.getSupportFragmentManager(), null);
 
-        // and send
+//        new PickmeReceiveDialog(pickMeRequest, new PickmeReceiveDialog.Callback(){
+//        }).show(this.activity.getSupportFragmentManager(), null);
+        // Create Pick Me Response and send
         // inviteDialog.showInvitedDialog(pickMeRequest);
 
-        // todo readed pickMeRequest must be deleted...
+        // todo readed pickMeRequest must be deleted... seprate onPickMerequest and savedPickMeRequest
         // dataSnapshot.getRef().removeValue();
     }
 
@@ -310,7 +326,7 @@ public class AppPresenter {
         // FirebaseDatabase.getInstance().getReference(modelDir + chatAccessKey \).setValue(chatProfile);
 
         /* Location Service를 개설하고 상대방에게 채팅방 키를 전달해줍니다. */
-        String locationAccessKey = RemoteDao.LocationFinder.insertWithGetRandomKey(UserStatusPresenter.lastLatLng);
+        String locationAccessKey = RemoteDao.LocationFinder.insertWithGetRandomKey(UserStatusPresenter.myLatLng);
 
         /* 채팅방을 개설하고 상대방에게 채팅방 키를 전달해줍니다 */
         MatchingComplete matchingComplete = new MatchingComplete(UserStatusPresenter.myUserAccessKey, otherUserAccesskey, chatAccessKey, locationAccessKey);
@@ -325,15 +341,33 @@ public class AppPresenter {
             return;
         }
 
-        int endIndex = activeUserProfileStartIndex + Const.PAGING_NUMBER_AT_ONCE;
+        int endIndex = activeUserProfileStartIndex + Const.PAGING_NUMBER_AT_ONCE -1 ;
 
-        if (endIndex > activeUserKeyList.size()) endIndex = activeUserKeyList.size()-1;
+        if (endIndex > (activeUserKeyList.size() - 1)) endIndex = activeUserKeyList.size()-1;
+
+        Log.i(TAG, activeUserProfileStartIndex + "부터 " + endIndex + "까지 데이터를 가져오려고 시도 합니다. ");
 
         fetchUserProfiles(activeUserProfileStartIndex, endIndex);
         activeUserProfileStartIndex = endIndex+1;    // next Index
-        Log.i(TAG, activeUserProfileStartIndex + "부터 " + endIndex + "까지 데이터를 가져오려고 시도 합니다. ");
+
     }
 
+    /* Send PickMe Request */
+    public void sendPickMeRequest(ActiveUserProfile targetActiveUserProfile){
+        String invitingTargetUserAccessKey = ConvString.commaSignToString(targetActiveUserProfile.getEmail());
+        PickMeRequest pickMeRequest = new PickMeRequest();
+        if (UserStatusPresenter.myUserAccessKey == null) {
+            Log.e(TAG, "User Profile is null, can not send pick me request");
+            return;
+        }
+
+        pickMeRequest.fetchDataFromUserProfile(UserStatusPresenter.myUserProfile);
+        String distance = ConvString.getDistance(targetActiveUserProfile.getDistanceFromUser(), activity.getString(R.string.fragment_active_distance_unit));
+        pickMeRequest.setDistance(distance);
+
+        /* Add Pick Me Request to Target */
+        FirebaseDao.insert(pickMeRequest, invitingTargetUserAccessKey);
+    }
 
     /* View Updater */
     // Data relate to View
@@ -341,7 +375,8 @@ public class AppPresenter {
 
     private Map<String, ActiveUser> activeUserMap = new HashMap<>();
     private List<String> activeUserKeyList = new ArrayList<>();
-    private List<UserProfile> activeUserProfileList = new ArrayList();
+    // private List<UserProfile> activeUserProfileList = new ArrayList();
+    private List<ActiveUserProfile> activeUserProfileList = new ArrayList();
 
     // View interface
     private ViewPagerMover viewPagerMover;
@@ -360,7 +395,7 @@ public class AppPresenter {
 
     public void notifyOtherUserProfileUpdate(UserProfile userProfile) {
         for (OtherUserProfileUpdater updater : otherUserProfileUpdaterList) {
-            updater.otherUserProfileUpdate(userProfile);
+            updater.updateOtherProfile(userProfile);
         }
     }
 
@@ -385,16 +420,23 @@ public class AppPresenter {
     private void fetchUserProfiles(int startIndex, int endIndex) {
         for (int i = startIndex; i <= endIndex; i++) {
             String userAccessKey = activeUserKeyList.get(i);
+            final ActiveUser activeUser = activeUserMap.get(userAccessKey);
             RemoteDao.FetchUserProfile.execute(userAccessKey, new RemoteDao.FetchUserProfile.Callback() {
                 @Override
                 public void postExecute(DataSnapshot dataSnapshot) {
-                    UserProfile userProfile = dataSnapshot.getValue(UserProfile.class);
+                    /* Down Casting */
+                    ActiveUserProfile activeUserProfile = dataSnapshot.getValue(ActiveUserProfile.class);
+
+                    /* Calculate Distance validate distance */
+                    float distance_m = LatLngUtil.distanceBetweenTwoLatLngUnitMeter(UserStatusPresenter.myLatLng, activeUser.getLatLng());
+                    activeUserProfile.setDistanceFromUser(distance_m);
 
                     /* Update UI */
-                    activeUserProfileList.add(userProfile);
-                    activeUserListView.notifyListDataSetChanged();
+                    activeUserProfileList.add(activeUserProfile);
+                    activeUserListView.notifyListDataAdded(activeUserProfileList.size());
+                    // activeUserListView.notifyListDataSetChanged();
 
-                    Log.i(TAG, "Fetch UserProfile Successful : " + userProfile.toString());
+                    Log.i(TAG, "Fetch UserProfile Successful : " + activeUserProfile.toString());
                 }
             });
         }
@@ -425,6 +467,7 @@ public class AppPresenter {
     }
 
     private void addGeoQueryListener(int selectedType, LatLng latLng){
+        geoQueryCallbackForActiveUser.initGeoQueryReadyFlag();
         GeoQueryListener.getInstance().listen(selectedType, latLng, geoQueryCallbackForActiveUser);
     }
 
@@ -435,7 +478,7 @@ public class AppPresenter {
     /* Create Callback Method */
     private GeoQueryListener.Callback geoQueryCallbackForActiveUser = new GeoQueryListener.Callback() {
 
-        private boolean beGeoQueryReady = false;
+        public boolean geoQueryReadyCompleteFlag = false;
 
         @Override
         public void onKeyEntered(String key, GeoLocation location) {
@@ -447,27 +490,23 @@ public class AppPresenter {
             activeUserMap.put(key, activeUser);
             activeUserKeyList.add(key);
 
-            /* No need this method... validate distance */
-            //todo distance between...
-            // float distance_m = LatLngUtil.distanceBetweenTwoLatLngUnitMeter(lastLatLng, activeUser.getLatLng());
-
-            if(beGeoQueryReady) {
+            /* Active User Google Map Marker Refresh */
+            if(geoQueryReadyCompleteFlag) {
+                activeUserMapView.addOtherActiveUserMarkers(activeUserMap);
                 // int position = activeUserProfileList.getLastItemViewPosition();
-
-
                 //todo fetchNext
                 //todo fetchCurrent
-
                 // if(position)
-
-
                 // activeUserKeyList
                 // todo 현재페이지의 사이즈가 0인데 하나가 추가됐을때는 fetch next page... or fetch just one index...
                 // fetch current profile or update....???
                 // todo if user가 한번에 가져오는 페지이 숫자보다 보다 작으면 10개를 다시 불러 올것....
             }
 
-            // Log.i(TAG, "ADD Active User Complete " + activeUser.getKey() + ", distance(m) is " + distance_m);
+            Log.i(TAG, "Add Active User [" + activeUser.getKey()
+                    + "], " + activeUser.getLatLng().latitude
+                    + ", " + activeUser.getLatLng().longitude
+                    + "to ActiveUserMap complete");
         }
 
         @Override
@@ -491,10 +530,16 @@ public class AppPresenter {
 
         @Override
         public void onGeoQueryReady() {
-            fetchNextPageUserProfiles();
             activeUserMapView.addOtherActiveUserMarkers(activeUserMap);
-            beGeoQueryReady = true;
+            // todo
+            fetchNextPageUserProfiles();
+            geoQueryReadyCompleteFlag = true;
             Log.i(TAG, "On Geo Query Ready");
+        }
+
+        @Override
+        public void initGeoQueryReadyFlag() {
+            geoQueryReadyCompleteFlag = false;
         }
     };
 
@@ -517,7 +562,7 @@ public class AppPresenter {
         return this.activeUserMap == null ? null : this.activeUserMap;
     }
 
-    public List<UserProfile> getActiveUserProfileList(){
+    public List<ActiveUserProfile> getActiveUserProfileList(){
         if (this.activeUserProfileList == null) {
             return null;
         }
@@ -543,6 +588,4 @@ public class AppPresenter {
     private interface UserStatusChangeCallback {
         void change();
     }
-
-
 }

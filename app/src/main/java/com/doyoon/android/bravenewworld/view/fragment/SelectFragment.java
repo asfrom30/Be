@@ -12,7 +12,8 @@ import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ActiveUserFragmentPublisher;
-import com.doyoon.android.bravenewworld.z.util.LogUtil;
+import com.doyoon.android.bravenewworld.presenter.permission.PermissionPresenter;
+import com.doyoon.android.bravenewworld.util.LogUtil;
 
 /**
  * Created by DOYOON on 7/13/2017.
@@ -21,6 +22,7 @@ import com.doyoon.android.bravenewworld.z.util.LogUtil;
 public class SelectFragment extends Fragment implements ActiveUserFragmentPublisher {
 
     private static String TAG = SelectFragment.class.getSimpleName();
+    private PermissionPresenter permissionPresenter;
 
     public static SelectFragment newInstance() {
 
@@ -46,7 +48,7 @@ public class SelectFragment extends Fragment implements ActiveUserFragmentPublis
 
         View view = inflater.inflate(R.layout.fragment_user_select, container, false);
 
-        if (UserStatusPresenter.getInstance().isOnFinding()) {
+        if (UserStatusPresenter.getInstance().isOnMatching()) {
             startFragment(ActiveUserMapFragment.newInstance());
         } else {
             startFragment(SelectPreFragment.newInstance());
@@ -66,4 +68,7 @@ public class SelectFragment extends Fragment implements ActiveUserFragmentPublis
     public void publish() {
         startFragment(ActiveUserMapFragment.newInstance());
     }
+
+
+
 }

@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.z.util.view.blur;
+package com.doyoon.android.bravenewworld.util.view.blur;
 
 /**
  * Created by DOYOON on 7/25/2017.

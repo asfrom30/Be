@@ -28,9 +28,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.doyoon.android.bravenewworld.z.util.ConvString;
-import com.doyoon.android.bravenewworld.z.util.LogUtil;
-import com.doyoon.android.bravenewworld.z.util.regex.EmailValidator;
+import com.doyoon.android.bravenewworld.util.ConvString;
+import com.doyoon.android.bravenewworld.util.LogUtil;
+import com.doyoon.android.bravenewworld.util.regex.EmailValidator;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -220,7 +220,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
             });
         } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
+            // The ViewPropertyAnimator APIs are not available, so simply showWithPreImageLoad
             // and hide the relevant UI components.
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
@@ -262,7 +262,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
+        //Create adapter to tell the AutoCompleteTextView what to showWithPreImageLoad in its dropdown list.
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(LoginActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);

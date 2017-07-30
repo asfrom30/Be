@@ -20,7 +20,6 @@
 
         <activity android:name=".SplashActivity"
                     android:theme="@style/SplashTheme">
-
         </activity>
 
         <activity
@@ -28,7 +27,8 @@
             android:label="@string/title_activity_login">
         </activity>
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

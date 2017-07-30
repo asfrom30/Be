@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.z.util.googlemap;
+package com.doyoon.android.bravenewworld.util.googlemap;
 
 import com.google.android.gms.maps.GoogleMap;
 

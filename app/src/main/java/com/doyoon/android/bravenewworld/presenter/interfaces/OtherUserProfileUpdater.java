@@ -7,5 +7,5 @@ import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
  */
 
 public interface OtherUserProfileUpdater {
-    void otherUserProfileUpdate(UserProfile userProfile);
+    void updateOtherProfile(UserProfile userProfile);
 }

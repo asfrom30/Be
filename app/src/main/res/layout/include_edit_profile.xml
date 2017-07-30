@@ -23,7 +23,7 @@
         tools:layout_editor_absoluteX="8dp"
         tools:layout_editor_absoluteY="8dp">
 
-        <com.doyoon.android.bravenewworld.z.util.view.blur.RoundedTopRectBlurView
+        <com.doyoon.android.bravenewworld.util.view.blur.RoundedTopRectBlurView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:realtimeBlurRadius="30dp"
@@ -119,15 +119,29 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
 
-        <Spinner
-            android:id="@+id/spinner"
+        <RadioGroup
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="43dp"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            tools:layout_editor_absoluteY="0dp" />
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <RadioButton
+                android:id="@+id/edit_profile_radio_male"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/gender_label_male" />
+
+            <RadioButton
+                android:id="@+id/edit_profile_radio_female"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/gender_label_female" />
+        </RadioGroup>
+
     </LinearLayout>
 
     <ImageButton
@@ -141,4 +155,5 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="@+id/linearLayout3"
         app:srcCompat="@drawable/profile_btn_umb" />
+
 </android.support.constraint.ConstraintLayout>

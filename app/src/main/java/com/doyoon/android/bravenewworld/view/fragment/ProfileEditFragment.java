@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -20,11 +21,13 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.presenter.UserProfilePresenter;
 import com.doyoon.android.bravenewworld.presenter.interfaces.UserProfileView;
-import com.doyoon.android.bravenewworld.z.util.Const;
+import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.util.device.VirtualKeyboard;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 import static android.app.Activity.RESULT_OK;
+import static com.doyoon.android.bravenewworld.R.id.edit_profile_btn_complete;
 import static com.doyoon.android.bravenewworld.presenter.UserStatusPresenter.myUserProfile;
 
 /**
@@ -44,6 +47,7 @@ public class ProfileEditFragment extends Fragment implements UserProfileView {
     private ImageButton editProfileBtnCamera;
     private ImageButton editProfileBtnBack;
     private ViewGroup viewGroup;
+    private RadioButton editProfileRadioMale, editProfileRadioFemale;
 
     public static ProfileEditFragment newInstance() {
 
@@ -97,9 +101,12 @@ public class ProfileEditFragment extends Fragment implements UserProfileView {
         editProfileEditTextName = (EditText) view.findViewById(R.id.edit_profile_editText_name);
         editProfileEditTextAge = (EditText) view.findViewById(R.id.edit_profile_editText_age);
         editProfileEditTextWork = (EditText) view.findViewById(R.id.edit_profile_editText_work);
-        editProfileBtnComplete = (ImageButton) view.findViewById(R.id.edit_profile_btn_complete);
+        editProfileBtnComplete = (ImageButton) view.findViewById(edit_profile_btn_complete);
         editProfileBtnCamera = (ImageButton) view.findViewById(R.id.edit_profile_btn_camera);
         editProfileBtnBack = (ImageButton) view.findViewById(R.id.edit_profile_btn_back);
+
+        editProfileRadioMale = (RadioButton) view.findViewById(R.id.edit_profile_radio_male);
+        editProfileRadioFemale = (RadioButton) view.findViewById(R.id.edit_profile_radio_female);
 
         viewGroup = (ViewGroup) view.findViewById(R.id.edit_profile_view_group);
     }
@@ -120,7 +127,13 @@ public class ProfileEditFragment extends Fragment implements UserProfileView {
                 int age = Integer.parseInt(editProfileEditTextAge.getText().toString());
                 String comment = editProfileEditTextComment.getText().toString();
 
-                UserProfilePresenter.getInstance().saveProfileToRemote(name, work, age, comment);
+                int gender = Const.Gender.NOT_YET_CHOOSED;
+                if(editProfileRadioMale.isChecked()) gender = Const.Gender.MALE;
+                else if(editProfileRadioFemale.isChecked()) gender = Const.Gender.FEMALE;
+
+                UserProfilePresenter.getInstance().saveProfileToRemote(name, work, age, comment, gender);
+
+                VirtualKeyboard.hide(getActivity(), editProfileBtnComplete);
             }
         });
 
@@ -141,6 +154,9 @@ public class ProfileEditFragment extends Fragment implements UserProfileView {
         if(myUserProfile.getName() != null) editProfileEditTextName.setText(myUserProfile.getName());
         if(myUserProfile.getWork() != null) editProfileEditTextWork.setText(myUserProfile.getWork());
         if(myUserProfile.getAge() != 0) editProfileEditTextAge.setText(myUserProfile.getAge()+"");
+
+        if(myUserProfile.getGender() == Const.Gender.MALE) editProfileRadioMale.setChecked(true);
+        else if(myUserProfile.getGender() == Const.Gender.FEMALE) editProfileRadioFemale.setChecked(true);
     }
 
     @Override
@@ -159,10 +175,9 @@ public class ProfileEditFragment extends Fragment implements UserProfileView {
         if(editProfileImage == null) return;
 
         Glide.with(this).load(strImageUri)
-                .bitmapTransform(new CenterCrop(getActivity()), new RoundedCornersTransformation(getActivity(), 100, 0, RoundedCornersTransformation.CornerType.TOP))
+                .bitmapTransform(new CenterCrop(getActivity()), new RoundedCornersTransformation(getActivity(), 25, 0, RoundedCornersTransformation.CornerType.TOP))
                 .into(editProfileImage);
     }
-
 
 
 }

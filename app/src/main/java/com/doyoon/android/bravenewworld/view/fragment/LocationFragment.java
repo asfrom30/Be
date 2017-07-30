@@ -19,8 +19,8 @@ import com.doyoon.android.bravenewworld.presenter.fetch.MyLastLocationFetcher;
 import com.doyoon.android.bravenewworld.presenter.interfaces.FindingMapView;
 import com.doyoon.android.bravenewworld.presenter.interfaces.OtherUserProfileUpdater;
 import com.doyoon.android.bravenewworld.presenter.interfaces.UserProfileView;
-import com.doyoon.android.bravenewworld.z.util.Const;
-import com.doyoon.android.bravenewworld.z.util.LogUtil;
+import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.util.LogUtil;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -41,6 +41,14 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Fi
     private static final String TAG = LocationFragment.class.getSimpleName();
     private ImageView locationFragmentMyImage, locationFragmentOtherImage;
 
+    private static float currentCameraZoom = Const.DEFAULT_CAMERA_ZOOM;
+
+    private MapView mMapView;
+    private GoogleMap mGoogleMap;
+
+    private LatLng myLatLng;
+    private LatLng otherLatLng;
+
     public static LocationFragment newInstance() {
 
         Bundle args = new Bundle();
@@ -49,14 +57,6 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Fi
         fragment.setArguments(args);
         return fragment;
     }
-
-    private static float currentCameraZoom = Const.DEFAULT_CAMERA_ZOOM;
-
-    private MapView mMapView;
-    private GoogleMap mGoogleMap;
-
-    private LatLng myLatLng;
-    private LatLng otherLatLng;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,11 +75,18 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Fi
 
         AppPresenter.getInstance().setFindingMapView(this);
         AppPresenter.getInstance().addOtherUserProfileUpdater(this);
-
         UserProfilePresenter.getInstance().addUserProfileView(this);
+
+        updateMarker();
         updateProfile();
+        updateOtherProfile(UserStatusPresenter.otherUserProfile);
 
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
     }
 
     @Override
@@ -87,8 +94,6 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Fi
         super.onDetach();
         UserProfilePresenter.getInstance().removeUserProfileView(this);
     }
-
-
 
     private void dependencyInjection(View view, Bundle savedInstanceState) {
         mMapView = (MapView) view.findViewById(R.id.mainMapView);
@@ -189,12 +194,6 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Fi
     public void onResume() {
         super.onResume();
         mMapView.onResume();
-
-//        if (mRequestingLocationUpdates && checkPermissions()) {
-//            startLocationUpdates();
-//        } else if (!checkPermissions()) {
-//            requestPermissions();
-//        }
     }
 
     @Override
@@ -237,7 +236,8 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Fi
 
 
     @Override
-    public void otherUserProfileUpdate(UserProfile userProfile) {
+    public void updateOtherProfile(UserProfile userProfile) {
+        if(userProfile == null) return;
         if(userProfile.getImageUri() == null || "".equals(userProfile.getImageUri())) return;
 
         Glide.with(this).load(userProfile.getImageUri()).bitmapTransform(new CropCircleTransformation(getContext())).into(locationFragmentOtherImage);

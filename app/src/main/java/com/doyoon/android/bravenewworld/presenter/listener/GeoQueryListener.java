@@ -2,7 +2,7 @@ package com.doyoon.android.bravenewworld.presenter.listener;
 
 import android.util.Log;
 
-import com.doyoon.android.bravenewworld.z.util.Const;
+import com.doyoon.android.bravenewworld.util.Const;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
@@ -138,5 +138,6 @@ public class GeoQueryListener {
         void onKeyEntered(String key, GeoLocation location);
         void onKeyExited(String key);
         void onGeoQueryReady();
+        void initGeoQueryReadyFlag();
     }
 }

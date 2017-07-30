@@ -8,8 +8,8 @@ import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
-import com.doyoon.android.bravenewworld.z.util.Const;
-import com.doyoon.android.bravenewworld.z.util.ConvString;
+import com.doyoon.android.bravenewworld.util.Const;
+import com.doyoon.android.bravenewworld.util.ConvString;
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
@@ -21,7 +21,7 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Random;
 
-import static com.doyoon.android.bravenewworld.z.util.ConvString.commaSignToString;
+import static com.doyoon.android.bravenewworld.util.ConvString.commaSignToString;
 
 /**
  * Created by DOYOON on 7/12/2017.
@@ -182,7 +182,7 @@ public class DummyDao {
         });
     }
 
-    public static String getDummyImageUrl(int gender){
+    private static String getDummyImageUrl(int gender){
         int index = getRandomInt(1, 5);
         String imageUrl;
         if (gender == Const.Gender.MALE) {

@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.z.util;
+package com.doyoon.android.bravenewworld.util;
 
 import android.app.Activity;
 import android.content.Context;
@@ -38,6 +38,7 @@ public class RuntimePermissionUtil {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             RuntimePermissionUtil.request(activity, callback, permissions);
         } else {
+            if(callback == null) return;
             callback.run();
         }
     }

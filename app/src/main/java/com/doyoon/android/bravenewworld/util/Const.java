@@ -1,4 +1,4 @@
-package com.doyoon.android.bravenewworld.z.util;
+package com.doyoon.android.bravenewworld.util;
 
 import com.doyoon.android.bravenewworld.R;
 import com.google.android.gms.location.LocationRequest;
@@ -116,6 +116,7 @@ public class Const {
 
     public static class Gender {
         public static int MALE = 1;
+        public static int NOT_YET_CHOOSED = 0;
         public static int FEMALE = -1;
     }
 

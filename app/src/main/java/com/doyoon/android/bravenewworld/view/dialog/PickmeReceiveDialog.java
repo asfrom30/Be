@@ -17,7 +17,7 @@ import com.doyoon.android.bravenewworld.R;
 import com.doyoon.android.bravenewworld.domain.firebase.value.PickMeRequest;
 import com.doyoon.android.bravenewworld.domain.reactivenetwork.ReactiveInviteResponse;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
-import com.doyoon.android.bravenewworld.z.util.ConvString;
+import com.doyoon.android.bravenewworld.util.ConvString;
 
 import jp.wasabeef.glide.transformations.CropCircleTransformation;
 

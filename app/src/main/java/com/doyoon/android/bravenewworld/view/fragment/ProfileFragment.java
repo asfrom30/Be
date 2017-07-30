@@ -14,17 +14,9 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.doyoon.android.bravenewworld.R;
-import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
-import com.doyoon.android.bravenewworld.domain.firebase.value.UserProfile;
 import com.doyoon.android.bravenewworld.presenter.UserProfilePresenter;
-import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.presenter.interfaces.UserProfileView;
-import com.doyoon.android.bravenewworld.z.util.Const;
-import com.doyoon.android.bravenewworld.z.util.LogUtil;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.doyoon.android.bravenewworld.util.LogUtil;
 
 import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
@@ -41,6 +33,7 @@ public class ProfileFragment extends Fragment implements UserProfileView {
     private TextView textViewTitle;
     private ImageView imageView;
     private ImageButton btnEditProfile;
+    private TextView umbCountTextView, rainCountTextView;
 
     public static ProfileFragment newInstance() {
 
@@ -81,6 +74,8 @@ public class ProfileFragment extends Fragment implements UserProfileView {
         imageView = (ImageView) view.findViewById(R.id.profile_title_imageView);
         textViewTitle = (TextView) view.findViewById(R.id.profile_title_textView);
         btnEditProfile = (ImageButton) view.findViewById(R.id.btnEditProfile);
+        umbCountTextView = (TextView) view.findViewById(R.id.edit_fragment_umb_count);
+        rainCountTextView = (TextView)  view.findViewById(R.id.edit_fragment_rain_count);
     }
 
     private void addWidgetsListener(){
@@ -104,14 +99,19 @@ public class ProfileFragment extends Fragment implements UserProfileView {
 
     @Override
     public void updateProfile() {
+        Log.e(TAG, "update profile");
         if(myUserProfile == null) return;
+
+
         if(myUserProfile.getImageUri() != null) setProfileImage(myUserProfile.getImageUri());
 
         String title = "";
 
         if(myUserProfile.getName() != null) title += myUserProfile.getName();
-        if(myUserProfile.getWork() != null) title += ", " + myUserProfile.getWork();
+        if(myUserProfile.getWork() != null || "".equals(myUserProfile.getWork())) title += ", " + myUserProfile.getWork();
         if(myUserProfile.getAge() != 0) title += ", " + myUserProfile.getAge();
+        if(myUserProfile.getRainCount() != 0) rainCountTextView.setText(myUserProfile.getRainCount() + "");
+        if(myUserProfile.getUmbCount() != 0) umbCountTextView.setText(myUserProfile.getUmbCount() + "");
 
         textViewTitle.setText(title);
     }
@@ -131,30 +131,4 @@ public class ProfileFragment extends Fragment implements UserProfileView {
         if(imageView == null) return;
         Glide.with(this).load(strImageUri).bitmapTransform(new CropCircleTransformation(getContext())).into(imageView);
     }
-
-
-    @Deprecated
-    private void updateProfileFromRemote(){
-        /* Get User Profile */
-        String modelDir = FirebaseHelper.getModelDir(Const.RefKey.USER_PROFILE, UserStatusPresenter.myUserAccessKey) + Const.RefKey.USER_PROFILE;
-        FirebaseDatabase.getInstance().getReference(modelDir).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                UserProfile userProfile = dataSnapshot.getValue(UserProfile.class);
-                updateUI(userProfile);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    @Deprecated
-    private void updateUI(UserProfile userProfile){
-
-    }
-
-
 }
