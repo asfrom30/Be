@@ -12,7 +12,7 @@ This application is for connecting between persons who have an umbrella and who 
 #### Send and Receive Inviting between each user.
 ![Send and Receive Invite](./screenshot/be_user_find_each_other.gif)
 
-#### Real time location tracking
+#### Realtime location tracking
 ![Location Tracking](./screenshot/be_real_time_location_tracking.gif)
 
 #### chatting
@@ -22,15 +22,86 @@ This application is for connecting between persons who have an umbrella and who 
 ![Edit Profile](./screenshot/be_edit_profile.gif)
 
 ### Code Fetures
-#### 
+#### MVP
+
+Apart from traditional MVP pattern.
+```java
+public interface ChatView {
+    void addChat(Chat chat);
+    void notifySetChanged();
+    void setFocusLastItem();
+    void updateProfileView();
+    void updateTitle();
+}
+```
+
+```java
+public class ChatFragment extends Fragment implements ChatView {
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+       
+        ...
+
+        /* Set AppPresenter */
+        AppPresenter.getInstance().setChatView(this);
+        
+        ...
+        
+        return view;
+    }
+}
+```
+
 
 #### Firebase Helper
+Using Firebase is very simple and easy. In spite of that, It is annoying work which every time remeber domain path and write. Even It is hard to see Database structure clearly. Because every model is scattered each class.
 
-#### prevent memory leak
+```
+String modelPath = "/root/.../.../model";
+
+FirebaseDatabase.getInstance().getReference(modelPath).addListenerForSingleValueEvent(Listener l);
+
+FirebaseDatabase.getInstance().getReference(modelPath).setValue(Object o);
+
+```
+
+In that reason, I made `FirebaseHelper` class. It uses XML which is written in asset folder. When application starts, it analyzes XML and calculate model path. So you can get Model Path easily.
+
+and It also supports AutogenerateKey.(Some value needs auto generated hash key) All you need to do is remember access key if it is `primary-key`
+
+Now you can see and mange `database structure` easily.
+
+```
+String modelPath = FirebaseHelper.getModelPath("giver", String... accessKey)
+
+FirebaseDatabase.getInstance().getReference(modelPath).addListenerForSingleValueEvent(Listener l);
+```
+
+[see all xml](./app/src/main/assets/database_structure.xml)
+```xml
+<root>
+    <activeusers type="reference-key">
+        <givers type="reference-key">
+            <giver type="value" isBundle="true" isAutoGenerateModelKey="true" refer="">
+                <activeuser type="geo-value"/>
+            </giver>
+        </givers>
+        ...
+    </activeusers>
+    ... 
+</root>
+```
 
 #### Keep all data recently.
 When user changed profile Image, It does not mean only need to update current view. Espeacially in view pager case.
 becase View Pager always create three views for Left and Right swiping.(If left and right view has profile image) In order to solve this problem, I made `UserProfileView Interface` and after inserted user profile image, `Presenter' notify all view which has profile image.
+
+
+
+#### prevent memory leak
+When using splash
 
 Detach
 
@@ -81,5 +152,3 @@ Consider another api..
 * [Fragment Transaction Slide in Slide out](https://stackoverflow.com/questions/21026409/fragment-transaction-animation-slide-in-and-slide-out)
 * [Fragment animation back stack](https://stackoverflow.com/questions/10886669/how-to-reverse-fragment-animations-on-backstack)
 ###
--. 가장 어려웠던 점은... 시간이 걸리는 작업의 경우가 여러개 있는 경우
- User status를 반영하는 타이밍을 정하기 어려웠던 점입니다.
