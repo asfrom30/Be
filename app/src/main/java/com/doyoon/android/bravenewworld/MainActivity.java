@@ -5,12 +5,14 @@ import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.doyoon.android.bravenewworld.domain.firebase.FirebaseHelper;
 import com.doyoon.android.bravenewworld.presenter.AppPresenter;
 import com.doyoon.android.bravenewworld.presenter.UserProfilePresenter;
 import com.doyoon.android.bravenewworld.presenter.UserStatusPresenter;
 import com.doyoon.android.bravenewworld.presenter.interfaces.ViewPagerMover;
+import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.LogUtil;
 import com.doyoon.android.bravenewworld.util.view.ViewPagerBuilder;
 import com.doyoon.android.bravenewworld.view.fragment.ChatFragment;
@@ -18,8 +20,6 @@ import com.doyoon.android.bravenewworld.view.fragment.LocationFragment;
 import com.doyoon.android.bravenewworld.view.fragment.ProfileFragment;
 import com.doyoon.android.bravenewworld.view.fragment.SelectFragment;
 import com.tsengvn.typekit.TypekitContextWrapper;
-
-import static com.doyoon.android.bravenewworld.domain.DummyDao.getMyDummyUserAccessKey;
 
 /**
  * 나는 뭐하는 놈입니다~
@@ -47,11 +47,9 @@ public class MainActivity extends AppCompatActivity implements ViewPagerMover{
         // DummyDao.createDummies(Const.RefKey.ACTIVE_USER_TYPE_TAKER);
 
         /* Get User Access Key */
-        String myUserAcessKey = getMyDummyUserAccessKey();
-        // String myUserAcessKey = getIntent().getStringExtra(Const.ExtraKey.USER_ACCESS_KEY);
-        if (myUserAcessKey == null) {
-
-        }
+        // String myUserAcessKey = getMyDummyUserAccessKey();
+        String myUserAcessKey = getIntent().getStringExtra(Const.ExtraKey.USER_ACCESS_KEY);
+        Log.e(TAG, "login Successfully" + myUserAcessKey);
 
         /* Build AppPresenter */
         buildPresenter(myUserAcessKey);

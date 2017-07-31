@@ -118,7 +118,6 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Fi
     }
 
     private void updateOnlyMyLocation() {
-        /* Code start */
         if (mGoogleMap != null) {
             Log.i(TAG, "mGoogleMap not null");
             if (UserStatusPresenter.userStatus == Const.UserStatus.ON_FINDING) {
@@ -130,6 +129,7 @@ public class LocationFragment extends Fragment implements OnMapReadyCallback, Fi
                     public void execute(LatLng latLng) {
                         // Get Lastlocation and Update
                         mGoogleMap.clear();
+                        myLatLng = latLng;
                         addMarker(latLng, Const.LocationFrag.DEFAULT_MAP_PIN_RES_ID);
                         moveCamera(mGoogleMap, latLng, currentCameraZoom);
                     }

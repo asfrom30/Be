@@ -28,6 +28,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.doyoon.android.bravenewworld.util.Const;
 import com.doyoon.android.bravenewworld.util.ConvString;
 import com.doyoon.android.bravenewworld.util.LogUtil;
 import com.doyoon.android.bravenewworld.util.regex.EmailValidator;
@@ -344,7 +345,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         Log.i(TAG, " start main activity");
 
         Intent intent = new Intent(getBaseContext(), MainActivity.class);
-        //intent.putExtra(Const.ExtraKey.USER_ACCESS_KEY, myUserAccessKey);
+        intent.putExtra(Const.ExtraKey.USER_ACCESS_KEY, myUserAccessKey);
         startActivity(intent);
         finish();
     }
