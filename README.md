@@ -58,7 +58,7 @@ public class ChatFragment extends Fragment implements ChatView {
 #### Firebase Helper
 Using Firebase is very simple and easy. In spite of that, It is annoying work which every time remeber domain path and write. Even It is hard to see Database structure clearly. Because every model is scattered each class.
 
-```
+```java
 String modelPath = "/root/.../.../model";
 
 FirebaseDatabase.getInstance().getReference(modelPath).addListenerForSingleValueEvent(Listener l);
@@ -73,7 +73,7 @@ and It also supports AutogenerateKey.(Some value needs auto generated hash key) 
 
 Now you can see and mange `database structure` easily.
 
-```
+```java
 String modelPath = FirebaseHelper.getModelPath("giver", String... accessKey)
 
 FirebaseDatabase.getInstance().getReference(modelPath).addListenerForSingleValueEvent(Listener l);
