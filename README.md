@@ -4,6 +4,10 @@
 ### Summary
 This application is for connecting between persons who have an umbrella and who hasn't. Every person can find and invite to near others who need or have umbrella through this service. Once connected, they can share Location and chat each other.
 
+### Member
+ * Designer : Deokha, Jieun
+ * Android Developer : Doyoon, Guozhe
+
 ### Fetures
 #### Send and Receive Inviting between each user.
 ![Send and Receive Invite](./screenshot/be_user_find_each_other.gif)
@@ -18,6 +22,9 @@ This application is for connecting between persons who have an umbrella and who 
 ![Edit Profile](./screenshot/be_edit_profile.gif)
 
 ### Code Fetures
+#### 
+
+#### Firebase Helper
 
 #### prevent memory leak
 
