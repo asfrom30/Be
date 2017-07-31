@@ -1,6 +1,8 @@
 
 # Be
 
+[README KR](./README_kr.md)
+
 ### Summary
 This application is for connecting between persons who have an umbrella and who hasn't. Every person can find and invite to near others who need or have umbrella through this service. Once connected, they can share Location and chat each other.
 
@@ -24,35 +26,9 @@ This application is for connecting between persons who have an umbrella and who 
 ### Code Fetures
 #### MVP
 
-Apart from traditional MVP pattern.
-```java
-public interface ChatView {
-    void addChat(Chat chat);
-    void notifySetChanged();
-    void setFocusLastItem();
-    void updateProfileView();
-    void updateTitle();
-}
-```
+At first I implement presenter in each fragment. But In my case I can't handle `data` properly in that. For example, after once attach firebase listener. That listener can be shared some of fragment(because I used ViewPager). I thought that type of design has duplicated listener and it's not good everytime I have to care the listener. 
 
-```java
-public class ChatFragment extends Fragment implements ChatView {
-
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-       
-        ...
-
-        /* Set AppPresenter */
-        AppPresenter.getInstance().setChatView(this);
-        
-        ...
-        
-        return view;
-    }
-}
-```
+So, aparted from traditional MVP pattern. I made AppPresenter with Singleton. Every firebase Listener(`ChatListener`, `GeoQueryListener`, `MatchingCompleteListener`, `OtherUserLocationListener`, `PickmeRequestListener`) is declared in AppPresenter. It has `Callback` interface, I made every business logic possible to be written in `AppPresenter` class.
 
 
 #### Firebase Helper
@@ -98,6 +74,35 @@ FirebaseDatabase.getInstance().getReference(modelPath).addListenerForSingleValue
 When user changed profile Image, It does not mean only need to update current view. Espeacially in view pager case.
 becase View Pager always create three views for Left and Right swiping.(If left and right view has profile image) In order to solve this problem, I made `UserProfileView Interface` and after inserted user profile image, `Presenter' notify all view which has profile image.
 
+
+```java
+public interface ChatView {
+    void addChat(Chat chat);
+    void notifySetChanged();
+    void setFocusLastItem();
+    void updateProfileView();
+    void updateTitle();
+}
+```
+
+```java
+public class ChatFragment extends Fragment implements ChatView {
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+       
+        ...
+
+        /* Set AppPresenter */
+        AppPresenter.getInstance().setChatView(this);
+        
+        ...
+        
+        return view;
+    }
+}
+```
 
 
 #### prevent memory leak
