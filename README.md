@@ -2,17 +2,7 @@
 # Be
 
 ### Summary
-
-In my case, I realize User Status is important on the way. That is not enough which is using just `Condition`,
-so I'm late but I separate User Status four, `NOT_YET_MATCHED`, `ON_FINDING`, `ON_MATCHING`, `ON_TOGEHTER`
- 
-the other focus is apply MVP Pattern, the advantage of MVP Pattern is I can change my view model easily.
-
-and finally I try to data every data keeps always up-to-date
-
-And also, using Interface and Abstract class I try to keep every class has recycleable and reuse.
-
-I really hope this code helps even a little.
+This application is for connecting between persons who have an umbrella and who hasn't. Every person can find and invite to near others who need or have umbrella through this service. Once connected, they can share Location and chat each other.
 
 ### Fetures
 #### Send and Receive Inviting between each user.
@@ -27,14 +17,31 @@ I really hope this code helps even a little.
 #### Edit Profile
 ![Edit Profile](./screenshot/be_edit_profile.gif)
 
+### Code Fetures
 
 #### prevent memory leak
 
 #### Keep all data recently.
-When user changed profile Image, It does not mean only update current view. Espeacially in view pager case.
-becase View Pager always create three views for Left and Right swiping. In order to solve this problem. I made Interface for UserProfileView.
-and Add All views at Presenter and notify.
+When user changed profile Image, It does not mean only need to update current view. Espeacially in view pager case.
+becase View Pager always create three views for Left and Right swiping.(If left and right view has profile image) In order to solve this problem, I made `UserProfileView Interface` and after inserted user profile image, `Presenter' notify all view which has profile image.
 
+Detach
+
+### Opinion
+In my case, I realize User Status is important on the way. That is not enough which is using just `Condition`,
+so I'm late but I separate User Status four, `NOT_YET_MATCHED`, `ON_FINDING`, `ON_MATCHING`, `ON_TOGEHTER`
+ 
+the other focus is apply MVP Pattern, the advantage of MVP Pattern is I can change my view model easily.
+
+and finally I try to data every data keeps always up-to-date
+
+And also, using Interface and Abstract class I try to keep every class has recycleable and reuse.
+
+I really hope this code helps even a little.
+
+### Version History
+    * V0.1
+        * 
 
 ### Behind
 
